@@ -1,6 +1,6 @@
 # WhatsAPI
 
-Python interface to WhatsApp Messenger
+Interface to WhatsApp Messenger
 
 ----------
 
