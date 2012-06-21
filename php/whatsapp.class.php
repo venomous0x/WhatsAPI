@@ -13,14 +13,11 @@ require "decode.php";
 	/*
 	Account Info
 	*/
-	private $_account_status = '';	// Active or not .. 
-	private $_account_kind = '';	// paid or free .. 
-	private $_account_creation = '';	// Timestamp of creation date
-	private $_account_expiration = '';	// Timestamp of expiration date
+	private $_account_status;	// Active or not .. 
+	private $_account_kind;	// paid or free .. 
+	private $_account_creation ;	// Timestamp of creation date
+	private $_account_expiration;	// Timestamp of expiration date
 
-
-	//
-	//
 	function __construct($Number, $Password){
 		$this->_number = $Number;
 		$this->_password = $Password;
