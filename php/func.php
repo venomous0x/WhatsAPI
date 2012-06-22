@@ -43,5 +43,3 @@ function endsWith($haystack, $needle){
     $start  = $length * -1; 
     return (substr($haystack, $start) === $needle);
 }
-
-?>
