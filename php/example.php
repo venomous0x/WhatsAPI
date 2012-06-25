@@ -1,5 +1,5 @@
 <?php
-require "whatsapp.v2.php";
+require "whatsapp.class.php";
  
 // DEMO OF USAGE
 $wa = new WhatsApp("full number without + or 00", "password", "John Doe");

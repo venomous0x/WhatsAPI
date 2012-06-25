@@ -19,12 +19,23 @@ require "decode.php";
 	private $_account_creation ;	// Timestamp of creation date
 	private $_account_expiration;	// Timestamp of expiration date
 
+	private $_incomplete_message = "";
+
 	function __construct($Number, $Password, $Nickname){
 		$this->_number = $Number;
 		$this->_password = $Password;
 		$this->_nickname = $Nickname;
 	}
 	
+	function _is_full_msg($str){
+		$length = ord(substr($str,0,1));
+ 		$sl = strlen($str);
+ 		if (strlen($str) < $length){
+			return false;
+		}
+		return true;
+	}
+
 	function _identify($str){
 		$msg_identifier = "\x5D\x38\xFA\xFC";		
 		$server_delivery_identifier = "\x8C";		
@@ -32,7 +43,11 @@ require "decode.php";
 		$acc_info_iden = "\x99\xBD\xA7\x94";		
 		$last_seen_ident = "\x48\x38\xFA\xFC";
 		$last_seen_ident2 = "\x7B\xBD\x4C\x8B";
-		if(startsWith($str,$msg_identifier,3)){ 
+
+		if ($this->_is_full_msg($str) == false){
+			return 'incomplete_msg';
+		}
+		else if(startsWith($str,$msg_identifier,3)){ 
 			if(endsWith($str,$server_delivery_identifier)){
 				return 'server_delivery_report';
 			}
@@ -62,14 +77,18 @@ require "decode.php";
 	}	
 	
 	function read(){
-		$buff = socket_read( $this->_socket, 1024 );
+		$buff = $this->_incomplete_message . socket_read( $this->_socket, 1024 );
+		$this->_incomplete_message = "";
 		$resarray = explode("\x00", $buff);
 		$removed  = array_shift($resarray);	
 		$rescount = count($resarray);
 		if ($rescount != 0){
 			foreach($resarray as $k=>$v){
 				$rcvd_type = $this->_identify($v);
-				if($rcvd_type == 'msg'){
+				if ($rcvd_type == 'incomplete_msg'){
+					$this->_incomplete_message = $v;
+				}
+				else if($rcvd_type == 'msg'){
 					$msg = $this->parse_received_message($v);
 					echo json_encode($msg); // Do something with the message here ?
 				}
