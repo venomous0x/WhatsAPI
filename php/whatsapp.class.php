@@ -150,7 +150,8 @@ require "decode.php";
 		$message['time_length'] = ord(substr($msg,0,1));
 		$msg = substr($msg,1); 		// Remove Length
 		$message['time'] = substr($msg,0,$message['time_length']);			
-		$msg = substr($msg,$message['time_length']); 
+		$msg = substr($msg,$message['time_length']);
+		$this->MessageReceived($message['from_number'], $message['message_id']);
 		return $message;
 	}
 
@@ -239,6 +240,21 @@ require "decode.php";
 		$password = md5($password);
 		$Response = sprintf('username="%s",realm="%s",nonce="%s",cnonce="%s",nc=%s,qop=%s,digest-uri="%s",response=%s,charset=utf-8',	$this -> _number, $this->_Realm, $nonce, $cnonce, $_NC, $this->_Qop, $this->_Digest_Uri, $password);
 		return $Response;
+	}
+
+	public function MessageReceived($to,$msgid){
+		$to_length = chr(mb_strlen($to,"UTF-8"));
+		$msgid_length = chr(mb_strlen($msgid));
+		#$content = "\x00$msg_length";
+		$content .= "\xf8\x08\x5d\xa0\xfa\xfc$to_length";
+		$content .= $to;
+		$content .= "\x8a\xa2\x1b\x43\xfc$msgid_length";
+		$content .= $msgid;
+		$content .= "\xf8\x01\xf8\x03\x7f\xbd\xad";
+		$total_length = hex2str(_hex(strlen($content)));
+		$msg = "\x00$total_length";
+		$msg .= $content;
+		$this->send($msg);
 	}
 
 	public function Message($msgid,$to,$txt){
