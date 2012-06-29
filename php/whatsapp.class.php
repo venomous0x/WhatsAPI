@@ -13,6 +13,7 @@ require "decode.php";
 	/*
 	Account Info
 	*/
+	private $_accinfo;
 	private $_account_status;	// Active or not .. 
 	private $_account_kind;	// paid or free .. 
 	private $_account_creation ;	// Timestamp of creation date
@@ -67,24 +68,22 @@ require "decode.php";
 		if ($rescount != 0){
 			foreach($resarray as $k=>$v){
 				$rcvd_type = $this->_identify($v);
-				echo "<h3> $rcvd_type </h3>";
 					if($rcvd_type == 'msg'){
 						$msg = $this->parse_received_message($v);
-						print_r($msg); // Do something with the message here ?
+						echo json_encode($msg); // Do something with the message here ?
 					}
 					else if ($rcvd_type == 'account_info'){
 						$accinfo = $this->parse_account_info($v);
-						print_r($accinfo); // They're stored in account variables too 
+						$this->accinfo = $accinfo;
 					}
 					else if ($rcvd_type == 'last_seen'){
 						$lastseen = $this->parse_last_seen($v);
-						print_r($lastseen); // They're stored in account variables too 
+						echo json_encode($lastseen); // They're stored in account variables too 
 					}
 			
 			}
 		unset($rcvd_type);
 		}
-		echo $buff."<br /><br /><br /><br /><br /><br /><br />";
 	    return $buff;
 	}
 	
@@ -175,11 +174,11 @@ require "decode.php";
 		$lastseen['seconds_ago'] = substr($msg,0,$last_seen_len);	
 		return $lastseen;
 	}
+	
 	function status(){
 		$status = socket_get_status($this->_socket);
 		print_r($status);
 	}
-	
 	
 	function Login()
 	{
@@ -212,8 +211,7 @@ require "decode.php";
 
 		}
 	
-	public function _authenticate( $nonce,$_NC = '00000001')
-	{
+	public function _authenticate( $nonce,$_NC = '00000001'){
 		$cnonce = random_uuid();		
 		$a1 = sprintf('%s:%s:%s', $this ->_number, $this ->_server, $this ->_password);
 		if (true) {
@@ -228,6 +226,7 @@ require "decode.php";
 		                $this -> _number, $this->_Realm, $nonce, $cnonce, $_NC, $this->_Qop, $this->_Digest_Uri, $password);	
 		return $Response;
 	}
+
 	public function Message($msgid,$to,$txt){
 		$long_txt_bool = isShort($txt);
 		$txt_length = hex2str(_hex(strlen($txt)));
@@ -249,7 +248,7 @@ require "decode.php";
 		$msg ="";
 		$msg .= "$total_length";
 		$msg .= $content;
-		echo str2hex($msg);
+		//echo str2hex($msg);
 		$stream = $this->send($msg);
 		$this->read();
 		$this->read();
@@ -280,7 +279,7 @@ require "decode.php";
 		$msg ="";
 		$msg .= "$total_length";
 		$msg .= $content;
-		echo str2hex($msg);
+		//echo str2hex($msg);
 		$stream = $this->send($msg);
 		$this->read();
 	}
@@ -311,6 +310,11 @@ require "decode.php";
 		$request .= $content;
 		$stream = $this->send($request);
 		$this->read();
+		$this->read();
+	}
+	
+	public function accountInfo(){
+		echo json_encode($this->accinfo);
 	}
 	
  }
