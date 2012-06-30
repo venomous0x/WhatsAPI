@@ -10,6 +10,9 @@ require "decode.php";
 	private $_Realm = 's.whatsapp.net';
 	private $_Qop = 'auth';
 	private $_contype = 'STREAM_CLIENT_PERSISTENT';
+    private $_device = "iPhone";
+    private $_whatsAppVer = "2.8.2";
+    private $_port = 5222;
 	/*
 	Account Info
 	*/
@@ -68,7 +71,7 @@ require "decode.php";
 	
 	function Connect(){ 
 		$Socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP );
-		socket_connect( $Socket, $this->_host, 5222 );
+		socket_connect( $Socket, $this->_host, $this->_port );
 		$this->_socket = $Socket;		
 	}
 	
@@ -207,7 +210,7 @@ require "decode.php";
 	}
 	
 	function Login(){
-		$Data = "WA"."\x01\x00\x00\x19\xf8\x05\x01\xa0\x8a\x84\xfc\x11"."iPhone-2.6.9-5222".
+		$Data = "WA"."\x01\x00\x00\x19\xf8\x05\x01\xa0\x8a\x84\xfc\x11"."$this->_device-$this->_whatsAppVer-$this->_port".
 				"\x00\x08\xf8\x02\x96\xf8\x01\xf8\x01\x7e\x00\x07\xf8\x05\x0f\x5a\x2a\xbd\xa7";
 		$this->send($Data);
 		$Buffer = $this->read();
