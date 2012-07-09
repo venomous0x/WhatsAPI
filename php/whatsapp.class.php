@@ -19,10 +19,12 @@ require "decode.php";
 	private $_account_creation ;	// Timestamp of creation date
 	private $_account_expiration;	// Timestamp of expiration date
 
-	function __construct($Number, $Password){
+	function __construct($Number, $Password, $Nickname){
 		$this->_number = $Number;
 		$this->_password = $Password;
+		$this->_nickname = $Nickname;
 	}
+	
 	function _identify($str){
 		$msg_identifier = "\x5D\x38\xFA\xFC";		
 		$server_delivery_identifier = "\x8C";		
@@ -31,16 +33,15 @@ require "decode.php";
 		$last_seen_ident = "\x48\x38\xFA\xFC";
 		$last_seen_ident2 = "\x7B\xBD\x4C\x8B";
 		if(startsWith($str,$msg_identifier,3)){ 
-			
-				if(endsWith($str,$server_delivery_identifier)){
-					return 'server_delivery_report';
-				}
-				else if(endsWith($str,$client_delivery_identifier)){
-					return 'client_delivery_report';
-				}
-				else{
-				return 'msg'; 
-				}
+			if(endsWith($str,$server_delivery_identifier)){
+				return 'server_delivery_report';
+			}
+			else if(endsWith($str,$client_delivery_identifier)){
+				return 'client_delivery_report';
+			}
+			else{
+			return 'msg'; 
+			}
 		}
 		else if(startsWith($str,$acc_info_iden,3)){
 		return 'account_info';
@@ -48,15 +49,16 @@ require "decode.php";
 		else if(startsWith($str,$last_seen_ident,3) && strpos($str, $last_seen_ident2)){
 		return 'last_seen';
 		}
-
-	
 	}
+	
 	function Connect(){ 
 		$Socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP );
 		socket_connect( $Socket, $this->_host, 5222 );
 		$this->_socket = $Socket;		
 	}
+	
 	function send($data){
+		error_log("RES | ".$data);
 		socket_send( $this->_socket, $data, strlen($data), 0 );
 	}	
 	
@@ -68,19 +70,19 @@ require "decode.php";
 		if ($rescount != 0){
 			foreach($resarray as $k=>$v){
 				$rcvd_type = $this->_identify($v);
-					if($rcvd_type == 'msg'){
-						$msg = $this->parse_received_message($v);
-						echo json_encode($msg); // Do something with the message here ?
-					}
-					else if ($rcvd_type == 'account_info'){
-						$accinfo = $this->parse_account_info($v);
-						$this->accinfo = $accinfo;
-					}
-					else if ($rcvd_type == 'last_seen'){
-						$lastseen = $this->parse_last_seen($v);
-						echo json_encode($lastseen); // They're stored in account variables too 
-					}
-			
+				if($rcvd_type == 'msg'){
+					error_log("WSA | ".$v);
+					$msg = $this->parse_received_message($v);
+					echo json_encode($msg); // Do something with the message here ?
+				}
+				else if ($rcvd_type == 'account_info'){
+					$accinfo = $this->parse_account_info($v);
+					$this->accinfo = $accinfo;
+				}
+				else if ($rcvd_type == 'last_seen'){
+					$lastseen = $this->parse_last_seen($v);
+					echo json_encode($lastseen); // They're stored in account variables too 
+				}
 			}
 		unset($rcvd_type);
 		}
@@ -129,6 +131,7 @@ require "decode.php";
 		$msg = substr($msg,$message['time_length']); 
 		return $message;
 	}
+
 	function parse_account_info($msg){
 		$msg = substr($msg,3); 		// Remove Length,F8,second length
 		$msg = substr($msg,4); 		// Remove Success XML
@@ -180,50 +183,39 @@ require "decode.php";
 		print_r($status);
 	}
 	
-	function Login()
-	{
+	function Login(){
 		$Data = "WA"."\x01\x00\x00\x19\xf8\x05\x01\xa0\x8a\x84\xfc\x11"."iPhone-2.6.9-5222".
 				"\x00\x08\xf8\x02\x96\xf8\x01\xf8\x01\x7e\x00\x07\xf8\x05\x0f\x5a\x2a\xbd\xa7";
 		$this->send($Data);
 		$Buffer = $this->read();
-		$Response = base64_decode( substr( $Buffer, 26 ) );
+		$Response = base64_decode(substr( $Buffer, 26 ));
 		$arrResp = explode( ",", $Response );
 		$authData = array();
-		foreach( $arrResp AS $Key => $Value )
-		{
+		foreach( $arrResp AS $Key => $Value ){
 			$resData = explode( "=", $Value );
-			$authData[ $resData[0] ] = str_replace( '"', '', $resData[1] );
+			$authData[$resData[0]] = str_replace( '"', '', $resData[1] );
 		}
-
 		$ResData = $this -> _authenticate( $authData['nonce'] );
-		$Response = "\x01\x31\xf8\x04\x86\xbd\xa7\xfd\x00\x01\x28" . base64_encode( $ResData );
+		$Response = "\x01\x31\xf8\x04\x86\xbd\xa7\xfd\x00\x01\x28".base64_encode($ResData);
 		$this->send($Response);
-		
-		$rBuffer =$this->read();
-		
+		$rBuffer = $this->read();
 		$this->read();
-		
-		// this packet contains the name 
-		$next = "\x00\x12\xf8\x05\x74\xa2\xa3\x61\xfc\x0a\x41\x68\x6d\x65\x64\x20\x4d\x6f\x68\x64\x00\x15\xf8\x06\x48\x43\x05\xa2\x3a\xf8\x01\xf8\x04\x7b\xbd\x4d\xf8\x01\xf8\x03\x55\x61\x24\x00\x12\xf8\x08\x48\x43\xfc\x01\x32\xa2\x3a\xa0\x8a\xf8\x01\xf8\x03\x1f\xbd\xb1";
+		$name = $this->_nickname;
+		$next = "\x00".chr(8+strlen($name))."\xf8\x05\x74\xa2\xa3\x61\xfc".chr(strlen($name)).$name.
+				"\x00\x15\xf8\x06\x48\x43\x05\xa2\x3a\xf8\x01\xf8\x04\x7b\xbd\x4d\xf8\x01\xf8\x03\x55\x61\x24".
+				"\x00\x12\xf8\x08\x48\x43\xfc\x01\x32\xa2\x3a\xa0\x8a\xf8\x01\xf8\x03\x1f\xbd\xb1";
 		$stream = $this->send($next);
 		$this->read();
-		
-
-		}
+	}
 	
 	public function _authenticate( $nonce,$_NC = '00000001'){
 		$cnonce = random_uuid();		
 		$a1 = sprintf('%s:%s:%s', $this ->_number, $this ->_server, $this ->_password);
-		if (true) {
-			$a1 = pack('H32', md5($a1) ) . ':' . $nonce . ':' . $cnonce;
-		}
+		$a1 = pack('H32', md5($a1) ) . ':' . $nonce . ':' . $cnonce;
 		$a2 = "AUTHENTICATE:" . $this->_Digest_Uri;
 		$password = md5($a1) . ':' . $nonce . ':' . $_NC . ':' . $cnonce . ':' . $this->_Qop . ':' .md5($a2);
-		
 		$password = md5($password);
-		
-		$Response = sprintf('username="%s",realm="%s",nonce="%s",cnonce="%s",nc=%s,qop=%s,digest-uri="%s",response=%s,charset=utf-8',
-		                $this -> _number, $this->_Realm, $nonce, $cnonce, $_NC, $this->_Qop, $this->_Digest_Uri, $password);	
+		$Response = sprintf('username="%s",realm="%s",nonce="%s",cnonce="%s",nc=%s,qop=%s,digest-uri="%s",response=%s,charset=utf-8',	$this -> _number, $this->_Realm, $nonce, $cnonce, $_NC, $this->_Qop, $this->_Digest_Uri, $password);
 		return $Response;
 	}
 
@@ -253,10 +245,9 @@ require "decode.php";
 		$this->read();
 		$this->read();
 		$this->read();
-	
 	}
+	
 	public function sendImage($msgid,$to,$path,$size,$link,$b64thumb){
-
 		$thumb_length = hex2str(_hex(strlen($b64thumb)));
 		$to_length = chr(mb_strlen($to,"UTF-8"));
 		$msgid_length = chr(mb_strlen($msgid));

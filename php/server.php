@@ -5,17 +5,19 @@ header("Access-Control-Allow-Methods: *");
 include("whatsapp.class.php");
 
 
-$api = new API($_POST['id'], $_POST['action']);
+$api = new API($_POST['id'], $_POST['action'], $_POST['nickname']);
 
 class API{
 
 	private $_id;
 	private $_wa;
+	private $_nickname;
 	
-	function API($id, $action){
+	function API($id, $action, $nickname){
 		$this->_id = $id;
 		$this->_id['udid'] = md5(strrev($this->_id['imei']));
-		$this->_wa = new WhatsApp($this->_id['cc'].$this->_id['pn'], $this->_id['udid']);
+		$this->_nickname = (strlen($nickname)>0) ? $nickname : "Unknown";
+		$this->_wa = new WhatsApp($this->_id['cc'].$this->_id['pn'], $this->_id['udid'], $this->_nickname);
 		$this->_wa->Connect();
 		$this->_wa->Login();
 		$this->_run($action);
