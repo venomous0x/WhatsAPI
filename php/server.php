@@ -24,8 +24,10 @@ class API{
 	private function _run($action){
 		if(method_exists($this->_wa, $action['method'])){
 			$pstr = "";
-			foreach($action['params'] as $param)$pstr.="\"".$param."\", ";
-			$pstr = substr($pstr, 0, -2);
+			if(count($action['params'])){
+				foreach($action['params'] as $param)$pstr.="\"".$param."\", ";
+				$pstr = substr($pstr, 0, -2);
+			}
 			eval("\$this->_wa->".$action['method']."(".$pstr.");");
 		}else $this->_err("INEXISTENT METHOD");
 	}
