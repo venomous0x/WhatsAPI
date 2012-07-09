@@ -58,7 +58,6 @@ require "decode.php";
 	}
 	
 	function send($data){
-		error_log("RES | ".$data);
 		socket_send( $this->_socket, $data, strlen($data), 0 );
 	}	
 	
@@ -71,7 +70,6 @@ require "decode.php";
 			foreach($resarray as $k=>$v){
 				$rcvd_type = $this->_identify($v);
 				if($rcvd_type == 'msg'){
-					error_log("WSA | ".$v);
 					$msg = $this->parse_received_message($v);
 					echo json_encode($msg); // Do something with the message here ?
 				}
