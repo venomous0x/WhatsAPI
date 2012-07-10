@@ -13,15 +13,29 @@ require "decode.php";
 	/*
 	Account Info
 	*/
+	private $_accinfo;
 	private $_account_status;	// Active or not .. 
 	private $_account_kind;	// paid or free .. 
 	private $_account_creation ;	// Timestamp of creation date
 	private $_account_expiration;	// Timestamp of expiration date
 
-	function __construct($Number, $Password){
+	private $_incomplete_message = "";
+
+	function __construct($Number, $Password, $Nickname){
 		$this->_number = $Number;
 		$this->_password = $Password;
+		$this->_nickname = $Nickname;
 	}
+	
+	function _is_full_msg($str){
+		$length = ord(substr($str,0,1));
+ 		$sl = strlen($str);
+ 		if (strlen($str) < $length){
+			return false;
+		}
+		return true;
+	}
+
 	function _identify($str){
 		$msg_identifier = "\x5D\x38\xFA\xFC";		
 		$server_delivery_identifier = "\x8C";		
@@ -29,17 +43,20 @@ require "decode.php";
 		$acc_info_iden = "\x99\xBD\xA7\x94";		
 		$last_seen_ident = "\x48\x38\xFA\xFC";
 		$last_seen_ident2 = "\x7B\xBD\x4C\x8B";
-		if(startsWith($str,$msg_identifier,3)){ 
-			
-				if(endsWith($str,$server_delivery_identifier)){
-					return 'server_delivery_report';
-				}
-				else if(endsWith($str,$client_delivery_identifier)){
-					return 'client_delivery_report';
-				}
-				else{
-				return 'msg'; 
-				}
+
+		if ($this->_is_full_msg($str) == false){
+			return 'incomplete_msg';
+		}
+		else if(startsWith($str,$msg_identifier,3)){ 
+			if(endsWith($str,$server_delivery_identifier)){
+				return 'server_delivery_report';
+			}
+			else if(endsWith($str,$client_delivery_identifier)){
+				return 'client_delivery_report';
+			}
+			else{
+			return 'msg'; 
+			}
 		}
 		else if(startsWith($str,$acc_info_iden,3)){
 		return 'account_info';
@@ -47,44 +64,45 @@ require "decode.php";
 		else if(startsWith($str,$last_seen_ident,3) && strpos($str, $last_seen_ident2)){
 		return 'last_seen';
 		}
-
-	
 	}
+	
 	function Connect(){ 
 		$Socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP );
 		socket_connect( $Socket, $this->_host, 5222 );
 		$this->_socket = $Socket;		
 	}
+	
 	function send($data){
 		socket_send( $this->_socket, $data, strlen($data), 0 );
 	}	
 	
 	function read(){
-		$buff = socket_read( $this->_socket, 1024 );
+		$buff = $this->_incomplete_message . socket_read( $this->_socket, 1024 );
+		$this->_incomplete_message = "";
 		$resarray = explode("\x00", $buff);
 		$removed  = array_shift($resarray);	
 		$rescount = count($resarray);
 		if ($rescount != 0){
 			foreach($resarray as $k=>$v){
 				$rcvd_type = $this->_identify($v);
-				echo "<h3> $rcvd_type </h3>";
-					if($rcvd_type == 'msg'){
-						$msg = $this->parse_received_message($v);
-						print_r($msg); // Do something with the message here ?
-					}
-					else if ($rcvd_type == 'account_info'){
-						$accinfo = $this->parse_account_info($v);
-						print_r($accinfo); // They're stored in account variables too 
-					}
-					else if ($rcvd_type == 'last_seen'){
-						$lastseen = $this->parse_last_seen($v);
-						print_r($lastseen); // They're stored in account variables too 
-					}
-			
+				if ($rcvd_type == 'incomplete_msg'){
+					$this->_incomplete_message = $v;
+				}
+				else if($rcvd_type == 'msg'){
+					$msg = $this->parse_received_message($v);
+					echo json_encode($msg); // Do something with the message here ?
+				}
+				else if ($rcvd_type == 'account_info'){
+					$accinfo = $this->parse_account_info($v);
+					$this->accinfo = $accinfo;
+				}
+				else if ($rcvd_type == 'last_seen'){
+					$lastseen = $this->parse_last_seen($v);
+					echo json_encode($lastseen); // They're stored in account variables too 
+				}
 			}
 		unset($rcvd_type);
 		}
-		echo $buff."<br /><br /><br /><br /><br /><br /><br />";
 	    return $buff;
 	}
 	
@@ -130,6 +148,7 @@ require "decode.php";
 		$msg = substr($msg,$message['time_length']); 
 		return $message;
 	}
+
 	function parse_account_info($msg){
 		$msg = substr($msg,3); 		// Remove Length,F8,second length
 		$msg = substr($msg,4); 		// Remove Success XML
@@ -175,59 +194,48 @@ require "decode.php";
 		$lastseen['seconds_ago'] = substr($msg,0,$last_seen_len);	
 		return $lastseen;
 	}
+	
 	function status(){
 		$status = socket_get_status($this->_socket);
 		print_r($status);
 	}
 	
-	
-	function Login()
-	{
+	function Login(){
 		$Data = "WA"."\x01\x00\x00\x19\xf8\x05\x01\xa0\x8a\x84\xfc\x11"."iPhone-2.6.9-5222".
 				"\x00\x08\xf8\x02\x96\xf8\x01\xf8\x01\x7e\x00\x07\xf8\x05\x0f\x5a\x2a\xbd\xa7";
 		$this->send($Data);
 		$Buffer = $this->read();
-		$Response = base64_decode( substr( $Buffer, 26 ) );
+		$Response = base64_decode(substr( $Buffer, 26 ));
 		$arrResp = explode( ",", $Response );
 		$authData = array();
-		foreach( $arrResp AS $Key => $Value )
-		{
+		foreach( $arrResp AS $Key => $Value ){
 			$resData = explode( "=", $Value );
-			$authData[ $resData[0] ] = str_replace( '"', '', $resData[1] );
+			$authData[$resData[0]] = str_replace( '"', '', $resData[1] );
 		}
-
 		$ResData = $this -> _authenticate( $authData['nonce'] );
-		$Response = "\x01\x31\xf8\x04\x86\xbd\xa7\xfd\x00\x01\x28" . base64_encode( $ResData );
+		$Response = "\x01\x31\xf8\x04\x86\xbd\xa7\xfd\x00\x01\x28".base64_encode($ResData);
 		$this->send($Response);
-		
-		$rBuffer =$this->read();
-		
+		$rBuffer = $this->read();
 		$this->read();
-		
-		// this packet contains the name 
-		$next = "\x00\x12\xf8\x05\x74\xa2\xa3\x61\xfc\x0a\x41\x68\x6d\x65\x64\x20\x4d\x6f\x68\x64\x00\x15\xf8\x06\x48\x43\x05\xa2\x3a\xf8\x01\xf8\x04\x7b\xbd\x4d\xf8\x01\xf8\x03\x55\x61\x24\x00\x12\xf8\x08\x48\x43\xfc\x01\x32\xa2\x3a\xa0\x8a\xf8\x01\xf8\x03\x1f\xbd\xb1";
+		$name = $this->_nickname;
+		$next = "\x00".chr(8+strlen($name))."\xf8\x05\x74\xa2\xa3\x61\xfc".chr(strlen($name)).$name.
+				"\x00\x15\xf8\x06\x48\x43\x05\xa2\x3a\xf8\x01\xf8\x04\x7b\xbd\x4d\xf8\x01\xf8\x03\x55\x61\x24".
+				"\x00\x12\xf8\x08\x48\x43\xfc\x01\x32\xa2\x3a\xa0\x8a\xf8\x01\xf8\x03\x1f\xbd\xb1";
 		$stream = $this->send($next);
 		$this->read();
-		
-
-		}
+	}
 	
-	public function _authenticate( $nonce,$_NC = '00000001')
-	{
+	public function _authenticate( $nonce,$_NC = '00000001'){
 		$cnonce = random_uuid();		
 		$a1 = sprintf('%s:%s:%s', $this ->_number, $this ->_server, $this ->_password);
-		if (true) {
-			$a1 = pack('H32', md5($a1) ) . ':' . $nonce . ':' . $cnonce;
-		}
+		$a1 = pack('H32', md5($a1) ) . ':' . $nonce . ':' . $cnonce;
 		$a2 = "AUTHENTICATE:" . $this->_Digest_Uri;
 		$password = md5($a1) . ':' . $nonce . ':' . $_NC . ':' . $cnonce . ':' . $this->_Qop . ':' .md5($a2);
-		
 		$password = md5($password);
-		
-		$Response = sprintf('username="%s",realm="%s",nonce="%s",cnonce="%s",nc=%s,qop=%s,digest-uri="%s",response=%s,charset=utf-8',
-		                $this -> _number, $this->_Realm, $nonce, $cnonce, $_NC, $this->_Qop, $this->_Digest_Uri, $password);	
+		$Response = sprintf('username="%s",realm="%s",nonce="%s",cnonce="%s",nc=%s,qop=%s,digest-uri="%s",response=%s,charset=utf-8',	$this -> _number, $this->_Realm, $nonce, $cnonce, $_NC, $this->_Qop, $this->_Digest_Uri, $password);
 		return $Response;
 	}
+
 	public function Message($msgid,$to,$txt){
 		$long_txt_bool = isShort($txt);
 		$txt_length = hex2str(_hex(strlen($txt)));
@@ -249,15 +257,14 @@ require "decode.php";
 		$msg ="";
 		$msg .= "$total_length";
 		$msg .= $content;
-		echo str2hex($msg);
+		//echo str2hex($msg);
 		$stream = $this->send($msg);
 		$this->read();
 		$this->read();
 		$this->read();
-	
 	}
+	
 	public function sendImage($msgid,$to,$path,$size,$link,$b64thumb){
-
 		$thumb_length = hex2str(_hex(strlen($b64thumb)));
 		$to_length = chr(mb_strlen($to,"UTF-8"));
 		$msgid_length = chr(mb_strlen($msgid));
@@ -280,7 +287,7 @@ require "decode.php";
 		$msg ="";
 		$msg .= "$total_length";
 		$msg .= $content;
-		echo str2hex($msg);
+		//echo str2hex($msg);
 		$stream = $this->send($msg);
 		$this->read();
 	}
@@ -311,6 +318,11 @@ require "decode.php";
 		$request .= $content;
 		$stream = $this->send($request);
 		$this->read();
+		$this->read();
+	}
+	
+	public function accountInfo(){
+		echo json_encode($this->accinfo);
 	}
 	
  }
