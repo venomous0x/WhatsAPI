@@ -129,7 +129,12 @@ require "decode.php";
 		$msg = substr($msg,$message['timestamp_length']);				// Remove Timestamp
 		// Check for Retry header 
 		if(substr($msg,0,1) == "\x88"){
-		$msg = substr($msg,4); 		// Remove Retry Length , i dont think i will need it
+			$msg = substr($msg,1);
+			if ((substr($msg,0,1)) == "\xfc"){
+				$msg = substr($msg,3); 		// Remove 4 byte Retry Length , i dont think i will need it
+			} else {
+				$msg = substr($msg,1); 		// Remove 2 byte Retry Length , i dont think i will need it
+			}
 		}
 		$msg = substr($msg,9); 		// Remove XMPP XML and Name XML Headers 
 		$message['sender_name_length'] = ord(substr($msg,0,1));
