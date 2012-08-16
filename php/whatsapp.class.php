@@ -82,6 +82,28 @@ require "decode.php";
 	}	
 	
 	function read(){
+		$buff = "";
+		$timeout_sec = 1;
+		$timeout_usec = 2000;
+		# Dirty method for draining a socket without blocking for long periods of time.
+		# Ideally reading the socket would be done in a separate thread, but this is php... 
+		# so that aint going to happen.
+		do
+		{
+			$read = array($this->_socket);
+			$write  = NULL;
+			$except = NULL;
+			$num_changed_sockets = socket_select($read, $write, $except, $timeout_sec, $timeout_usec);
+			$timeout_sec = 0;
+			if ($num_changed_sockets > 0)
+			{
+				$buff .= $this->read_soc();
+			}
+		} while ($num_changed_sockets > 0);
+		return $buff;
+	}
+
+	function read_soc(){
 		$buff = $this->_incomplete_message . socket_read( $this->_socket, 1024 );
 		$this->_incomplete_message = "";
 		$resarray = explode("\x00", $buff);
@@ -247,11 +269,11 @@ require "decode.php";
 		return $Response;
 	}
 
-	public function MessageReceived($to,$msgid){
+	function MessageReceived($to,$msgid){
 		$to_length = chr(mb_strlen($to,"UTF-8"));
 		$msgid_length = chr(mb_strlen($msgid));
 		#$content = "\x00$msg_length";
-		$content .= "\xf8\x08\x5d\xa0\xfa\xfc$to_length";
+		$content = "\xf8\x08\x5d\xa0\xfa\xfc$to_length";
 		$content .= $to;
 		$content .= "\x8a\xa2\x1b\x43\xfc$msgid_length";
 		$content .= $msgid;
@@ -285,8 +307,6 @@ require "decode.php";
 		$msg .= $content;
 		//echo str2hex($msg);
 		$stream = $this->send($msg);
-		$this->read();
-		$this->read();
 		$this->read();
 	}
 	
@@ -343,7 +363,6 @@ require "decode.php";
 		$request .= "$total_length";
 		$request .= $content;
 		$stream = $this->send($request);
-		$this->read();
 		$this->read();
 	}
 	
