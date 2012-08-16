@@ -21,10 +21,10 @@ class IncompleteMessageException extends CustomException
 
 class ProtocolNode
 {
-	private $_tag;
-    private $_attributeHash;
-    private $_children;
-    private $_data;
+	public $_tag;
+    public $_attributeHash;
+    public $_children;
+    public $_data;
 
     function __construct($tag, $attributeHash, $children, $data)
     {
@@ -37,9 +37,12 @@ class ProtocolNode
     public function NodeString($indent = "")
     {
         $ret = "\n" . $indent . "<" . $this->_tag;
-        foreach ($this->_attributeHash as $key => $value)
+        if ($this->_attributeHash != NULL)
         {
-            $ret .= " " . $key . "=\"" . $value . "\"";
+            foreach ($this->_attributeHash as $key => $value)
+            {
+                $ret .= " " . $key . "=\"" . $value . "\"";
+            }
         }
         $ret .= ">";
         if (strlen($this->_data) > 0)
@@ -95,6 +98,7 @@ class BinTreeNodeReader
     {
         $this->_dictionary = $dictionary;
     }
+
     public function nextTree($input = NULL)
     {
         if ($input != NULL)
@@ -378,7 +382,7 @@ class BinTreeNodeWriter
         if (count($node->_children) > 0)
         {
             $this->writeListStart(count($node->_children));
-            foreach ($this->_children as $child)
+            foreach ($node->_children as $child)
             {
                 $this->writeInternal($child);
             }
@@ -476,14 +480,19 @@ class BinTreeNodeWriter
             }
         }
     }
+
     protected function writeAttributes($attributes)
     {
-        foreach ($attributes as $key => $value)
+        if ($attributes != NULL)
         {
-            $this->writeString($key);
-            $this->writeString($value);
+            foreach ($attributes as $key => $value)
+            {
+                $this->writeString($key);
+                $this->writeString($value);
+            }
         }
     }
+
     protected function writeListStart($len)
     {
         if ($len == 0)

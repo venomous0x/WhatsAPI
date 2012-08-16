@@ -1,8 +1,7 @@
 <?php
-require "protocol.class.php";
-$writer = new BinTreeNodeWriter(getDictionary());
-$reader = new BinTreeNodeReader(getDictionary());
-$data = $writer->StartStream("s.whatsapp.net", "iPhone-2.8.2-5222");
-printhexstr($data, "start");
+require "whatsprot.class.php";
+$w = new WhatsProt("31631782112", md5(strrev("359599040911883")), "John Doe");
+$w->Connect();
+$w->Login();
 ?>
 
