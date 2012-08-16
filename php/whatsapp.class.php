@@ -13,6 +13,7 @@ require "decode.php";
     private $_device = "iPhone";
     private $_whatsAppVer = "2.8.2";
     private $_port = 5222;
+	private $_timeout = array("sec" => 2, "usec" => 0);
 	/*
 	Account Info
 	*/
@@ -72,7 +73,8 @@ require "decode.php";
 	function Connect(){ 
 		$Socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP );
 		socket_connect( $Socket, $this->_host, $this->_port );
-		$this->_socket = $Socket;		
+		$this->_socket = $Socket;
+		socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, $this->_timeout);
 	}
 	
 	function send($data){
