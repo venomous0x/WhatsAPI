@@ -10,9 +10,9 @@ require "decode.php";
 	private $_Realm = 's.whatsapp.net';
 	private $_Qop = 'auth';
 	private $_contype = 'STREAM_CLIENT_PERSISTENT';
-    private $_device = "iPhone";
-    private $_whatsAppVer = "2.8.2";
-    private $_port = 5222;
+	private $_device = "iPhone";
+	private $_whatsAppVer = "2.8.2";
+	private $_port = 5222;
 	private $_timeout = array("sec" => 2, "usec" => 0);
 	/*
 	Account Info
