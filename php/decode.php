@@ -30,7 +30,7 @@ function printhexstr($data, $name)
         {
             print("\n");
         }
-        printf(" %x%x", $data[$i], $data[$i+1]);
+        printf(" %s%s", $data[$i], $data[$i+1]);
     }
 
     print("\n");

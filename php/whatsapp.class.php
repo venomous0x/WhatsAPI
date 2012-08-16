@@ -306,6 +306,7 @@ require "decode.php";
 		$msg .= "$total_length";
 		$msg .= $content;
 		//echo str2hex($msg);
+		//printhexstr($msg, "msg");
 		$stream = $this->send($msg);
 		$this->read();
 	}
