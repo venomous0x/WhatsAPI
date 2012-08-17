@@ -67,7 +67,7 @@ if ($_SERVER['argv'][1] == "-i") {
 					break;
 				default:
 					echo "[] Send message to $dst: $line\n";
-					//$wa->Message(time()."-1","$dst","$line");
+					$wa->Message(time()."-1","$dst","$line");
 					break;
 			}
 		}
