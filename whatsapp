@@ -46,8 +46,30 @@ if ($_SERVER['argv'][1] == "-i") {
 		$buff = $wa->read();
 		$line = fgets_u(STDIN);
 		if ($line != "") {
-			echo "[] Send message to $dst: $line\n";
-			$wa->Message(time()."-1","$dst","$line");
+			if (strrchr($line, " ")) {
+				// needs PHP >= 5.3.0
+				$command = trim(strstr($line, ' ', TRUE));
+			} else {
+				$command = $line;
+			}
+			switch ($command) {
+				case "/query":
+					$dst = trim(strstr($line, ' ', FALSE));
+					echo "[] Interactive conversation with $dst:\n";
+					break;
+				case "/accountinfo":
+					echo "[] Account Info: ";
+					$wa->accountInfo();
+					break;
+				case "/lastseen":
+					echo "[] Request last seen $dst: ";
+					$wa->RequestLastSeen("$dst"); 
+					break;
+				default:
+					echo "[] Send message to $dst: $line\n";
+					//$wa->Message(time()."-1","$dst","$line");
+					break;
+			}
 		}
 	}
 	exit(0);
