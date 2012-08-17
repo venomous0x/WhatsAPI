@@ -117,7 +117,8 @@ require "decode.php";
 				}
 				else if($rcvd_type == 'msg'){
 					$msg = $this->parse_received_message($v);
-					echo json_encode($msg); // Do something with the message here ?
+					echo "[] Message from ".$msg['from_number']." '".$msg['sender_name']."': ".$msg['body_txt']."\n"; 
+					//echo json_encode($msg); // Do something with the message here ?
 				}
 				else if ($rcvd_type == 'account_info'){
 					$accinfo = $this->parse_account_info($v);
