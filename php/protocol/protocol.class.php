@@ -166,8 +166,8 @@ class BinTreeNodeReader
         }
         else if ($token = 0xfa)
         {
-            $user = $this->readString(readInt8());
-            $server = $this->readString(readInt8());
+            $user = $this->readString($this->readInt8());
+            $server = $this->readString($this->readInt8());
             if ((strlen($user) > 0) && (strlen($server) > 0))
             {
                 $ret = $user . "@" . $server;
@@ -186,8 +186,8 @@ class BinTreeNodeReader
         $attribCount = ($size - 2 + $size % 2) / 2;
         for ($i = 0; $i < $attribCount; $i++)
         {
-            $key = $this->readString(readInt8());
-            $value = $this->readString(readInt8());
+            $key = $this->readString($this->readInt8());
+            $value = $this->readString($this->readInt8());
             $attributes[$key] = $value;
         }
         return $attributes;
@@ -201,7 +201,7 @@ class BinTreeNodeReader
         if ($token == 1)
         {
             $attributes = $this->readAttributes($size);
-            return new ProtocolTreeNode("start", $attributes, NULL, "");
+            return new ProtocolNode("start", $attributes, NULL, "");
         }
         if ($token == 2)
         {
@@ -211,14 +211,14 @@ class BinTreeNodeReader
         $attributes = $this->readAttributes($size);
         if (($size % 2) == 1)
         {
-            return new ProtocolTreeNode($tag, $attributes, NULL, "");
+            return new ProtocolNode($tag, $attributes, NULL, "");
         }
         $token = $this->readInt8();
-        if (isListTag($token))
+        if ($this->isListTag($token))
         {
-            return new ProtocolTreeNode($tag, $attributes, $this->readList($token), "");
+            return new ProtocolNode($tag, $attributes, $this->readList($token), "");
         }
-        return new ProtocolTreeNode($tag, $attributes, NULL, $this->readString($token));
+        return new ProtocolNode($tag, $attributes, NULL, $this->readString($token));
     }
 
     protected function isListTag($token)
@@ -234,7 +234,7 @@ class BinTreeNodeReader
         {
             array_push($ret, $this->nextTreeInternal());
         }
-        return ret;
+        return $ret;
     }
 
     protected function readListSize($token)
@@ -294,7 +294,9 @@ class BinTreeNodeReader
         $ret = 0;
         if (strlen($this->_input) >= 1)
         {
-            $ret = ord(substr($this->_input, 0, 1));
+            $sbstr = substr($this->_input, 0, 1);
+            $ret = ord($sbstr);
+            $this->_input = substr($this->_input, 1);
         }
         return $ret;
     }
@@ -433,6 +435,7 @@ class BinTreeNodeWriter
     {
         $ret  = chr(($v & 0xff00) >> 8);
         $ret .= chr(($v & 0x00ff) >> 0);
+        return $ret;
     }
 
     protected function writeInt24($v)
