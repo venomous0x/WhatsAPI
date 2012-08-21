@@ -49,7 +49,7 @@ class ProtocolNode
         {
             $ret .= $this->_data;
         }
-        if (count($this->_children) > 0)
+        if ($this->_children)
         {
             foreach ($this->_children as $child)
             {
@@ -74,18 +74,21 @@ class ProtocolNode
     public function getChild($tag)
     {
         $ret = NULL;
-		foreach ($this->_children as $child)
-		{
-	    	if (strcmp($child->_tag, $tag) == 0)
-	    	{
-	            return $child;
-	        }
-	        $ret = $child->getChild($tag);
-	        if ($ret != NULL)
-	        {
-	            return $ret;
-	        }
-	    }
+        if ($this->_children)
+        {
+            foreach ($this->_children as $child)
+            {
+                if (strcmp($child->_tag, $tag) == 0)
+                {
+                    return $child;
+                }
+                $ret = $child->getChild($tag);
+                if ($ret)
+                {
+                    return $ret;
+                }
+            }
+        }
         return NULL;
     }
 }
@@ -164,7 +167,7 @@ class BinTreeNodeReader
             $token = $this->readInt8();
             $ret = $this->getToken($token + 0xf5);
         }
-        else if ($token = 0xfa)
+        else if ($token == 0xfa)
         {
             $user = $this->readString($this->readInt8());
             $server = $this->readString($this->readInt8());
@@ -203,7 +206,7 @@ class BinTreeNodeReader
             $attributes = $this->readAttributes($size);
             return new ProtocolNode("start", $attributes, NULL, "");
         }
-        if ($token == 2)
+        else if ($token == 2)
         {
             return NULL;
         }
@@ -381,7 +384,7 @@ class BinTreeNodeWriter
         {
             $this->writeBytes($node->_data);
         }
-        if (count($node->_children) > 0)
+        if ($node->_children)
         {
             $this->writeListStart(count($node->_children));
             foreach ($node->_children as $child)
@@ -486,7 +489,7 @@ class BinTreeNodeWriter
 
     protected function writeAttributes($attributes)
     {
-        if ($attributes != NULL)
+        if ($attributes)
         {
             foreach ($attributes as $key => $value)
             {
