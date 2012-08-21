@@ -1,6 +1,6 @@
 <?php
 require "protocol.class.php";
-require "../func.php";
+require (__DIR__."/../func.php");
 class WhatsProt 
 {
     protected $_phoneNumber;
@@ -20,6 +20,8 @@ class WhatsProt
     protected $_disconnectedStatus = "disconnected";
     protected $_connectedStatus = "connected";
     protected $_loginStatus;
+
+    protected $_messageQueue = array();
 
     protected $_socket;
     protected $_writer;
@@ -118,8 +120,13 @@ class WhatsProt
 
     protected function read()
     {
-        $buff = $this->_incomplete_message . socket_read( $this->_socket, 1024 );
-        $this->_incomplete_message = "";
+        $buff = "";
+        $ret = socket_read( $this->_socket, 1024 );
+        if ($ret)
+        {
+            $buff = $this->_incomplete_message . $ret;
+            $this->_incomplete_message = "";
+        }
         return $buff;
     }
     
@@ -135,6 +142,29 @@ class WhatsProt
         }
     }
     
+    protected function sendMessageReceived($msg)
+    {
+        $requestNode = $msg->getChild("request");
+        if ($requestNode != null)
+        {
+            $xmlnsAttrib = $requestNode->getAttribute("xmlns");
+            if (strcmp($xmlnsAttrib, "urn:xmpp:receipts") == 0)
+            {
+                $recievedHash = array();
+                $recievedHash["xmlns"] = "urn:xmpp:receipts";
+                $receivedNode = new ProtocolNode("received", $recievedHash, null, "");
+
+                $messageHash = array();
+                $messageHash["to"] = $msg->getAttribute("from");
+                $messageHash["type"] = "chat";
+                $messageHash["id"] = $msg->getAttribute("id");
+                $messageNode = new ProtocolNode("message", $messageHash, array($receivedNode), "");
+                $data = $this->_writer->write($messageNode);
+                $this->send($data);
+            }
+        }
+    }
+
     protected function processInboundData($data)
     {
         try
@@ -142,7 +172,7 @@ class WhatsProt
             $node = $this->_reader->nextTree($data);
             while ($node != null)
             {
-                print($node->NodeString("") . "\n");
+                #print($node->NodeString("") . "\n");
                 if (strcmp($node->_tag, "challenge") == 0)
                 {
                     $this->processChallenge($node);
@@ -151,13 +181,17 @@ class WhatsProt
                 {
                     $this->_loginStatus = $this->_connectedStatus;
                 }
+                if (strcmp($node->_tag, "message") == 0)
+                {
+                    array_push($this->_messageQueue, $node);
+                    $this->sendMessageReceived($node);
+                }
                 $node = $this->_reader->nextTree();
             }
         }
         catch (IncompleteMessageException $e)
         {
             $this->_incomplete_message = $e->getInput();
-            printf("IncompleteMessageException\n");
         }
     }
 
@@ -186,9 +220,36 @@ class WhatsProt
         } while (($cnt++ < 100) && (strcmp($this->_loginStatus, $this->_disconnectedStatus) == 0));
     }
 
+    # Pull from the socket, and place incoming messages in the message queue
     public function PollMessages()
     {
         $this->processInboundData($this->read());
+    }
+    
+    # Drain the message queue for application processing
+    public function GetMessages()
+    {
+        $ret = $this->_messageQueue;
+        $this->_messageQueue = array();
+        return $ret;
+    }
+
+    public function Message($msgid, $to, $txt)
+    {
+        $bodyNode = new ProtocolNode("body", null, null, $txt);
+        $serverNode = new ProtocolNode("server", null, null, "");
+
+        $xHash = array();
+        $xHash["xmlns"] = "jabber:x:event";
+        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
+
+        $messageHash = array();
+        $messageHash["to"] = $to . "@" . $this->_whatsAppServer;
+        $messageHash["type"] = "chat";
+        $messageHash["id"] = $msgid;
+        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
+        $data = $this->_writer->write($messsageNode);
+        $this->send($data);
     }
 }
 

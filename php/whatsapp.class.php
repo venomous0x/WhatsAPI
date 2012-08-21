@@ -237,7 +237,6 @@ require "decode.php";
 	function Login(){
 		$Data = "WA"."\x01\x00\x00\x19\xf8\x05\x01\xa0\x8a\x84\xfc\x11"."$this->_device-$this->_whatsAppVer-$this->_port".
 				"\x00\x08\xf8\x02\x96\xf8\x01\xf8\x01\x7e\x00\x07\xf8\x05\x0f\x5a\x2a\xbd\xa7";
-        printhexstr($Data, "data");
 		$this->send($Data);
 		$Buffer = $this->read();
 		$Response = base64_decode(substr( $Buffer, 26 ));

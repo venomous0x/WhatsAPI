@@ -1,5 +1,5 @@
 <?php
-require "../decode.php";
+require (__DIR__."/../decode.php");
 require "exception.php";
 
 class IncompleteMessageException extends CustomException
@@ -74,16 +74,19 @@ class ProtocolNode
     public function getChild($tag)
     {
         $ret = NULL;
-        foreach ($this->_children as $child)
+        if (count($this->_children) > 0)
         {
-            if (strcmp($child->_tag, $tag) == 0)
+            foreach ($this->_children as $child)
             {
-                return $child;
-            }
-            $ret = $child->getChild($tag);
-            if ($ret != NULL)
-            {
-                return $ret;
+                if (strcmp($child->_tag, $tag) == 0)
+                {
+                    return $child;
+                }
+                $ret = $child->getChild($tag);
+                if ($ret != NULL)
+                {
+                    return $ret;
+                }
             }
         }
         return NULL;
@@ -470,7 +473,7 @@ class BinTreeNodeWriter
         }
         else
         {
-            $index = strstr($tag, '@');
+            $index = strpos($tag, '@');
             if ($index)
             {
                 $server = substr($tag, $index + 1);
