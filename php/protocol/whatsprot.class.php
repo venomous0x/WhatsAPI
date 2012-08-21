@@ -1,5 +1,6 @@
 <?php
 require "protocol.class.php";
+require "../func.php";
 class WhatsProt 
 {
     protected $_phoneNumber;
@@ -16,15 +17,23 @@ class WhatsProt
     protected $_timeout = array("sec" => 2, "usec" => 0);
     protected $_incomplete_message = "";
 
+    protected $_disconnectedStatus = "disconnected";
+    protected $_connectedStatus = "connected";
+    protected $_loginStatus;
+
     protected $_socket;
     protected $_writer;
     protected $_reader;
 	
-    function __construct($Number, $Password, $Nickname)
+    function __construct($Number, $imei, $Nickname)
     {
         $dict = getDictionary();
         $this->_writer = new BinTreeNodeWriter($dict);
         $this->_reader = new BinTreeNodeReader($dict);
+        $this->_phoneNumber = $Number;
+        $this->_imei = $imei;
+        $this->_name = $Nickname;
+        $this->_loginStatus = $this->_disconnectedStatus;
     }
     
     protected function addFeatures()
@@ -42,13 +51,68 @@ class WhatsProt
         $node = new ProtocolNode("auth", $authHash, NULL, "");
         return $this->_writer->write($node);
     }
+    
+    protected function encryptPassword()
+    {
+        return md5(strrev($this->_imei));
+    }
+
+    protected function authenticate($nonce)
+    {
+        $NC = "00000001";
+        $qop = "auth";
+        $cnonce = random_uuid();
+        $data1 = $this->_phoneNumber;
+        $data1 .= ":";
+        $data1 .= $this->_whatsAppServer;
+        $data1 .= ":";
+        $data1 .= $this->EncryptPassword();
+
+        $data2 = pack('H32', md5($data1));
+        $data2 .= ":";
+        $data2 .= $nonce;
+        $data2 .= ":";
+        $data2 .= $cnonce;
+
+        $data3 = "AUTHENTICATE:";
+        $data3 .= $this->_whatsAppDigest;
+
+        $data4 = md5($data2);
+        $data4 .= ":";
+        $data4 .= $nonce;
+        $data4 .= ":";
+        $data4 .= $NC;
+        $data4 .= ":";
+        $data4 .= $cnonce;
+        $data4 .= ":";
+        $data4 .= $qop;
+        $data4 .= ":";
+        $data4 .= md5($data3);
+
+        $data5 = md5($data4);
+		$response = sprintf('username="%s",realm="%s",nonce="%s",cnonce="%s",nc=%s,qop=%s,digest-uri="%s",response=%s,charset=utf-8', 
+            $this->_phoneNumber, 
+            $this->_whatsAppRealm, 
+            $nonce, 
+            $cnonce, 
+            $NC, 
+            $qop, 
+            $this->_whatsAppDigest, 
+            $data5);
+        return $response;
+    }
 
     protected function addAuthResponse()
     {
-
+        $resp = $this->authenticate($this->challengeArray["nonce"]);
+        $respHash = array();
+        $respHash["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
+        $node = new ProtocolNode("response", $respHash, NULL, base64_encode($resp));
+        return $this->_writer->write($node);        
     }
 
-	protected function send($data){
+	protected function send($data)
+    {
 		socket_send( $this->_socket, $data, strlen($data), 0 );
 	}	
 
@@ -73,16 +137,27 @@ class WhatsProt
     
     protected function processInboundData($data)
     {
-        printhexstr($data, "data");
-        $node = $this->_reader->nextTree($data);
-        while ($node != null)
+        try
         {
-            print($node->NodeString("") . "\n");
-            if (strcmp($node->_tag, "challenge") == 0)
+            $node = $this->_reader->nextTree($data);
+            while ($node != null)
             {
-                $this->processChallenge($node);
+                print($node->NodeString("") . "\n");
+                if (strcmp($node->_tag, "challenge") == 0)
+                {
+                    $this->processChallenge($node);
+                }
+                else if (strcmp($node->_tag, "success") == 0)
+                {
+                    $this->_loginStatus = $this->_connectedStatus;
+                }
+                $node = $this->_reader->nextTree();
             }
-            $node = $this->_reader->nextTree();
+        }
+        catch (IncompleteMessageException $e)
+        {
+            $this->_incomplete_message = $e->getInput();
+            printf("IncompleteMessageException\n");
         }
     }
 
@@ -99,11 +174,21 @@ class WhatsProt
         $data = $this->_writer->StartStream($this->_whatsAppServer, $resource);
         $data .= $this->addFeatures();
         $data .= $this->addAuth();
-		$this->send($data);
-        $input = "\x00\x05\xf8\x03\x01\x38\x8a\x00\x08\xf8\x02\x96\xf8\x01\xf8\x01\x7e\x00\x5f\xf8\x04\x1a\xbd\xa7\xfc\x58\x62\x6d\x39\x75\x59\x32\x55\x39\x49\x6a\x63\x31\x4e\x7a\x4d\x78\x4f\x44\x45\x34\x4d\x44\x45\x33\x4e\x79\x49\x73\x63\x57\x39\x77\x50\x53\x4a\x68\x64\x58\x52\x6f\x49\x69\x78\x6a\x61\x47\x46\x79\x63\x32\x56\x30\x50\x58\x56\x30\x5a\x69\x30\x34\x4c\x47\x46\x73\x5a\x32\x39\x79\x61\x58\x52\x6f\x62\x54\x31\x74\x5a\x44\x55\x74\x63\x32\x56\x7a\x63\x77\x3d\x3d";
+        $this->send($data);
 
-        $this->processInboundData($input);
-        #$this->processInboundData($this->read($data));
+        $this->processInboundData($this->read());
+        $data = $this->addAuthResponse();
+        $this->send($data);
+        $cnt = 0;
+        do
+        {
+            $this->processInboundData($this->read());
+        } while (($cnt++ < 100) && (strcmp($this->_loginStatus, $this->_disconnectedStatus) == 0));
+    }
+
+    public function PollMessages()
+    {
+        $this->processInboundData($this->read());
     }
 }
 
