@@ -164,7 +164,7 @@ class BinTreeNodeReader
             $token = $this->readInt8();
             $ret = $this->getToken($token + 0xf5);
         }
-        else if ($token = 0xfa)
+        else if ($token == 0xfa)
         {
             $user = $this->readString($this->readInt8());
             $server = $this->readString($this->readInt8());
