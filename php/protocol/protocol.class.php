@@ -485,7 +485,7 @@ class BinTreeNodeWriter
 
     protected function writeAttributes($attributes)
     {
-        if ($attributes != NULL)
+        if ($attributes)
         {
             foreach ($attributes as $key => $value)
             {
