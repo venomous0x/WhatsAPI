@@ -74,21 +74,18 @@ class ProtocolNode
     public function getChild($tag)
     {
         $ret = NULL;
-        if (count($this->_children) > 0)
-        {
-            foreach ($this->_children as $child)
-            {
-                if (strcmp($child->_tag, $tag) == 0)
-                {
-                    return $child;
-                }
-                $ret = $child->getChild($tag);
-                if ($ret != NULL)
-                {
-                    return $ret;
-                }
-            }
-        }
+		foreach ($this->_children as $child)
+		{
+	    	if (strcmp($child->_tag, $tag) == 0)
+	    	{
+	            return $child;
+	        }
+	        $ret = $child->getChild($tag);
+	        if ($ret != NULL)
+	        {
+	            return $ret;
+	        }
+	    }
         return NULL;
     }
 }
