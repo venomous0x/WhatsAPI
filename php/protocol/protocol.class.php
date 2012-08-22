@@ -202,8 +202,7 @@ class BinTreeNodeReader
         {
             $attributes = $this->readAttributes($size);
             return new ProtocolNode("start", $attributes, NULL, "");
-        }
-        if ($token == 2)
+        } else if ($token == 2)
         {
             return NULL;
         }
