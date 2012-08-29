@@ -27,6 +27,17 @@ function random_uuid(){
 	);
 }
 
+function getPassword($imei) {
+	$res = "";
+	foreach (str_split(md5(strrev($imei))) as $chr) {
+		$b = ord($chr);
+		$c1 = $b >> 4;
+		$c2 = $b % 16;
+		$res.= chr(intval(hexdec($c1.$c2)));
+	}
+	return $res;
+}
+
 function strtohex($str){
 	$hex = '';
 	for ($i=0; $i < strlen($str); $i++)$hex .= "\x".dechex(ord($str[$i]));
