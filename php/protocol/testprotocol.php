@@ -1,5 +1,8 @@
 <?php
 require "whatsprot.class.php";
+# phone number, IMEI, and name, the IMEI is reversed 
+# and hashed in whatsprot.class.php so just put your 
+# IMEI here as it is!
 $w = new WhatsProt("***********", "***************", "John Doe");
 $w->Connect();
 $w->Login();
@@ -10,7 +13,8 @@ while(1)
     $msgs = $w->GetMessages();
     foreach ($msgs as $m)
     {
-        print($m->NodeString("") . "\n");
+        # process inbound messages
+        #print($m->NodeString("") . "\n");
     }
 }
 ?>

@@ -42,7 +42,7 @@ class WhatsProt
     {
         $child = new ProtocolNode("receipt_acks", NULL, NULL, "");
         $parent = new ProtocolNode("stream:features", NULL, array($child), "");
-        return $this->_writer->write($parent);
+        return $parent;
     }
 
     protected function addAuth()
@@ -51,7 +51,7 @@ class WhatsProt
         $authHash["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
         $authHash["mechanism"] = "DIGEST-MD5-1";
         $node = new ProtocolNode("auth", $authHash, NULL, "");
-        return $this->_writer->write($node);
+        return $node;
     }
     
     protected function encryptPassword()
@@ -110,15 +110,21 @@ class WhatsProt
         $respHash = array();
         $respHash["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
         $node = new ProtocolNode("response", $respHash, NULL, base64_encode($resp));
-        return $this->_writer->write($node);        
+        return $node;
     }
 
-	protected function send($data)
+	protected function sendData($data)
     {
 		socket_send( $this->_socket, $data, strlen($data), 0 );
 	}	
+    
+    protected function sendNode($node)
+    {
+        print($node->NodeString("tx  ") . "\n");
+        $this->sendData($this->_writer->write($node));
+    }
 
-    protected function read()
+    protected function readData()
     {
         $buff = "";
         $ret = socket_read( $this->_socket, 1024 );
@@ -159,8 +165,7 @@ class WhatsProt
                 $messageHash["type"] = "chat";
                 $messageHash["id"] = $msg->getAttribute("id");
                 $messageNode = new ProtocolNode("message", $messageHash, array($receivedNode), "");
-                $data = $this->_writer->write($messageNode);
-                $this->send($data);
+                $this->sendNode($messageNode);
             }
         }
     }
@@ -172,7 +177,7 @@ class WhatsProt
             $node = $this->_reader->nextTree($data);
             while ($node != null)
             {
-                #print($node->NodeString("") . "\n");
+                print($node->NodeString("rx  ") . "\n");
                 if (strcmp($node->_tag, "challenge") == 0)
                 {
                     $this->processChallenge($node);
@@ -206,24 +211,26 @@ class WhatsProt
     {
         $resource = "$this->_device-$this->_whatsAppVer-$this->_port";
         $data = $this->_writer->StartStream($this->_whatsAppServer, $resource);
-        $data .= $this->addFeatures();
-        $data .= $this->addAuth();
-        $this->send($data);
+        $feat = $this->addFeatures();
+        $auth = $this->addAuth();
+        $this->sendData($data);
+        $this->sendNode($feat);
+        $this->sendNode($auth);
 
-        $this->processInboundData($this->read());
+        $this->processInboundData($this->readData());
         $data = $this->addAuthResponse();
-        $this->send($data);
+        $this->sendNode($data);
         $cnt = 0;
         do
         {
-            $this->processInboundData($this->read());
+            $this->processInboundData($this->readData());
         } while (($cnt++ < 100) && (strcmp($this->_loginStatus, $this->_disconnectedStatus) == 0));
     }
 
     # Pull from the socket, and place incoming messages in the message queue
     public function PollMessages()
     {
-        $this->processInboundData($this->read());
+        $this->processInboundData($this->readData());
     }
     
     # Drain the message queue for application processing
@@ -248,8 +255,7 @@ class WhatsProt
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
-        $data = $this->_writer->write($messsageNode);
-        $this->send($data);
+        $this->sendNode($messsageNode);
     }
 }
 
