@@ -336,7 +336,7 @@ class BinTreeNodeWriter
     {
         $attributes = array();
         $this->_output = "WA";
-        $this->_output .= "\x00\x04\x00\x19";
+        $this->_output .= "\x01\x01\x00\x19";
 
         $attributes["to"] = $domain;
         $attributes["resource"] = $resource;
