@@ -3,7 +3,9 @@ require "whatsprot.class.php";
 # phone number, IMEI, and name, the IMEI is reversed 
 # and hashed in whatsprot.class.php so just put your 
 # IMEI here as it is!
-$w = new WhatsProt("***********", "***************", "John Doe");
+$options = getopt("d::", array("debug::"));
+$debug = (array_key_exists("debug", $options) || array_key_exists("d", $options)) ? true : false;
+$w = new WhatsProt("***********", "***************", "John Doe", $debug);
 $w->Connect();
 $w->Login();
 $w->Message(time() . "-1", "***********", "yurp");

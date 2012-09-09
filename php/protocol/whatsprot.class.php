@@ -26,9 +26,12 @@ class WhatsProt
     protected $_socket;
     protected $_writer;
     protected $_reader;
+
+    protected $_debug;
 	
-    function __construct($Number, $imei, $Nickname)
+    function __construct($Number, $imei, $Nickname, $debug = false)
     {
+        $this->_debug = $debug;
         $dict = getDictionary();
         $this->_writer = new BinTreeNodeWriter($dict);
         $this->_reader = new BinTreeNodeReader($dict);
@@ -120,7 +123,7 @@ class WhatsProt
     
     protected function sendNode($node)
     {
-        print($node->NodeString("tx  ") . "\n");
+        $this->DebugPrint($node->NodeString("tx  ") . "\n");
         $this->sendData($this->_writer->write($node));
     }
 
@@ -177,7 +180,7 @@ class WhatsProt
             $node = $this->_reader->nextTree($data);
             while ($node != null)
             {
-                print($node->NodeString("rx  ") . "\n");
+                $this->DebugPrint($node->NodeString("rx  ") . "\n");
                 if (strcmp($node->_tag, "challenge") == 0)
                 {
                     $this->processChallenge($node);
@@ -256,6 +259,13 @@ class WhatsProt
         $messageHash["id"] = $msgid;
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
         $this->sendNode($messsageNode);
+    }
+    protected function DebugPrint($debugMsg)
+    {
+        if ($this->_debug)
+        {
+            print($debugMsg);
+        }
     }
 }
 
