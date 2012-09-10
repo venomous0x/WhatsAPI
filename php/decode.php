@@ -2,6 +2,7 @@
 
 function decode($hex){
 	$hexarr = str_split($hex, 2);
+	$str = null;
 	foreach($hexarr as $k=>$v)	$str .= "  ".getToken(hexdec($v));
 	return $str;
 }
@@ -14,10 +15,29 @@ function str2hex($string) {
 function hex2str($hexstr) {
 	$hexstr = str_replace(' ', '', $hexstr);
 	$hexstr = str_replace('\x', '', $hexstr);
-	return pack('H*', $hexstr);
+	$retstr = pack('H*', $hexstr);
+	return $retstr;
 }
 
-function getToken($token){
+function printhexstr($data, $name)
+{
+    $data = str2hex($data);
+    $len = strlen($data);
+    print("Len: $len - $name\n");
+    for ($i = 0; $i < $len; $i += 2)
+    {
+        if ((($i-1) % 32) == 31)
+        {
+            print("\n");
+        }
+        printf(" %s%s", $data[$i], $data[$i+1]);
+    }
+
+    print("\n");
+}
+
+function getDictionary(){
+    $dict = "WHATISTHIS";
 	$dic[0] = 0;
 	$dic[1] = 0;
 	$dic[2] = 0;
@@ -232,7 +252,7 @@ function getToken($token){
 	$dic[211] = "first";
 	$dic[212] = "index";
 	$dic[213] = "invalid-mechanism";
-	$dic[214] = "last";
+	$dic[214] = "l$dict";
 	$dic[215] = "max";
 	$dic[216] = "offline";
 	$dic[217] = "proceed";
@@ -261,8 +281,19 @@ function getToken($token){
 	$dic[240] = "w:p";
 	$dic[241] = "w:profile:picture";
 	$dic[242] = "notification";
-	$dic[248] = "XXX";
-	
+	$dic[243] = 0;
+	$dic[244] = 0;
+	$dic[245] = 0;
+	$dic[246] = 0;
+	$dic[247] = 0;
+    $dic[248] = "XXX";
+    return $dic;
+}
+
+function getToken($token){
+    $dic = getDictionary();
 	return $dic[$token];
-}	
+}
+
+		
 ?>
