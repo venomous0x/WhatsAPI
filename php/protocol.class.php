@@ -1,5 +1,5 @@
 <?php
-require (__DIR__."/../decode.php");
+require "decode.php";
 require "exception.php";
 
 class IncompleteMessageException extends CustomException

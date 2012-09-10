@@ -1,6 +1,6 @@
 <?php
 require "protocol.class.php";
-require (__DIR__."/../func.php");
+require "func.php";
 class WhatsProt 
 {
     protected $_phoneNumber;
