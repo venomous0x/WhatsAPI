@@ -17,10 +17,9 @@ function fgets_u($pStdn) {
 }
 
 $nickname = "Philipp";
-$sender = "xxxxxxxxxx";
-$imei = "xxxxxxxxxx"; //IMEI for Andorid or Mac Address for iOS
+$sender = "xxxxxxxxxxxx";
+$imei = "xxxxxxxxxxxxxx"; //IMEI for Andorid or Mac Address for iOS
 
-$password = md5(strrev($imei));
 
 $countrycode = substr($sender,0,2);
 $phonenumber=substr($sender,2);
@@ -42,7 +41,7 @@ for ($i=3; $i<$argc; $i++) {
 }
 
 echo "[] Logging in as '$nickname' ($sender)\n";
-$wa = new WhatsProt("$sender", $imei, "$nickname");
+$wa = new WhatsProt("$sender", $imei, "$nickname",true);
 
 $url = "https://r.whatsapp.net/v1/exist.php?cc=".$countrycode."&in=".$phonenumber."&udid=".$wa->encryptPassword();
 $content = file_get_contents($url);
@@ -60,6 +59,9 @@ if ($_SERVER['argv'][1] == "-i") {
 	while(TRUE) {
 		$wa->PollMessages();
 		$buff = $wa->GetMessages();
+		if(!empty($buff)){
+			print_r($buff);
+		}
 		$line = fgets_u(STDIN);
 		if ($line != "") {
 			if (strrchr($line, " ")) {
@@ -77,10 +79,10 @@ if ($_SERVER['argv'][1] == "-i") {
 					echo "[] Account Info: ";
 					$wa->accountInfo();
 					break;
-				case "/lastseen":
+				/*case "/lastseen":
 					echo "[] Request last seen $dst: ";
 					$wa->RequestLastSeen("$dst"); 
-					break;
+					break;*/
 				default:
 					echo "[] Send message to $dst: $line\n";
 					$wa->Message(time()."-1","$dst","$line");
