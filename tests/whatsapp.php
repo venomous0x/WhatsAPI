@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-require "php/whatsapp.class.php";
+require "../src/php/whatsprot.class.php";
 
 function fgets_u($pStdn) {
 	$pArr = array($pStdn);
@@ -13,11 +13,13 @@ function fgets_u($pStdn) {
 	}
 }
 
-$nickname = "Your Name";
-$sender = "346xxxxxxxx";
-$imei = "35xxxxxxxxxxxxx";
+$nickname = "WhatsAPI Test";
+$sender = 	""; // Mobile number with country code (but without + or 00)
+$imei = 	""; // MAC Address for iOS IMEI for other platform (Android/etc) 
 
-$password = md5(strrev($imei));
+
+$countrycode = substr($sender, 0, 2);
+$phonenumber=substr($sender, 2);
 
 if ($argc < 2) {
 	echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>]\n";
@@ -29,13 +31,21 @@ if ($argc < 2) {
 }
 
 $dst=$_SERVER['argv'][2];
-$msg="";
+$msg = "";
 for ($i=3; $i<$argc; $i++) {
-	$msg.=$_SERVER['argv'][$i]." ";
+	$msg .= $_SERVER['argv'][$i]." ";
 }
 
 echo "[] Logging in as '$nickname' ($sender)\n";
-$wa = new WhatsApp("$sender", "$password", "$nickname");
+$wa = new WhatsProt($sender, $imei, $nickname, true);
+
+$url = "https://r.whatsapp.net/v1/exist.php?cc=".$countrycode."&in=".$phonenumber."&udid=".$wa->encryptPassword();
+$content = file_get_contents($url);
+if(stristr($content,'status="ok"') === false){
+	echo "Wrong Password\n";
+	exit(0);
+}
+
 $wa->Connect();
 $wa->Login();
 
@@ -43,7 +53,11 @@ if ($_SERVER['argv'][1] == "-i") {
 	echo "\n[] Interactive conversation with $dst:\n";
 	stream_set_timeout(STDIN,1);
 	while(TRUE) {
-		$buff = $wa->read();
+		$wa->PollMessages();
+		$buff = $wa->GetMessages();
+		if(!empty($buff)){
+			print_r($buff);
+		}
 		$line = fgets_u(STDIN);
 		if ($line != "") {
 			if (strrchr($line, " ")) {
@@ -67,7 +81,7 @@ if ($_SERVER['argv'][1] == "-i") {
 					break;
 				default:
 					echo "[] Send message to $dst: $line\n";
-					$wa->Message(time()."-1","$dst","$line");
+					$wa->Message(time()."-1", $dst , $line);
 					break;
 			}
 		}
@@ -75,24 +89,21 @@ if ($_SERVER['argv'][1] == "-i") {
 	exit(0);
 }
 
-//echo "\n[] Account Info: ";
-//$wa->accountInfo();
-
 if ($_SERVER['argv'][1] == "-l") {
 	echo "\n[] Listen mode:\n";
 	while (TRUE) {
-		$buff = $wa->read();
-		if (strlen($buff) != 0)
-			echo "\n";
+		$wa->PollMessages();
+		$data = $wa->GetMessages();
+		if(!empty($data)) print_r($data);
 		sleep(1);
 	}
 	exit(0);
 }
 
 echo "\n[] Request last seen $dst: ";
-$wa->RequestLastSeen("$dst"); 
+$wa->RequestLastSeen($dst); 
 
 echo "\n[] Send message to $dst: $msg\n";
-$wa->Message(time()."-1","$dst","$msg");
+$wa->Message(time()."-1", $dst , $msg);
 echo "\n";
 ?>

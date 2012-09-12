@@ -243,7 +243,7 @@ class BinTreeNodeReader
     protected function readListSize($token)
     {
         $size = 0;
-        if ($token = 0xf8)
+        if ($token == 0xf8)
         {
             $size = $this->readInt8();
         }
