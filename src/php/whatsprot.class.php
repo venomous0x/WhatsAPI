@@ -57,9 +57,14 @@ class WhatsProt
         return $node;
     }
     
-    protected function encryptPassword()
+    public function encryptPassword()
     {
-        return md5(strrev($this->_imei));
+    	if(stristr($this->_imei,":")){
+    		return md5($this->_imei.$this->_imei);
+    	}
+        else{
+        	return md5(strrev($this->_imei));
+        }
     }
 
     protected function authenticate($nonce)
@@ -194,6 +199,7 @@ class WhatsProt
                     array_push($this->_messageQueue, $node);
                     $this->sendMessageReceived($node);
                 }
+                print_r($node);
                 $node = $this->_reader->nextTree();
             }
         }

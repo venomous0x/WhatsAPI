@@ -17,20 +17,14 @@ function fgets_u($pStdn) {
 }
 
 $nickname = "Philipp";
-$sender = "491622300437";
-$imei = "353426055242721";
+$sender = "xxxxxxxxxx";
+$imei = "xxxxxxxxxx"; //IMEI for Andorid or Mac Address for iOS
 
 $password = md5(strrev($imei));
 
 $countrycode = substr($sender,0,2);
 $phonenumber=substr($sender,2);
 
-$url = "https://r.whatsapp.net/v1/exist.php?cc=".$countrycode."&in=".$phonenumber."&udid=".$password;
-$content = file_get_contents($url);
-if(stristr($content,'status="ok"') === false){
-	echo "Wrong Password\n";
-	exit(0);
-}
 
 if ($argc < 2) {
 	echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>]\n";
@@ -48,7 +42,15 @@ for ($i=3; $i<$argc; $i++) {
 }
 
 echo "[] Logging in as '$nickname' ($sender)\n";
-$wa = new WhatsProt("$sender", $password, "$nickname");
+$wa = new WhatsProt("$sender", $imei, "$nickname");
+
+$url = "https://r.whatsapp.net/v1/exist.php?cc=".$countrycode."&in=".$phonenumber."&udid=".$wa->encryptPassword();
+$content = file_get_contents($url);
+if(stristr($content,'status="ok"') === false){
+	echo "Wrong Password\n";
+	exit(0);
+}
+
 $wa->Connect();
 $wa->Login();
 
@@ -56,7 +58,8 @@ if ($_SERVER['argv'][1] == "-i") {
 	echo "\n[] Interactive conversation with $dst:\n";
 	stream_set_timeout(STDIN,1);
 	while(TRUE) {
-		$buff = $wa->read();
+		$wa->PollMessages();
+		$buff = $wa->GetMessages();
 		$line = fgets_u(STDIN);
 		if ($line != "") {
 			if (strrchr($line, " ")) {
@@ -94,9 +97,9 @@ if ($_SERVER['argv'][1] == "-i") {
 if ($_SERVER['argv'][1] == "-l") {
 	echo "\n[] Listen mode:\n";
 	while (TRUE) {
-		$buff = $wa->read();
-		if (strlen($buff) != 0)
-			echo "\n";
+		$wa->PollMessages();
+		$data = $wa->GetMessages();
+		if(!empty($data)) print_r($data);
 		sleep(1);
 	}
 	exit(0);
