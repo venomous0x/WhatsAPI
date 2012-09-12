@@ -22,6 +22,16 @@ $imei = "35xxxxxxxxxxxxx";
 
 $password = md5(strrev($imei));
 
+$countrycode = substr($sender,0,2);
+$phonenumber=substring($sender,2);
+
+$url = "https://r.whatsapp.net/v1/exist.php?cc=".$countrycode."&in=".$phonenumber."&udid=".$password;
+$content = file_get_conents($url);
+if(stristr($conten,'status="ok"') === false){
+	echo "Wrong Password\n";
+	exit(0);
+}
+
 if ($argc < 2) {
 	echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>]\n";
 	echo "\tphone: full number including country code, without '+' or '00'\n";
