@@ -16,18 +16,18 @@ function fgets_u($pStdn) {
 	}
 }
 
-$nickname = "Your Name";
-$sender = "346xxxxxxxx";
-$imei = "35xxxxxxxxxxxxx";
+$nickname = "Philipp";
+$sender = "491622300437";
+$imei = "353426055242721";
 
 $password = md5(strrev($imei));
 
 $countrycode = substr($sender,0,2);
-$phonenumber=substring($sender,2);
+$phonenumber=substr($sender,2);
 
 $url = "https://r.whatsapp.net/v1/exist.php?cc=".$countrycode."&in=".$phonenumber."&udid=".$password;
-$content = file_get_conents($url);
-if(stristr($conten,'status="ok"') === false){
+$content = file_get_contents($url);
+if(stristr($content,'status="ok"') === false){
 	echo "Wrong Password\n";
 	exit(0);
 }
