@@ -309,7 +309,7 @@ class BinTreeNodeReader
         $ret = "";
         if (strlen($this->_input) >= $len)
         {
-            $ret = utf8_decode(substr($this->_input, 0, $len));
+            $ret = substr($this->_input, 0, $len);
             $this->_input = substr($this->_input, $len);
         }
         return $ret;
@@ -461,7 +461,7 @@ class BinTreeNodeWriter
             $this->_output .= "\xfc";
             $this->writeInt8($len);
         }
-        $this->_output .= utf8_encode($bytes);
+        $this->_output .= $bytes;
     }
 
     protected function writeString($tag)
