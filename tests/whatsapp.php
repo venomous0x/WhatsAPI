@@ -3,7 +3,7 @@
 /**
  * 12-sep-2012 note: this is currently broken, to be fixed in the next push.
  */
-require "../src/php/whatsapp.class.php";
+require "../src/php/whatsprot.class.php";
 
 function fgets_u($pStdn) {
 	$pArr = array($pStdn);
@@ -38,7 +38,7 @@ for ($i=3; $i<$argc; $i++) {
 }
 
 echo "[] Logging in as '$nickname' ($sender)\n";
-$wa = new WhatsApp("$sender", "$password", "$nickname");
+$wa = new WhatsProt("$sender", $password, "$nickname");
 $wa->Connect();
 $wa->Login();
 
