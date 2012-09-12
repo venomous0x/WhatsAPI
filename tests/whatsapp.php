@@ -1,6 +1,9 @@
 #!/usr/bin/php
 <?php
-require "php/whatsapp.class.php";
+/**
+ * 12-sep-2012 note: this is currently broken, to be fixed in the next push.
+ */
+require "../src/php/whatsapp.class.php";
 
 function fgets_u($pStdn) {
 	$pArr = array($pStdn);
