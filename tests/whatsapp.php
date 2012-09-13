@@ -3,7 +3,7 @@
 /**
  * 12-sep-2012 note: this is currently broken, to be fixed in the next push.
  */
-require "../src/php/whatsapp.class.php";
+require "../src/php/whatsprot.class.php";
 
 function fgets_u($pStdn) {
 	$pArr = array($pStdn);
@@ -16,11 +16,14 @@ function fgets_u($pStdn) {
 	}
 }
 
-$nickname = "Your Name";
-$sender = "346xxxxxxxx";
-$imei = "35xxxxxxxxxxxxx";
+$nickname = "Philipp";
+$sender = "xxxxxxxxxxxx";
+$imei = "xxxxxxxxxxxxxx"; //IMEI for Andorid or Mac Address for iOS
 
-$password = md5(strrev($imei));
+
+$countrycode = substr($sender,0,2);
+$phonenumber=substr($sender,2);
+
 
 if ($argc < 2) {
 	echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>]\n";
@@ -38,7 +41,15 @@ for ($i=3; $i<$argc; $i++) {
 }
 
 echo "[] Logging in as '$nickname' ($sender)\n";
-$wa = new WhatsApp("$sender", "$password", "$nickname");
+$wa = new WhatsProt("$sender", $imei, "$nickname",true);
+
+$url = "https://r.whatsapp.net/v1/exist.php?cc=".$countrycode."&in=".$phonenumber."&udid=".$wa->encryptPassword();
+$content = file_get_contents($url);
+if(stristr($content,'status="ok"') === false){
+	echo "Wrong Password\n";
+	exit(0);
+}
+
 $wa->Connect();
 $wa->Login();
 
@@ -46,7 +57,11 @@ if ($_SERVER['argv'][1] == "-i") {
 	echo "\n[] Interactive conversation with $dst:\n";
 	stream_set_timeout(STDIN,1);
 	while(TRUE) {
-		$buff = $wa->read();
+		$wa->PollMessages();
+		$buff = $wa->GetMessages();
+		if(!empty($buff)){
+			print_r($buff);
+		}
 		$line = fgets_u(STDIN);
 		if ($line != "") {
 			if (strrchr($line, " ")) {
@@ -64,10 +79,10 @@ if ($_SERVER['argv'][1] == "-i") {
 					echo "[] Account Info: ";
 					$wa->accountInfo();
 					break;
-				case "/lastseen":
+				/*case "/lastseen":
 					echo "[] Request last seen $dst: ";
 					$wa->RequestLastSeen("$dst"); 
-					break;
+					break;*/
 				default:
 					echo "[] Send message to $dst: $line\n";
 					$wa->Message(time()."-1","$dst","$line");
@@ -84,9 +99,9 @@ if ($_SERVER['argv'][1] == "-i") {
 if ($_SERVER['argv'][1] == "-l") {
 	echo "\n[] Listen mode:\n";
 	while (TRUE) {
-		$buff = $wa->read();
-		if (strlen($buff) != 0)
-			echo "\n";
+		$wa->PollMessages();
+		$data = $wa->GetMessages();
+		if(!empty($data)) print_r($data);
 		sleep(1);
 	}
 	exit(0);

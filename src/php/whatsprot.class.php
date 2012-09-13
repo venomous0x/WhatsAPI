@@ -20,6 +20,7 @@ class WhatsProt
     protected $_disconnectedStatus = "disconnected";
     protected $_connectedStatus = "connected";
     protected $_loginStatus;
+    protected $_accountinfo;
 
     protected $_messageQueue = array();
 
@@ -57,9 +58,15 @@ class WhatsProt
         return $node;
     }
     
-    protected function encryptPassword()
+    public function encryptPassword()
     {
-        return md5(strrev($this->_imei));
+    	if(stristr($this->_imei,":")){
+    		$this->_imei = strtoupper($this->_imei);
+    		return md5($this->_imei.$this->_imei);
+    	}
+        else{
+        	return md5(strrev($this->_imei));
+        }
     }
 
     protected function authenticate($nonce)
@@ -188,12 +195,14 @@ class WhatsProt
                 else if (strcmp($node->_tag, "success") == 0)
                 {
                     $this->_loginStatus = $this->_connectedStatus;
+                    $this->_accountinfo = array('status'=>$node->getAttribute('status'),'kind'=>$node->getAttribute('kind'),'creation'=>$node->getAttribute('creation'),'expiration'=>$node->getAttribute('expiration'));
                 }
                 if (strcmp($node->_tag, "message") == 0)
                 {
                     array_push($this->_messageQueue, $node);
                     $this->sendMessageReceived($node);
                 }
+                print_r($node);
                 $node = $this->_reader->nextTree();
             }
         }
@@ -203,6 +212,15 @@ class WhatsProt
         }
     }
 
+    public function accountInfo(){
+    	if(is_array($this->_accountinfo)){
+    		print_r($this->_accountinfo);
+    	}
+    	else{
+    		echo "No information available";
+    	}
+    }
+    
     public function Connect(){ 
         $Socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP );
         socket_connect( $Socket, $this->_whatsAppHost, $this->_port );
