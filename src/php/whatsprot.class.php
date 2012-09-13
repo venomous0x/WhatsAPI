@@ -202,7 +202,6 @@ class WhatsProt
                     array_push($this->_messageQueue, $node);
                     $this->sendMessageReceived($node);
                 }
-                print_r($node);
                 $node = $this->_reader->nextTree();
             }
         }

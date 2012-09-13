@@ -461,7 +461,7 @@ class BinTreeNodeWriter
             $this->_output .= "\xfc";
             $this->writeInt8($len);
         }
-        $this->_output .= utf8_encode($bytes);
+        $this->_output .= $bytes;
     }
 
     protected function writeString($tag)
