@@ -111,7 +111,7 @@ class BinTreeNodeReader
         $stanzaSize = $this->peekInt16();
         if ($stanzaSize > strlen($this->_input))
         {
-            $exception = new IncompleteMessageException();
+            $exception = new IncompleteMessageException("Incomplete message");
             $exception->setInput($this->_input);
             throw $exception;
         }
