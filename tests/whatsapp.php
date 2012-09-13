@@ -1,8 +1,5 @@
 #!/usr/bin/php
 <?php
-/**
- * 12-sep-2012 note: this is currently broken, to be fixed in the next push.
- */
 require "../src/php/whatsprot.class.php";
 
 function fgets_u($pStdn) {
@@ -16,9 +13,9 @@ function fgets_u($pStdn) {
 	}
 }
 
-$nickname = "Philipp";
-$sender = "xxxxxxxxxxxx";
-$imei = "xxxxxxxxxxxxxx"; //IMEI for Andorid or Mac Address for iOS
+$nickname = "WhatsAPI Test";
+$sender = 	"xxxxxxxxxxxx";
+$imei = 	"xxxxxxxxxxxxxx"; //IMEI for Andorid or Mac Address for iOS
 
 
 $countrycode = substr($sender,0,2);

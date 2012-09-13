@@ -60,11 +60,11 @@ class WhatsProt
     
     public function encryptPassword()
     {
-    	if(stristr($this->_imei,":")){
+    	if(stripos($this->_imei, ":") !== false){
     		$this->_imei = strtoupper($this->_imei);
     		return md5($this->_imei.$this->_imei);
     	}
-        else{
+        else {
         	return md5(strrev($this->_imei));
         }
     }
