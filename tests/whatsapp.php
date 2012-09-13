@@ -14,13 +14,12 @@ function fgets_u($pStdn) {
 }
 
 $nickname = "WhatsAPI Test";
-$sender = 	"xxxxxxxxxxxx";
-$imei = 	"xxxxxxxxxxxxxx"; //IMEI for Andorid or Mac Address for iOS
+$sender = 	""; // Mobile number with country code (but without + or 00)
+$imei = 	""; // MAC Address for iOS IMEI for other platform (Android/etc) 
 
 
-$countrycode = substr($sender,0,2);
-$phonenumber=substr($sender,2);
-
+$countrycode = substr($sender, 0, 2);
+$phonenumber=substr($sender, 2);
 
 if ($argc < 2) {
 	echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>]\n";
@@ -32,13 +31,13 @@ if ($argc < 2) {
 }
 
 $dst=$_SERVER['argv'][2];
-$msg="";
+$msg = "";
 for ($i=3; $i<$argc; $i++) {
-	$msg.=$_SERVER['argv'][$i]." ";
+	$msg .= $_SERVER['argv'][$i]." ";
 }
 
 echo "[] Logging in as '$nickname' ($sender)\n";
-$wa = new WhatsProt("$sender", $imei, "$nickname",true);
+$wa = new WhatsProt($sender, $imei, $nickname, true);
 
 $url = "https://r.whatsapp.net/v1/exist.php?cc=".$countrycode."&in=".$phonenumber."&udid=".$wa->encryptPassword();
 $content = file_get_contents($url);
@@ -76,22 +75,19 @@ if ($_SERVER['argv'][1] == "-i") {
 					echo "[] Account Info: ";
 					$wa->accountInfo();
 					break;
-				/*case "/lastseen":
+				case "/lastseen":
 					echo "[] Request last seen $dst: ";
 					$wa->RequestLastSeen("$dst"); 
-					break;*/
+					break;
 				default:
 					echo "[] Send message to $dst: $line\n";
-					$wa->Message(time()."-1","$dst","$line");
+					$wa->Message(time()."-1", $dst , $line);
 					break;
 			}
 		}
 	}
 	exit(0);
 }
-
-//echo "\n[] Account Info: ";
-//$wa->accountInfo();
 
 if ($_SERVER['argv'][1] == "-l") {
 	echo "\n[] Listen mode:\n";
@@ -105,9 +101,9 @@ if ($_SERVER['argv'][1] == "-l") {
 }
 
 echo "\n[] Request last seen $dst: ";
-$wa->RequestLastSeen("$dst"); 
+$wa->RequestLastSeen($dst); 
 
 echo "\n[] Send message to $dst: $msg\n";
-$wa->Message(time()."-1","$dst","$msg");
+$wa->Message(time()."-1", $dst , $msg);
 echo "\n";
 ?>

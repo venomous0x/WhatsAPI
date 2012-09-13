@@ -285,6 +285,12 @@ class WhatsProt
             print($debugMsg);
         }
     }
+    /**
+	 * TODO
+     */
+    public function RequestLastSeen($var){
+    	return null;
+    }
 }
 
 ?>
