@@ -8,7 +8,7 @@ $debug = (array_key_exists("debug", $options) || array_key_exists("d", $options)
 $w = new WhatsProt("***********", "***************", "John Doe", $debug);
 $w->Connect();
 $w->Login();
-$w->Message(time() . "-1", "***********", "yurp");
+$w->Message(time() . "-1", "***********", "yürp");
 while(1)
 {
     $w->PollMessages();
