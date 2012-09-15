@@ -9,6 +9,7 @@ class WhatsProt
 
     protected $_whatsAppHost = "bin-short.whatsapp.net";
     protected $_whatsAppServer = "s.whatsapp.net";
+    protected $_whatsAppGroupServer = "g.us";
     protected $_whatsAppRealm = "s.whatsapp.net";
     protected $_whatsAppDigest = "xmpp/s.whatsapp.net";
     protected $_device = "iPhone";
@@ -263,6 +264,11 @@ class WhatsProt
 
     public function Message($msgid, $to, $txt)
     {
+        $whatsAppServer = $this->_whatsAppServer;
+        if(strpos($to, "-") !== false)
+        {
+            $whatsAppServer = $this->_whatsAppGroupServer;
+        }
         $bodyNode = new ProtocolNode("body", null, null, $txt);
         $serverNode = new ProtocolNode("server", null, null, "");
 
@@ -271,7 +277,7 @@ class WhatsProt
         $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
 
         $messageHash = array();
-        $messageHash["to"] = $to . "@" . $this->_whatsAppServer;
+        $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
