@@ -204,7 +204,7 @@ class WhatsProt
                 }
                 if (strcmp($node->_tag, "iq") == 0 AND strcmp($node->_attributeHash['type'], "get") == 0 AND strcmp($node->_children[0]->_tag, "ping") == 0)
                 {
-                        $this->Pong($node->_attributeHash['id']);
+                    $this->Pong($node->_attributeHash['id']);
                 }
 
                 $node = $this->_reader->nextTree();
