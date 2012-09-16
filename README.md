@@ -72,7 +72,8 @@ With the sufficent permissions of course
 <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 ```
 
-
+on iOS however the password is the MD5 hash the mac address repeated twice
+thanks to http://www.ezioamodio.it/?p=29
 
 # NOTES
 
