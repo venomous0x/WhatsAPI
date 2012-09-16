@@ -1,3 +1,5 @@
+For recent changes, refer to the [Change Log](https://github.com/venomous0x/WhatsAPI/blob/master/CHANGELOG.md)
+
 # WhatsAPI
 
 Interface to WhatsApp Messenger
@@ -8,7 +10,7 @@ Interface to WhatsApp Messenger
 ### What is WhatsApp?
 According to [the company](http://www.whatsapp.com/): 
 
-> ìWhatsApp Messenger is a cross-platform mobile messenger that replaces SMS and works through the existing internet data plan of your device. WhatsApp is available for iPhone, BlackBerry, Android, Windows Phone, Nokia Symbian60 & S40 phones. Because WhatsApp Messenger uses the same internet data plan that you use for email and web browsing, there is no cost to message and stay in touch with your friends.î
+> ‚ÄúWhatsApp Messenger is a cross-platform mobile messenger that replaces SMS and works through the existing internet data plan of your device. WhatsApp is available for iPhone, BlackBerry, Android, Windows Phone, Nokia Symbian60 & S40 phones. Because WhatsApp Messenger uses the same internet data plan that you use for email and web browsing, there is no cost to message and stay in touch with your friends.‚Äù
 
 Late 2011 numbers: 1 billion messages per day, ~20 million users.
 
@@ -16,15 +18,15 @@ Late 2011 numbers: 1 billion messages per day, ~20 million users.
 WhatsApp uses some sort of customized XMPP server, named internally as FunXMPP, which is basically some extended proprietary version.
 
 ### Login procedure
-Much like XMPP, WhatsApp uses JID (jabber id) and password to successfully login to the service. The password is hashed and happened to be an MD5íd, reversed-version of the mobileís IMEI (International Mobile Equipment Identity) or equivalent unique ID, stored in servers upon account creation and used transparently everytime the client connects the server.
+Much like XMPP, WhatsApp uses JID (jabber id) and password to successfully login to the service. The password is hashed and happened to be an MD5‚Äôd, reversed-version of the mobile‚Äôs IMEI (International Mobile Equipment Identity) or equivalent unique ID, stored in servers upon account creation and used transparently everytime the client connects the server.
 
 
-The JID is a concatenation between your countryís code and mobile number.
+The JID is a concatenation between your country‚Äôs code and mobile number.
 
 Initial login uses Digest Access Authentication.
 
 ### Message sending
-Messages are basically sent as TCP packets, following WhatsAppís own format (unlike whatís defined in XMPP RFCs).
+Messages are basically sent as TCP packets, following WhatsApp‚Äôs own format (unlike what‚Äôs defined in XMPP RFCs).
 
 
 Despite the usage of SSL-like communication, messages are being sent in plain-text format.
@@ -35,25 +37,25 @@ Photos, Videos and Audio files shared with WhatsApp contacts are HTTP-uploaded t
 # FAQ
 
 
-- **Whatís with the hex chars floating all over the code?**
+- **What‚Äôs with the hex chars floating all over the code?**
 
-	Mostly WhatsAppís proprietary control chars/commands, or formatted data according to their serverís specifications, stored in predefined dictionaries within the clients.
+	Mostly WhatsApp‚Äôs proprietary control chars/commands, or formatted data according to their server‚Äôs specifications, stored in predefined dictionaries within the clients.
 
-- **Whatís your future development plans?**
+- **What‚Äôs your future development plans?**
 
-	We donít have any.
+	We don‚Äôt have any.
 
 - **Would it run over the web?**
 
-	Weíve tested a slightly-modified version on top of Tornado Web Server and worked like a charm, however, building a chat client is a bit tricky, do your research.
+	We‚Äôve tested a slightly-modified version on top of Tornado Web Server and worked like a charm, however, building a chat client is a bit tricky, do your research.
 
 - **Can I receive chats?**
 
-	Indeed, using the same socket-receiving mechanism. But you have to parse the incoming data. Parsing functions arenít included in this release, maybe in the next one?
+	Indeed, using the same socket-receiving mechanism. But you have to parse the incoming data. Parsing functions aren‚Äôt included in this release, maybe in the next one?
 
 - **I think the code is messy.**
 
-	Itís working.
+	It‚Äôs working.
 
 - **How can I obtain my password?**
 
@@ -72,7 +74,7 @@ With the sufficent permissions of course
 <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 ```
 
-on iOS however the password is the MD5 hash the mac address repeated twice
+On iOS however the password is the MD5 hash of the MAC address repeated twice
 thanks to http://www.ezioamodio.it/?p=29
 
 # NOTES
