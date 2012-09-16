@@ -16,7 +16,7 @@ $w->Message(time() . "-1", "***********", "yürp");
 # You can also just leave the last param empty to send no icon
 # Obviously this needs better integration... but this is a start...
 # Also thumb.jpgb64 is just for an example!
-$iconfile = "thumb.jpgb64";
+$iconfile = "tests/thumb.jpgb64";
 $fp = fopen($iconfile, "r");
 $icon = fread($fp, filesize($iconfile));
 fclose($fp);
