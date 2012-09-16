@@ -202,6 +202,11 @@ class WhatsProt
                     array_push($this->_messageQueue, $node);
                     $this->sendMessageReceived($node);
                 }
+                if (strcmp($node->_tag, "iq") == 0 AND strcmp($node->_attributeHash['type'], "get") == 0 AND strcmp($node->_children[0]->_tag, "ping") == 0)
+                {
+                        $this->Pong($node->_attributeHash['id']);
+                }
+
                 $node = $this->_reader->nextTree();
             }
         }
@@ -294,6 +299,19 @@ class WhatsProt
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, null, $icon);
         $this->SendMessageNode($msgid, $to, $mediaNode);
+    }
+    
+    public function Pong($msgid)
+    {
+        $whatsAppServer = $this->_whatsAppServer;
+
+        $messageHash = array();
+        $messageHash["to"] = $whatsAppServer;
+        $messageHash["id"] = $msgid;
+        $messageHash["type"] = "result";
+       
+       	$messsageNode = new ProtocolNode("iq", $messageHash, null, "");
+	$this->sendNode($messsageNode);
     }
 
     protected function DebugPrint($debugMsg)
