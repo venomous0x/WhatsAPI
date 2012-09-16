@@ -261,9 +261,8 @@ class WhatsProt
         return $ret;
     }
 
-    public function Message($msgid, $to, $txt)
+    protected function SendMessageNode($msgid, $to, $node)
     {
-        $bodyNode = new ProtocolNode("body", null, null, $txt);
         $serverNode = new ProtocolNode("server", null, null, "");
 
         $xHash = array();
@@ -274,9 +273,29 @@ class WhatsProt
         $messageHash["to"] = $to . "@" . $this->_whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
-        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
+        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $node), "");
         $this->sendNode($messsageNode);
     }
+
+    public function Message($msgid, $to, $txt)
+    {
+        $bodyNode = new ProtocolNode("body", null, null, $txt);
+        $this->SendMessageNode($msgid, $to, $bodyNode);
+    }
+
+    public function MessageImage($msgid, $to, $url, $file, $size, $icon)
+    {
+        $mediaAttribs = array();
+        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+        $mediaAttribs["type"] = "image";
+        $mediaAttribs["url"] = $url;
+        $mediaAttribs["file"] = $file;
+        $mediaAttribs["size"] = $size;
+
+        $mediaNode = new ProtocolNode("media", $mediaAttribs, null, $icon);
+        $this->SendMessageNode($msgid, $to, $mediaNode);
+    }
+
     protected function DebugPrint($debugMsg)
     {
         if ($this->_debug)

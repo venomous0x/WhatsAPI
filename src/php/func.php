@@ -44,4 +44,19 @@ function endsWith($haystack, $needle){
     return (substr($haystack, $start) === $needle);
 }
 
+function createIcon($file)
+{
+    $outfile = "thumb.jpg";
+    $cmd = "convert $file -resize 100x100 $outfile";
+    system($cmd);
+    $fp = fopen($outfile, "r");
+    $contents = fread($fp, filesize($outfile));
+    fclose($fp);
+    $b64 = base64_encode($contents);
+    $outfile .= "b64";
+    $fp = fopen($outfile, "w");
+    fwrite($fp, $b64);
+    fclose($fp);
+}
+
 ?>
