@@ -1,3 +1,6 @@
+###September 29 Note:
+> Development to be resumed, let's pretend that nothing was happened.
+
 For recent changes, refer to the [Change Log](https://github.com/venomous0x/WhatsAPI/blob/master/CHANGELOG.md)
 
 # WhatsAPI
