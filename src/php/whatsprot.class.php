@@ -300,7 +300,28 @@ class WhatsProt
         $mediaNode = new ProtocolNode("media", $mediaAttribs, null, $icon);
         $this->SendMessageNode($msgid, $to, $mediaNode);
     }
-    
+
+    public function Location($msgid, $to, $long, $lat)
+    {
+        $whatsAppServer = $this->_whatsAppServer;
+
+        $mediaHash = array();
+        $mediaHash['type'] = "location";
+        $mediaHash['longitude'] = $long;
+        $mediaHash['latitude'] = $lat;
+        $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
+        $mediaNode = new ProtocolNode("media", $mediaHash, null, null);
+
+        $messageHash = array();
+        $messageHash["to"] = $to . "@" . $whatsAppServer;
+        $messageHash["type"] = "chat";
+        $messageHash["id"] = $msgid;
+        $messageHash["author"] = $this->_phoneNumber . "@" . $this->_whatsAppServer;
+
+        $messsageNode = new ProtocolNode("message", $messageHash, array($mediaNode), "");
+        $this->sendNode($messsageNode);
+    }
+
     public function Pong($msgid)
     {
         $whatsAppServer = $this->_whatsAppServer;
