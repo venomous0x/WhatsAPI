@@ -206,7 +206,10 @@ class WhatsProt
                 {
                     $this->Pong($node->_attributeHash['id']);
                 }
-
+                if (strcmp($node->_tag, "iq") == 0 AND strcmp($node->_attributeHash['type'], "result") == 0 AND strcmp($node->_children[0]->_tag, "query") == 0)
+                {
+                    array_push($this->_messageQueue, $node);
+                }
                 $node = $this->_reader->nextTree();
             }
         }
@@ -342,12 +345,26 @@ class WhatsProt
             print($debugMsg);
         }
     }
-    /**
-	 * TODO
-     */
-    public function RequestLastSeen($var){
-    	return null;
+    
+    public function RequestLastSeen($msgid, $to)
+    {
+
+    	$whatsAppServer = $this->_whatsAppServer;
+
+    	$queryHash = array();
+    	$queryHash['xmlns'] = "jabber:iq:last";
+    	$queryNode = new ProtocolNode("query", $queryHash, null, null);
+
+    	$messageHash = array();
+    	$messageHash["to"] = $to . "@" . $whatsAppServer;
+    	$messageHash["type"] = "get";
+    	$messageHash["id"] = $msgid;
+    	$messageHash["from"] = $this->_phoneNumber . "@" . $this->_whatsAppServer;
+
+    	$messsageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
+    	$this->sendNode($messsageNode);
     }
+
 }
 
 ?>
