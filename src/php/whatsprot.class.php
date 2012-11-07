@@ -1,18 +1,19 @@
 <?php
 require "protocol.class.php";
 require "func.php";
+require "rc4.php";
 class WhatsProt 
 {
     protected $_phoneNumber;
     protected $_imei;
     protected $_name;
 
-    protected $_whatsAppHost = "bin-short.whatsapp.net";
+    protected $_whatsAppHost = "c.whatsapp.net";
     protected $_whatsAppServer = "s.whatsapp.net";
     protected $_whatsAppRealm = "s.whatsapp.net";
     protected $_whatsAppDigest = "xmpp/s.whatsapp.net";
     protected $_device = "iPhone";
-    protected $_whatsAppVer = "2.8.2";
+    protected $_whatsAppVer = "2.8.4";
     protected $_port = 5222;
     protected $_timeout = array("sec" => 2, "usec" => 0);
     protected $_incomplete_message = "";
@@ -27,6 +28,9 @@ class WhatsProt
     protected $_socket;
     protected $_writer;
     protected $_reader;
+    
+    protected $_inputKey;
+    protected $_outputKey;
 
     protected $_debug;
 	
@@ -53,7 +57,8 @@ class WhatsProt
     {
         $authHash = array();
         $authHash["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
-        $authHash["mechanism"] = "DIGEST-MD5-1";
+        $authHash["mechanism"] = "WAUTH-1";
+        $authHash["user"] = $this->_phoneNumber;
         $node = new ProtocolNode("auth", $authHash, NULL, "");
         return $node;
     }
@@ -69,57 +74,22 @@ class WhatsProt
         }
     }
 
-    protected function authenticate($nonce)
+    protected function authenticate()
     {
-        $NC = "00000001";
-        $qop = "auth";
-        $cnonce = random_uuid();
-        $data1 = $this->_phoneNumber;
-        $data1 .= ":";
-        $data1 .= $this->_whatsAppServer;
-        $data1 .= ":";
-        $data1 .= $this->EncryptPassword();
-
-        $data2 = pack('H32', md5($data1));
-        $data2 .= ":";
-        $data2 .= $nonce;
-        $data2 .= ":";
-        $data2 .= $cnonce;
-
-        $data3 = "AUTHENTICATE:";
-        $data3 .= $this->_whatsAppDigest;
-
-        $data4 = md5($data2);
-        $data4 .= ":";
-        $data4 .= $nonce;
-        $data4 .= ":";
-        $data4 .= $NC;
-        $data4 .= ":";
-        $data4 .= $cnonce;
-        $data4 .= ":";
-        $data4 .= $qop;
-        $data4 .= ":";
-        $data4 .= md5($data3);
-
-        $data5 = md5($data4);
-		$response = sprintf('username="%s",realm="%s",nonce="%s",cnonce="%s",nc=%s,qop=%s,digest-uri="%s",response=%s,charset=utf-8', 
-            $this->_phoneNumber, 
-            $this->_whatsAppRealm, 
-            $nonce, 
-            $cnonce, 
-            $NC, 
-            $qop, 
-            $this->_whatsAppDigest, 
-            $data5);
+        $key = pbkdf2("sha1", $this->encryptPassword(), $this->challengeData, 16, 20, true);
+        $this->_inputKey = new KeyStream($key);
+        $this->_outputKey = new KeyStream($key);
+        $array = $this->_phoneNumber.$this->challengeData.time();
+        $response = $this->_outputKey->encode($array, 0, strlen($array), false);
         return $response;
     }
 
     protected function addAuthResponse()
     {
-        $resp = $this->authenticate($this->challengeArray["nonce"]);
+        $resp = $this->authenticate();
         $respHash = array();
         $respHash["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
-        $node = new ProtocolNode("response", $respHash, NULL, base64_encode($resp));
+        $node = new ProtocolNode("response", $respHash, NULL, $resp);
         return $node;
     }
 
@@ -148,14 +118,7 @@ class WhatsProt
     
     protected function processChallenge($node)
     {
-        $challenge = base64_decode($node->_data);
-        $challengeStrs = explode(",", $challenge);
-        $this->challengeArray = array();
-        foreach ($challengeStrs as $c)
-        {
-            $d = explode("=", $c);
-            $this->challengeArray[$d[0]] = str_replace("\"", "", $d[1]);
-        }
+        $this->challengeData = $node->_data;
     }
     
     protected function sendMessageReceived($msg)
@@ -248,6 +211,8 @@ class WhatsProt
         $this->processInboundData($this->readData());
         $data = $this->addAuthResponse();
         $this->sendNode($data);
+        $this->_reader->setKey($this->_inputKey);
+        $this->_writer->setKey($this->_outputKey);
         $cnt = 0;
         do
         {
@@ -335,7 +300,7 @@ class WhatsProt
         $messageHash["type"] = "result";
        
        	$messsageNode = new ProtocolNode("iq", $messageHash, null, "");
-	$this->sendNode($messsageNode);
+        $this->sendNode($messsageNode);
     }
 
     protected function DebugPrint($debugMsg)
