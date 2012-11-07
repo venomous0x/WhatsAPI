@@ -97,25 +97,37 @@ class BinTreeNodeReader
 {
     private $_dictionary;
     private $_input;
+    private $_key;
+    
     function __construct($dictionary)
     {
         $this->_dictionary = $dictionary;
     }
 
+    public function setKey($key)
+    {
+        $this->_key = $key;
+    }    
+    
     public function nextTree($input = NULL)
     {
         if ($input != NULL)
         {
             $this->_input = $input;
         }
-        $stanzaSize = $this->peekInt16();
+        $stanzaFlag = ($this->peekInt8() & 0xF0) >> 4;
+        $stanzaSize = $this->peekInt16(1);
         if ($stanzaSize > strlen($this->_input))
         {
             $exception = new IncompleteMessageException("Incomplete message");
             $exception->setInput($this->_input);
             throw $exception;
         }
-        $this->readInt16();
+        $this->readInt24();
+        if (($stanzaFlag & 8) && isset($this->_key))
+        {
+            $this->_input = $this->_key->decode($this->_input, 0, $stanzaSize);
+        }
         if ($stanzaSize > 0)
         {
             return $this->nextTreeInternal();
@@ -258,26 +270,35 @@ class BinTreeNodeReader
         return $size;
     }
 
-    protected function readInt24()
+    protected function peekInt24($offset = 0)
     {
         $ret = 0;
+        if (strlen($this->_input) >= (3 + $offset))
+        {
+            $ret  = ord(substr($this->_input, $offset, 1)) << 16;
+            $ret |= ord(substr($this->_input, $offset + 1, 1)) << 8;
+            $ret |= ord(substr($this->_input, $offset + 2, 1)) << 0;
+        }
+        return $ret;
+    }    
+    
+    protected function readInt24()
+    {
+        $ret = $this->peekInt24();
         if (strlen($this->_input) >= 3)
         {
-            $ret  = ord(substr($this->_input, 0, 1)) << 16;
-            $ret |= ord(substr($this->_input, 1, 1)) << 8;
-            $ret |= ord(substr($this->_input, 2, 1)) << 0;
             $this->_input = substr($this->_input, 3);
         }
         return $ret;
     }
 
-    protected function peekInt16()
+    protected function peekInt16($offset = 0)
     {
         $ret = 0;
-        if (strlen($this->_input) >= 2)
+        if (strlen($this->_input) >= (2 + $offset))
         {
-            $ret  = ord(substr($this->_input, 0, 1)) << 8;
-            $ret |= ord(substr($this->_input, 1, 1)) << 0;
+            $ret  = ord(substr($this->_input, $offset, 1)) << 8;
+            $ret |= ord(substr($this->_input, $offset + 1, 1)) << 0;
         }
         return $ret;
     }
@@ -291,14 +312,23 @@ class BinTreeNodeReader
         }
         return $ret;
     }
-
-    protected function readInt8()
+    
+    protected function peekInt8($offset = 0)
     {
         $ret = 0;
-        if (strlen($this->_input) >= 1)
+        if (strlen($this->_input) >= (1 + $offset))
         {
             $sbstr = substr($this->_input, 0, 1);
             $ret = ord($sbstr);
+        }
+        return $ret;
+    }
+
+    protected function readInt8()
+    {
+        $ret = $this->peekInt8();
+        if (strlen($this->_input) >= 1)
+        {
             $this->_input = substr($this->_input, 1);
         }
         return $ret;
@@ -320,6 +350,7 @@ class BinTreeNodeWriter
 {
     private $_output;
     private $_tokenMap = array();
+    private $_key;
 
     function __construct($dictionary)
     {
@@ -331,12 +362,18 @@ class BinTreeNodeWriter
             }
         }
     }
+    
+    public function setKey($key)
+    {
+        $this->_key = $key;
+    }
 
     public function StartStream($domain, $resource)
     {
         $attributes = array();
-        $this->_output = "WA";
-        $this->_output .= "\x01\x01\x00\x19";
+        $header = "WA";
+        $header .= $this->writeInt8(1);
+        $header .= $this->writeInt8(2);
 
         $attributes["to"] = $domain;
         $attributes["resource"] = $resource;
@@ -344,8 +381,7 @@ class BinTreeNodeWriter
         
         $this->_output .= "\x01";
         $this->writeAttributes($attributes);
-        $ret = $this->_output;
-        $this->_output = "";
+        $ret = $header.$this->flushBuffer();
         return $ret;
     }
 
@@ -396,9 +432,11 @@ class BinTreeNodeWriter
 
     protected function flushBuffer()
     {
-        $size = strlen($this->_output);
-        $ret = $this->writeInt16($size);
-        $ret .= $this->_output;
+        $data = (isset($this->_key)) ? $this->_key->encode($this->_output, 0, strlen($this->_output)) : $this->_output;
+        $size = strlen($data);
+        $ret  = $this->writeInt8(isset($this->_key) ? (1 << 4) : 0);
+        $ret .= $this->writeInt16($size);
+        $ret .= $data;
         $this->_output = "";
         return $ret;
     }
@@ -431,21 +469,23 @@ class BinTreeNodeWriter
 
     protected function writeInt8($v)
     {
-        $this->_output .= chr($v & 0xff);
+        $ret = chr($v & 0xff);
+        return $ret;
     }
 
     protected function writeInt16($v)
     {
-        $ret  = chr(($v & 0xff00) >> 8);
+        $ret = chr(($v & 0xff00) >> 8);
         $ret .= chr(($v & 0x00ff) >> 0);
         return $ret;
     }
 
     protected function writeInt24($v)
     {
-        $this->_output .= chr(($v & 0xff0000) >> 16);
-        $this->_output .= chr(($v & 0x00ff00) >> 8);
-        $this->_output .= chr(($v & 0x0000ff) >> 0);
+        $ret = chr(($v & 0xff0000) >> 16);
+        $ret .= chr(($v & 0x00ff00) >> 8);
+        $ret .= chr(($v & 0x0000ff) >> 0);
+        return ret;
     }
 
     protected function writeBytes($bytes)
@@ -454,12 +494,12 @@ class BinTreeNodeWriter
         if ($len >= 0x100)
         {
             $this->_output .= "\xfd";
-            $this->writeInt24($len);
+            $this->_output .= $this->writeInt24($len);
         }
         else
         {
             $this->_output .= "\xfc";
-            $this->writeInt8($len);
+            $this->_output .= $this->writeInt8($len);
         }
         $this->_output .= $bytes;
     }
