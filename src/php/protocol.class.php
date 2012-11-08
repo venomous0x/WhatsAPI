@@ -318,7 +318,7 @@ class BinTreeNodeReader
         $ret = 0;
         if (strlen($this->_input) >= (1 + $offset))
         {
-            $sbstr = substr($this->_input, 0, 1);
+            $sbstr = substr($this->_input, $offset, 1);
             $ret = ord($sbstr);
         }
         return $ret;
