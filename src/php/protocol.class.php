@@ -126,7 +126,8 @@ class BinTreeNodeReader
         $this->readInt24();
         if (($stanzaFlag & 8) && isset($this->_key))
         {
-            $this->_input = $this->_key->decode($this->_input, 0, $stanzaSize);
+			$remainingData = substr($this->_input, $stanzaSize);
+            $this->_input = $this->_key->decode($this->_input, 0, $stanzaSize) . $remainingData;
         }
         if ($stanzaSize > 0)
         {
