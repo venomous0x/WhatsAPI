@@ -68,4 +68,3 @@ class KeyStream
         return $this->_rc4->cipher($data, $offset + 4, $length - 4);
     }
 }
-?>
