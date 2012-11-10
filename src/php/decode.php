@@ -294,6 +294,3 @@ function getToken($token){
     $dic = getDictionary();
 	return $dic[$token];
 }
-
-		
-?>

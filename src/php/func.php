@@ -85,5 +85,3 @@ function createIcon($file)
     fwrite($fp, $b64);
     fclose($fp);
 }
-
-?>
