@@ -486,7 +486,7 @@ class BinTreeNodeWriter
         $ret = chr(($v & 0xff0000) >> 16);
         $ret .= chr(($v & 0x00ff00) >> 8);
         $ret .= chr(($v & 0x0000ff) >> 0);
-        return ret;
+        return $ret;
     }
 
     protected function writeBytes($bytes)
