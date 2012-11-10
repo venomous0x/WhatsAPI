@@ -556,5 +556,3 @@ class BinTreeNodeWriter
         }
     }
 }
-
- ?>
