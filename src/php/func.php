@@ -67,7 +67,7 @@ function startsWith($haystack, $needle , $pos=0){
 
 function endsWith($haystack, $needle){
     $length = strlen($needle);
-    $start  = $length * -1; 
+    $start  = $length * -1;
     return (substr($haystack, $start) === $needle);
 }
 
@@ -84,4 +84,11 @@ function createIcon($file)
     $fp = fopen($outfile, "w");
     fwrite($fp, $b64);
     fclose($fp);
+}
+
+function resize_image($image, $w, $h) {
+    $img = new Imagick();
+    $img->readImageBlob($image);
+    $img->thumbnailImage($w, $h, TRUE);
+    return base64_encode($img);
 }

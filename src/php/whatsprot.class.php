@@ -2,7 +2,7 @@
 require "protocol.class.php";
 require "func.php";
 require "rc4.php";
-class WhatsProt 
+class WhatsProt
 {
     protected $_phoneNumber;
     protected $_imei;
@@ -10,6 +10,7 @@ class WhatsProt
 
     protected $_whatsAppHost = "c.whatsapp.net";
     protected $_whatsAppServer = "s.whatsapp.net";
+    protected $_whatsAppGroupServer = "g.us";
     protected $_whatsAppRealm = "s.whatsapp.net";
     protected $_whatsAppDigest = "xmpp/s.whatsapp.net";
     protected $_device = "iPhone";
@@ -28,12 +29,12 @@ class WhatsProt
     protected $_socket;
     protected $_writer;
     protected $_reader;
-    
+
     protected $_inputKey;
     protected $_outputKey;
 
     protected $_debug;
-	
+
     function __construct($Number, $imei, $Nickname, $debug = false)
     {
         $this->_debug = $debug;
@@ -45,7 +46,7 @@ class WhatsProt
         $this->_name = $Nickname;
         $this->_loginStatus = $this->_disconnectedStatus;
     }
-    
+
     protected function addFeatures()
     {
         $child = new ProtocolNode("receipt_acks", NULL, NULL, "");
@@ -62,7 +63,7 @@ class WhatsProt
         $node = new ProtocolNode("auth", $authHash, NULL, "");
         return $node;
     }
-    
+
     public function encryptPassword()
     {
     	if(stripos($this->_imei, ":") !== false){
@@ -96,8 +97,8 @@ class WhatsProt
 	protected function sendData($data)
     {
 		socket_send( $this->_socket, $data, strlen($data), 0 );
-	}	
-    
+	}
+
     protected function sendNode($node)
     {
         $this->DebugPrint($node->NodeString("tx  ") . "\n");
@@ -115,12 +116,12 @@ class WhatsProt
         }
         return $buff;
     }
-    
+
     protected function processChallenge($node)
     {
         $this->challengeData = $node->_data;
     }
-    
+
     protected function sendMessageReceived($msg)
     {
         $requestNode = $msg->getChild("request");
@@ -190,8 +191,8 @@ class WhatsProt
     		echo "No information available";
     	}
     }
-    
-    public function Connect(){ 
+
+    public function Connect(){
         $Socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP );
         socket_connect( $Socket, $this->_whatsAppHost, $this->_port );
         $this->_socket = $Socket;
@@ -225,7 +226,7 @@ class WhatsProt
     {
         $this->processInboundData($this->readData());
     }
-    
+
     # Drain the message queue for application processing
     public function GetMessages()
     {
@@ -236,6 +237,11 @@ class WhatsProt
 
     protected function SendMessageNode($msgid, $to, $node)
     {
+        $whatsAppServer = $this->_whatsAppServer;
+        if(strpos($to, "-") !== false)
+        {
+            $whatsAppServer = $this->_whatsAppGroupServer;
+        }
         $serverNode = new ProtocolNode("server", null, null, "");
 
         $xHash = array();
@@ -243,7 +249,7 @@ class WhatsProt
         $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
 
         $messageHash = array();
-        $messageHash["to"] = $to . "@" . $this->_whatsAppServer;
+        $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $node), "");
@@ -256,14 +262,18 @@ class WhatsProt
         $this->SendMessageNode($msgid, $to, $bodyNode);
     }
 
-    public function MessageImage($msgid, $to, $url, $file, $size, $icon)
+    public function MessageImage($msgid, $to, $url)
     {
+        $image = file_get_contents($url);
+        $filesize = strlen($image);
+        $icon = resize_image($image, 100, 100);
+
         $mediaAttribs = array();
         $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
         $mediaAttribs["type"] = "image";
         $mediaAttribs["url"] = $url;
-        $mediaAttribs["file"] = $file;
-        $mediaAttribs["size"] = $size;
+        $mediaAttribs["file"] = basename($url);
+        $mediaAttribs["size"] = $filesize;
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, null, $icon);
         $this->SendMessageNode($msgid, $to, $mediaNode);
@@ -290,6 +300,14 @@ class WhatsProt
         $this->sendNode($messsageNode);
     }
 
+    public function sendNickname($nickname)
+    {
+        $messageHash = array();
+        $messageHash["name"] = $nickname;
+        $messsageNode = new ProtocolNode("presence", $messageHash, null, "");
+        $this->sendNode($messsageNode);
+    }
+
     public function Pong($msgid)
     {
         $whatsAppServer = $this->_whatsAppServer;
@@ -298,7 +316,7 @@ class WhatsProt
         $messageHash["to"] = $whatsAppServer;
         $messageHash["id"] = $msgid;
         $messageHash["type"] = "result";
-       
+
        	$messsageNode = new ProtocolNode("iq", $messageHash, null, "");
         $this->sendNode($messsageNode);
     }
@@ -310,7 +328,7 @@ class WhatsProt
             print($debugMsg);
         }
     }
-    
+
     public function RequestLastSeen($msgid, $to)
     {
 
