@@ -318,6 +318,15 @@ class WhatsProt
         $this->sendNode($messsageNode);
     }
 
+    public function sendNickname($nickname)
+    {
+        $messageHash = array();
+        $messageHash["name"] = $nickname;
+        $messsageNode = new ProtocolNode("presence", $messageHash, null, "");
+        $this->sendNode($messsageNode);
+    }
+
+
     protected function DebugPrint($debugMsg)
     {
         if ($this->_debug)
