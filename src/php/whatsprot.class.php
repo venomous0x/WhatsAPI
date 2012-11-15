@@ -326,6 +326,13 @@ class WhatsProt
         $this->sendNode($messsageNode);
     }
 
+    public function sendPresence($available = true){
+    	$messageHash = array();
+    	$messageHash["from"] = $_phoneNumber.'@$_whatsAppServer';
+    	$messageHash["type"] = ($available) ? 'available' : 'unavailable';
+    	$messsageNode = new ProtocolNode("presence", $messageHash, null, "");
+    	$this->sendNode($messsageNode);
+    }
 
     protected function DebugPrint($debugMsg)
     {
