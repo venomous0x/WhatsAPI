@@ -22,11 +22,12 @@ $countrycode = substr($sender, 0, 2);
 $phonenumber=substr($sender, 2);
 
 if ($argc < 2) {
-	echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>]\n";
+	echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>] [-set <status>]\n";
 	echo "\tphone: full number including country code, without '+' or '00'\n";
 	echo "\t-s: send message\n";
 	echo "\t-l: listen for new messages\n";
 	echo "\t-i: interactive conversation with <phone>\n";
+	echo "\t-set: Set Status to <status>\n";
 	exit(1);
 }
 
@@ -97,6 +98,12 @@ if ($_SERVER['argv'][1] == "-l") {
 		if(!empty($data)) print_r($data);
 		sleep(1);
 	}
+	exit(0);
+}
+
+if ($_SERVER['argv'][1] == "-set"){
+	echo "\n[] Setting status:\n";
+	$wa->sendStatusUpdate(1,$_SERVER['argv'][2]);
 	exit(0);
 }
 
