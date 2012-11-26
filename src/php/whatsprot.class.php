@@ -33,6 +33,8 @@ class WhatsProt
     protected $_outputKey;
 
     protected $_debug;
+    
+    protected $_newmsgBind = false;
 	
     function __construct($Number, $imei, $Nickname, $debug = false)
     {
@@ -93,10 +95,10 @@ class WhatsProt
         return $node;
     }
 
-	protected function sendData($data)
+    protected function sendData($data)
     {
-		socket_send( $this->_socket, $data, strlen($data), 0 );
-	}	
+	socket_send( $this->_socket, $data, strlen($data), 0 );
+    }	
     
     protected function sendNode($node)
     {
@@ -233,20 +235,54 @@ class WhatsProt
         $this->_messageQueue = array();
         return $ret;
     }
-
+    
+    public function WaitforReceipt()
+    {
+        $received = false;
+        do{
+            $this->PollMessages();
+            $msgs = $this->GetMessages();
+            foreach ($msgs as $m)
+            {
+                # process inbound messages
+                if($m->_tag == "message"){
+                    if($m->getChild('received')!=null){
+                        $received = true;
+                    }
+                }
+                print($m->NodeString("") . "\n");
+            }
+        }while(!$received);
+        echo "Received node!!\n";
+    }
+    
+    public function SendPrecense($type="available")
+    {
+        $presence = array();
+        $presence['type'] = $type;
+        $presence['name'] = $this->_name;
+        $node = new ProtocolNode("presence", $presence, null, "");
+        $this->sendNode($node);
+    }
+    
     protected function SendMessageNode($msgid, $to, $node)
     {
         $serverNode = new ProtocolNode("server", null, null, "");
-
         $xHash = array();
         $xHash["xmlns"] = "jabber:x:event";
         $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
-
+        $notify = array();
+        $notify['urn:xmpp:whatsapp'];
+        $notify['name'] = $this->_name;
+        $notnode = new ProtocolNode("notify", $notify, null, "");
+        $request = array();
+        $request['xmlns'] = "urn:xmpp:receipts";
+        $reqnode = new ProtocolNode("request", $request, null, "");
         $messageHash = array();
         $messageHash["to"] = $to . "@" . $this->_whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
-        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $node), "");
+        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode,$reqnode,$node), "");
         $this->sendNode($messsageNode);
     }
 
