@@ -24,7 +24,9 @@ class WhatsProt
     protected $_accountinfo;
 
     protected $_messageQueue = array();
-
+    protected $_outQueue = array();
+    protected $_lastId = false;
+    protected $_msgCounter = 1;
     protected $_socket;
     protected $_writer;
     protected $_reader;
@@ -68,11 +70,12 @@ class WhatsProt
     public function encryptPassword()
     {
     	if(stripos($this->_imei, ":") !== false){
-    		$this->_imei = strtoupper($this->_imei);
-    		return md5($this->_imei.$this->_imei);
+            $this->_imei = strtoupper($this->_imei);
+            return md5($this->_imei.$this->_imei);
     	}
-        else {
-        	return md5(strrev($this->_imei));
+        else
+        {
+            return md5(strrev($this->_imei));
         }
     }
 
@@ -84,6 +87,16 @@ class WhatsProt
         $array = $this->_phoneNumber.$this->challengeData.time();
         $response = $this->_outputKey->encode($array, 0, strlen($array), false);
         return $response;
+    }
+    
+    public function setNewMessageBind($bind)
+    {
+        $this->_newmsgBind = $bind;
+    }
+    
+    public function addOutQueue($node)
+    {
+        $this->_outQueue[] = $node;
     }
 
     protected function addAuthResponse()
@@ -126,25 +139,23 @@ class WhatsProt
     protected function sendMessageReceived($msg)
     {
         $requestNode = $msg->getChild("request");
-        if ($requestNode != null)
+        $receivedNode = $msg->getChild("received");
+        if ($requestNode != null || $receivedNode != null)
         {
-            $xmlnsAttrib = $requestNode->getAttribute("xmlns");
-            if (strcmp($xmlnsAttrib, "urn:xmpp:receipts") == 0)
-            {
-                $recievedHash = array();
-                $recievedHash["xmlns"] = "urn:xmpp:receipts";
-                $receivedNode = new ProtocolNode("received", $recievedHash, null, "");
+            $recievedHash = array();
+            $recievedHash["xmlns"] = "urn:xmpp:receipts";
+            $receivedNode = new ProtocolNode("received", $recievedHash, null, "");
 
-                $messageHash = array();
-                $messageHash["to"] = $msg->getAttribute("from");
-                $messageHash["type"] = "chat";
-                $messageHash["id"] = $msg->getAttribute("id");
-                $messageNode = new ProtocolNode("message", $messageHash, array($receivedNode), "");
-                $this->sendNode($messageNode);
-            }
+            $messageHash = array();
+            $messageHash["to"] = $msg->getAttribute("from");
+            $messageHash["type"] = "chat";
+            $messageHash["id"] = $msg->getAttribute("id");
+            $messageHash["t"] = time();
+            $messageNode = new ProtocolNode("message", $messageHash, array($receivedNode), "");
+            $this->sendNode($messageNode);
         }
     }
-
+    
     protected function processInboundData($data)
     {
         try
@@ -166,6 +177,10 @@ class WhatsProt
                 {
                     array_push($this->_messageQueue, $node);
                     $this->sendMessageReceived($node);
+                    if($node->hasChild('x') && $this->_lastId==$node->getAttribute('id'))
+                        $this->sendNext();
+                    if($this->_newmsgBind && $node->getChild('body'))
+                        $this->_newmsgBind->process($node);
                 }
                 if (strcmp($node->_tag, "iq") == 0 AND strcmp($node->_attributeHash['type'], "get") == 0 AND strcmp($node->_children[0]->_tag, "ping") == 0)
                 {
@@ -184,12 +199,39 @@ class WhatsProt
         }
     }
 
+    public function sendNext()
+    {
+        if(count($this->_outQueue)>0)
+        {
+            $msgnode = array_shift($this->_outQueue);
+            $msgnode->refreshTimes();
+            $this->_lastId = $msgnode->getAttribute('id');
+            $this->sendNode($msgnode);
+        }else
+            $this->_lastId = false;
+    }
+    
+    public function sendComposing($msg)
+    {
+        $comphash = array();
+        $comphash['xmlns'] = "http://jabber.org/protocol/chatstates";
+        $compose = new ProtocolNode("composing", $comphash, null, "");
+        $messageHash = array();
+        $messageHash["to"] = $msg->getAttribute("from");
+        $messageHash["type"] = "chat";
+        $messageHash["id"] = time().'-'.$this->_msgCounter;
+        $messageHash["t"] = time();
+        $this->_msgCounter++;
+        $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
+        $this->sendNode($messageNode);
+    }
+    
     public function accountInfo(){
     	if(is_array($this->_accountinfo)){
-    		print_r($this->_accountinfo);
+            print_r($this->_accountinfo);
     	}
     	else{
-    		echo "No information available";
+            echo "No information available";
     	}
     }
     
@@ -220,6 +262,8 @@ class WhatsProt
         {
             $this->processInboundData($this->readData());
         } while (($cnt++ < 100) && (strcmp($this->_loginStatus, $this->_disconnectedStatus) == 0));
+        $this->sendNickname();
+        $this->SendPresence();
     }
 
     # Pull from the socket, and place incoming messages in the message queue
@@ -250,13 +294,13 @@ class WhatsProt
                         $received = true;
                     }
                 }
-                print($m->NodeString("") . "\n");
+                //print($m->NodeString("") . "\n");
             }
         }while(!$received);
-        echo "Received node!!\n";
+        //echo "Received node!!\n";
     }
     
-    public function SendPrecense($type="available")
+    public function SendPresence($type="available")
     {
         $presence = array();
         $presence['type'] = $type;
@@ -265,34 +309,41 @@ class WhatsProt
         $this->sendNode($node);
     }
     
-    protected function SendMessageNode($msgid, $to, $node)
+    protected function SendMessageNode($to, $node)
     {
         $serverNode = new ProtocolNode("server", null, null, "");
         $xHash = array();
         $xHash["xmlns"] = "jabber:x:event";
         $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
         $notify = array();
-        $notify['urn:xmpp:whatsapp'];
+        $notify['xmlns'] = 'urn:xmpp:whatsapp';
         $notify['name'] = $this->_name;
         $notnode = new ProtocolNode("notify", $notify, null, "");
         $request = array();
         $request['xmlns'] = "urn:xmpp:receipts";
         $reqnode = new ProtocolNode("request", $request, null, "");
+        $msgid = time().'-'.$this->_msgCounter;
         $messageHash = array();
         $messageHash["to"] = $to . "@" . $this->_whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
+        $messageHash["t"] = time();
+        $this->_msgCounter++;
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode,$reqnode,$node), "");
-        $this->sendNode($messsageNode);
+        if(!$this->_lastId){
+            $this->_lastId = $msgid;
+            $this->sendNode($messsageNode);
+        }else
+            $this->_outQueue[] = $messsageNode;
     }
 
-    public function Message($msgid, $to, $txt)
+    public function Message($to, $txt)
     {
         $bodyNode = new ProtocolNode("body", null, null, $txt);
-        $this->SendMessageNode($msgid, $to, $bodyNode);
+        $this->SendMessageNode($to, $bodyNode);
     }
 
-    public function MessageImage($msgid, $to, $url, $file, $size, $icon)
+    public function MessageImage($to, $url, $file, $size, $icon)
     {
         $mediaAttribs = array();
         $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
@@ -302,7 +353,7 @@ class WhatsProt
         $mediaAttribs["size"] = $size;
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, null, $icon);
-        $this->SendMessageNode($msgid, $to, $mediaNode);
+        $this->SendMessageNode($to, $mediaNode);
     }
 
     public function Location($msgid, $to, $long, $lat)
@@ -325,7 +376,22 @@ class WhatsProt
         $messsageNode = new ProtocolNode("message", $messageHash, array($mediaNode), "");
         $this->sendNode($messsageNode);
     }
-
+    
+    public function sendStatusUpdate($msgid, $txt)
+    {
+        $bodyNode = new ProtocolNode("body", null, null, $txt);
+        $serverNode = new ProtocolNode("server", null, null, "");
+        $xHash = array();
+        $xHash["xmlns"] = "jabber:x:event";
+        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
+        $messageHash = array();
+        $messageHash["to"] = 's.us';
+        $messageHash["type"] = "chat";
+        $messageHash["id"] = $msgid;
+        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
+        $this->sendNode($messsageNode);
+    }
+    
     public function Pong($msgid)
     {
         $whatsAppServer = $this->_whatsAppServer;
@@ -336,6 +402,14 @@ class WhatsProt
         $messageHash["type"] = "result";
        
        	$messsageNode = new ProtocolNode("iq", $messageHash, null, "");
+        $this->sendNode($messsageNode);
+    }
+    
+    public function sendNickname()
+    {
+        $messageHash = array();
+        $messageHash["name"] = $this->_name;
+        $messsageNode = new ProtocolNode("presence", $messageHash, null, "");
         $this->sendNode($messsageNode);
     }
 
