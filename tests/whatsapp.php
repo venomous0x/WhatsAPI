@@ -78,7 +78,7 @@ if ($_SERVER['argv'][1] == "-i") {
 					break;
 				case "/lastseen":
 					echo "[] Request last seen $dst: ";
-					$wa->RequestLastSeen("$dst"); 
+					$wa->RequestLastSeen(time()."-1", "$dst");
 					break;
 				default:
 					echo "[] Send message to $dst: $line\n";
@@ -108,9 +108,10 @@ if ($_SERVER['argv'][1] == "-set"){
 }
 
 echo "\n[] Request last seen $dst: ";
-$wa->RequestLastSeen($dst); 
+$wa->RequestLastSeen(time()."-1", $dst);
 
 echo "\n[] Send message to $dst: $msg\n";
 $wa->Message(time()."-1", $dst , $msg);
 echo "\n";
+
 ?>
