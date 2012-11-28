@@ -21,7 +21,7 @@ class IncompleteMessageException extends CustomException
 
 class ProtocolNode
 {
-	public $_tag;
+    public $_tag;
     public $_attributeHash;
     public $_children;
     public $_data;
@@ -90,6 +90,24 @@ class ProtocolNode
             }
         }
         return NULL;
+    }
+    
+    public function hasChild($tag)
+    {
+        return $this->getChild($tag)==null ? false : true;
+    }
+    
+    public function refreshTimes($offset=0)
+    {
+        if(isset($this->_attributeHash['id']))
+        {
+            $id = $this->_attributeHash['id'];
+            $parts = explode('-',$id);
+            $parts[0] = time()+$offset;
+            $this->_attributeHash['id'] = implode('-',$parts);
+        }
+        if(isset($this->_attributeHash['t']))
+            $this->_attributeHash['t'] = time();
     }
 }
 
