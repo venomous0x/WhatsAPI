@@ -77,11 +77,15 @@ With the sufficent permissions of course
 <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 ```
 
-On iOS however the password is the MD5 hash of the MAC address repeated twice
-thanks to http://www.ezioamodio.it/?p=29
+#### Password Overview
 
-# Real cases
-- [WhatsAppify](http://www.whatsappify.com/) (as of november 2012 closed beta. Only delivering WhatsApp messages to [Telepienso](http://www.telepienso.com/) customers when their parcel is assigned a tracking number.) 
+- **Android**: MD5 hash of reversed IMEI (Credit: [WhatsAPI Original Authors](https://github.com/venomous0x/WhatsAPI#venomous))
+- **iOS**: MD5 hash of the MAC address repeated twice (Credit: [Ezio Amodio](http://www.ezioamodio.it/?p=29))
+- **Windows Phone**: MD5 hash of reversed DeviceUniqueId (Credit: [Robe Fernández](http://blog-robefernandez.blogspot.com.es/2012/11/know-your-whatsapp-password-on-windows.html))
+ 
+
+# Applications
+- [WhatsAppify](http://www.whatsappify.com/) (as of november 2012 closed beta. Only delivering WhatsApp messages to Telepienso customers when their parcel is assigned a tracking number.) 
 
 # NOTES
 
