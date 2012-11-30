@@ -440,6 +440,6 @@ class WhatsProt
     	$this->sendNode($messsageNode);
     }
 
-}
+}php -s "04915788351438" "123"
 
 ?>
