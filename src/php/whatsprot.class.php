@@ -111,7 +111,7 @@ class WhatsProt
 
     protected function sendData($data)
     {
-    socket_send( $this->_socket, $data, strlen($data), 0 );
+        socket_send( $this->_socket, $data, strlen($data), 0 );
     }    
     
     protected function sendNode($node)
