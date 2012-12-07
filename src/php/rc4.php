@@ -45,13 +45,13 @@ class KeyStream
 {
     private $_rc4;
     private $_key;
-    
+
     function __construct($key)
     {
         $this->_rc4 = new RC4($key, 256);
         $this->_key = $key;
     }
-    
+
     public function encode($data, $offset, $length, $append = true)
     {
         $d = $this->_rc4->cipher($data, $offset, $length);
@@ -61,10 +61,12 @@ class KeyStream
         else
             return $h.$d;
     }
-    
+
     public function decode($data, $offset, $length)
     {
         /* TODO: Hash check */
         return $this->_rc4->cipher($data, $offset + 4, $length - 4);
     }
 }
+
+/* End of file rc4.php */

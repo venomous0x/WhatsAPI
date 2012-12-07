@@ -33,7 +33,7 @@ class ProtocolNode
         $this->_children = $children;
         $this->_data = $data;
     }
-    
+
     public function NodeString($indent = "")
     {
         $ret = "\n" . $indent . "<" . $this->_tag;
@@ -91,12 +91,12 @@ class ProtocolNode
         }
         return NULL;
     }
-    
+
     public function hasChild($tag)
     {
         return $this->getChild($tag)==null ? false : true;
     }
-    
+
     public function refreshTimes($offset=0)
     {
         if(isset($this->_attributeHash['id']))
@@ -116,7 +116,7 @@ class BinTreeNodeReader
     private $_dictionary;
     private $_input;
     private $_key;
-    
+
     function __construct($dictionary)
     {
         $this->_dictionary = $dictionary;
@@ -126,7 +126,7 @@ class BinTreeNodeReader
     {
         $this->_key = $key;
     }    
-    
+
     public function nextTree($input = NULL)
     {
         if ($input != NULL)
@@ -144,7 +144,7 @@ class BinTreeNodeReader
         $this->readInt24();
         if (($stanzaFlag & 8) && isset($this->_key))
         {
-			$remainingData = substr($this->_input, $stanzaSize);
+            $remainingData = substr($this->_input, $stanzaSize);
             $this->_input = $this->_key->decode($this->_input, 0, $stanzaSize) . $remainingData;
         }
         if ($stanzaSize > 0)
@@ -300,7 +300,7 @@ class BinTreeNodeReader
         }
         return $ret;
     }    
-    
+
     protected function readInt24()
     {
         $ret = $this->peekInt24();
@@ -331,7 +331,7 @@ class BinTreeNodeReader
         }
         return $ret;
     }
-    
+
     protected function peekInt8($offset = 0)
     {
         $ret = 0;
@@ -381,7 +381,7 @@ class BinTreeNodeWriter
             }
         }
     }
-    
+
     public function setKey($key)
     {
         $this->_key = $key;
@@ -574,3 +574,5 @@ class BinTreeNodeWriter
         }
     }
 }
+
+/* End of file protocol.class.php */

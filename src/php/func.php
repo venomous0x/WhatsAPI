@@ -1,16 +1,16 @@
 <?php
 
 function isShort($str){
-	$len = strlen($str);
-	if($len < 256)$res = true;
-	else $res =  false;
-	return $res;
+    $len = strlen($str);
+    if($len < 256)$res = true;
+    else $res =  false;
+    return $res;
 }
 
 function strlen_wa($str){
-	$len = strlen($str);
-	if($len >= 256)$len = $len&0xFF00 >> 8;
-	return $len;
+    $len = strlen($str);
+    if($len >= 256)$len = $len&0xFF00 >> 8;
+    return $len;
 }
 
 function _hex($int){
@@ -18,13 +18,13 @@ function _hex($int){
 }
 
 function random_uuid(){
-	return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-		mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
-		mt_rand( 0, 0xffff ),
-		mt_rand( 0, 0x0fff ) | 0x4000,
-		mt_rand( 0, 0x3fff ) | 0x8000,
-		mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
-	);
+    return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+        mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ),
+        mt_rand( 0, 0xffff ),
+        mt_rand( 0, 0x0fff ) | 0x4000,
+        mt_rand( 0, 0x3fff ) | 0x8000,
+        mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff ), mt_rand( 0, 0xffff )
+    );
 }
 
 function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output = false)
@@ -55,9 +55,9 @@ function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output =
 }
 
 function strtohex($str){
-	$hex = '';
-	for ($i=0; $i < strlen($str); $i++)$hex .= "\x".dechex(ord($str[$i]));
-	return $hex;
+    $hex = '';
+    for ($i=0; $i < strlen($str); $i++)$hex .= "\x".dechex(ord($str[$i]));
+    return $hex;
 }
 
 function startsWith($haystack, $needle , $pos=0){
@@ -85,3 +85,5 @@ function createIcon($file)
     fwrite($fp, $b64);
     fclose($fp);
 }
+
+/* End of file func.php */
