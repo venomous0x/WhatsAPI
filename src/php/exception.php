@@ -8,7 +8,7 @@ interface IException
     public function getLine();                    // Source line
     public function getTrace();                   // An array of the backtrace()
     public function getTraceAsString();           // Formated string of trace
-    
+
     /* Overrideable methods inherited from Exception class */
     public function __toString();                 // formated string for display
     public function __construct($message = null, $code = 0);
@@ -30,10 +30,12 @@ abstract class CustomException extends Exception implements IException
         }
         parent::__construct($message, $code);
     }
-    
+
     public function __toString()
     {
         return get_class($this) . " '{$this->message}' in {$this->file}({$this->line})\n"
                                 . "{$this->getTraceAsString()}";
     }
 }
+
+/* End of file exception.php */
