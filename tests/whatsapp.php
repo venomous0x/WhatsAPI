@@ -95,8 +95,11 @@ if ($_SERVER['argv'][1] == "-l") {
 	while (TRUE) {
 		$wa->PollMessages();
 		$data = $wa->GetMessages();
-		if(!empty($data)) print_r($data);
-		sleep(1);
+		if(!empty($data)) {			
+			echo "\n \n contact:".$data[0]->_attributeHash["from"]." (".$data[0]->_children[0]->_tag.")  ";
+			if ( count($data[0]->_children)>2) echo" (".$data[0]->_children[0]->_attributeHash["name"]."): " . $data[0]->_children[2]->_data;
+		}
+		sleep(2);
 	}
 	exit(0);
 }
