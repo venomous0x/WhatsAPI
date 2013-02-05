@@ -1,5 +1,5 @@
 <?php
-require "protocol.class.php";
+require "../src/php/whatsprot.class.php";
 require "func.php";
 require "rc4.php";
 class WhatsProt 
