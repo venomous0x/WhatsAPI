@@ -24,8 +24,8 @@ class WhatsProt
     protected $_accountinfo;
 
     protected $_messageQueue = array();
-    protected $_outQueue = array();
-    protected $_lastId = false;
+    protected $_sentQueue = array();
+    protected $_lastSendTime;
     protected $_msgCounter = 1;
     protected $_socket;
     protected $_writer;
@@ -48,6 +48,7 @@ class WhatsProt
         $this->_imei = $imei;
         $this->_name = $Nickname;
         $this->_loginStatus = $this->_disconnectedStatus;
+	$this->_lastSendTime = time();
     }
     
     protected function addFeatures()
@@ -94,9 +95,9 @@ class WhatsProt
         $this->_newmsgBind = $bind;
     }
     
-    public function addOutQueue($node)
+    public function addSentQueue($msgid,$node)
     {
-        $this->_outQueue[] = $node;
+        $this->_sentQueue[$msgid] = $node;
     }
 
     protected function addAuthResponse()
@@ -177,8 +178,8 @@ class WhatsProt
                 {
                     array_push($this->_messageQueue, $node);
                     $this->sendMessageReceived($node);
-                    if($node->hasChild('x') && $this->_lastId==$node->getAttribute('id'))
-                        $this->sendNext();
+                    if($node->hasChild('x'))
+                        $this->removeFromSentQueue($node->getAttribute('id'));
                     if($this->_newmsgBind && $node->getChild('body'))
                         $this->_newmsgBind->process($node);
                 }
@@ -199,16 +200,12 @@ class WhatsProt
         }
     }
 
-    public function sendNext()
+    public function removeFromSentQueue($msgid)
     {
-        if(count($this->_outQueue)>0)
-        {
-            $msgnode = array_shift($this->_outQueue);
-            $msgnode->refreshTimes();
-            $this->_lastId = $msgnode->getAttribute('id');
-            $this->sendNode($msgnode);
-        }else
-            $this->_lastId = false;
+	if(isset($this->_sentQueue[$msgid]))
+	{
+	    unset($this->_sentQueue[$msgid]);
+	}
     }
     
     public function sendComposing($msg)
@@ -309,6 +306,22 @@ class WhatsProt
         $this->sendNode($node);
     }
     
+    protected function GenerateMsgID()
+    {
+	$currentTime = time();
+	if($this->_lastSendTime != $currentTime)
+	{
+		$this->_lastSendTime = $currentTime;
+		$this->_msgCounter = 1;
+		return $this->_lastSendTime.'-'.$this->_msgCounter;
+	}
+	else
+	{
+		$this->_msgCounter++;
+		return $this->_lastSendTime.'-'.$this->_msgCounter;
+	}
+    }
+    
     protected function SendMessageNode($to, $node)
     {
         $serverNode = new ProtocolNode("server", null, null, "");
@@ -322,19 +335,15 @@ class WhatsProt
         $request = array();
         $request['xmlns'] = "urn:xmpp:receipts";
         $reqnode = new ProtocolNode("request", $request, null, "");
-        $msgid = time().'-'.$this->_msgCounter;
+        $msgid = $this->GenerateMsgID();
         $messageHash = array();
         $messageHash["to"] = $to . "@" . $this->_whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
         $messageHash["t"] = time();
-        $this->_msgCounter++;
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode,$reqnode,$node), "");
-        if(!$this->_lastId){
-            $this->_lastId = $msgid;
-            $this->sendNode($messsageNode);
-        }else
-            $this->_outQueue[] = $messsageNode;
+	$this->addSentQueue($msgid,$messsageNode);
+	$this->sendNode($messsageNode);	
     }
 
     public function Message($to, $txt)
