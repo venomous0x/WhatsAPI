@@ -6,6 +6,7 @@ class WhatsProt
 {
     protected $_phoneNumber;
     protected $_imei;
+    protected $_password;
     protected $_name;
 
     protected $_whatsAppHost = "c.whatsapp.net";
@@ -67,14 +68,7 @@ class WhatsProt
     
     public function encryptPassword()
     {
-    	if(stripos($this->_imei, ":") !== false){
-            $this->_imei = strtoupper($this->_imei);
-            return md5($this->_imei.$this->_imei);
-    	}
-        else
-        {
-            return md5(strrev($this->_imei));
-        }
+        return base64_decode($this->_password);
     }
 
     protected function authenticate()
