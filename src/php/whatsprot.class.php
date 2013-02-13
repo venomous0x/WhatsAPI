@@ -6,17 +6,23 @@ class WhatsProt
 {
     protected $_phoneNumber;
     protected $_imei;
+    protected $_password;
     protected $_name;
 
     protected $_whatsAppHost = "c.whatsapp.net";
     protected $_whatsAppServer = "s.whatsapp.net";
-    protected $_whatsAppRealm = "s.whatsapp.net";
-    protected $_whatsAppDigest = "xmpp/s.whatsapp.net";
     protected $_device = "iPhone";
-    protected $_whatsAppVer = "2.8.4";
+    protected $_whatsAppVer = "2.8.7";
     protected $_port = 5222;
     protected $_timeout = array("sec" => 2, "usec" => 0);
     protected $_incomplete_message = "";
+
+    protected $_whatsAppReqHost = 'v.whatsapp.net/v2/code';
+    protected $_whatsAppRegHost = 'v.whatsapp.net/v2/register';
+    protected $_whatsAppCheHost = 'v.whatsapp.net/v2/exist';
+
+    protected $_whatsAppUserAgent = 'WhatsApp/2.3.53 S40Version/14.26 Device/Nokia302';
+    protected $_whatsAppToken = 'PdA2DJyKoUrwLw1Bg6EIhzh502dF9noR9uFCllGk1354754753509';
 
     protected $_disconnectedStatus = "disconnected";
     protected $_connectedStatus = "connected";
@@ -69,14 +75,7 @@ class WhatsProt
     
     public function encryptPassword()
     {
-    	if(stripos($this->_imei, ":") !== false){
-            $this->_imei = strtoupper($this->_imei);
-            return md5($this->_imei.$this->_imei);
-    	}
-        else
-        {
-            return md5(strrev($this->_imei));
-        }
+        return base64_decode($this->_password);
     }
 
     protected function authenticate()
@@ -244,6 +243,11 @@ class WhatsProt
 
     public function Login()
     {
+        $credentials = $this->checkCredentials();
+        if ($credentials->status == 'ok')
+        {
+               $this->_password($credentials->pw);
+        }
         $resource = "$this->_device-$this->_whatsAppVer-$this->_port";
         $data = $this->_writer->StartStream($this->_whatsAppServer, $resource);
         $feat = $this->addFeatures();
@@ -440,6 +444,152 @@ class WhatsProt
     	$this->sendNode($messsageNode);
     }
 
+    /**
+     * Request a registration code from WhatsApp.
+     */
+    public function requestCode($method = 'sms', $countryCody = 'US', $langCode = 'en')
+    {
+        if (!$phone = $this->dissectPhone())
+        {
+            throw new Exception('The prived phone number is not valid.');
+        }
+
+        // Build the token.
+        $token = md5($this->_whatsAppToken . $phone['phone']);
+
+        // Build the url.
+        $host = 'https://' . $this->_whatsAppReqHost;
+        $query = array(
+            'cc' => $phone['cc'],
+            'in' => $phone['phone'],
+            'lc' => $countryCode,
+            'lg' => $langCode,
+            'mcc' => '000',
+            'mnc' => '000',
+            'method' => $method,
+            'id' => $this->identity,
+            'token' => $token,
+            'c' => 'cookie',
+        );
+
+        $rest = $this->getResponse($host, $query);
+
+        if ($rest->status != 'sent')
+        {
+            throw new Exception('There was a problem trying to request the code..');
+        }
+        else
+        {
+            return $rest;
+        }
+    }
+
+    /*
+     * Register account on WhatsApp using the provided code.
+     */
+    public function registerCode($code)
+    {
+        if (!$phone = $this->dissectPhone())
+        {
+            throw new Exception('The prived phone number is not valid.');
+        }
+
+        // Build the url.
+        $host = 'https://' . $this->_whatsAppRegHost;
+        $query = array(
+            'cc' => $phone['cc'],
+            'in' => $phone['phone'],
+            'id' => $this->_identity,
+            'code' => $code,
+            'c' => 'cookie',
+        );
+
+        $rest = $this->getResponse($host, $query);
+
+        if ($rest->status != 'ok')
+        {
+            throw new Exception('An error occurred registering the registration code from WhatsApp.');
+        }
+
+        return $rest;
+    }
+
+    /*
+     * Check if account credentials are valid.
+     */
+    public function checkCredentials()
+    {
+        if (!$phone = $this->dissectPhone())
+        {
+            throw new Exception('The prived phone number is not valid.');
+        }
+
+        // Build the url.
+        $host = 'https://' . $this->whatsAppCheHost;
+        $query = array(
+          'cc' => $phone['cc'],
+          'in' => $phone['phone'],
+          'id' => $this->_identity,
+          'c' => 'cookie',
+        );
+
+        return $this->getResponse($host, $query);
+    }
+
+    protected function getResponse($host, $query) {
+        // Build the url.
+        $url = $host . '?';
+        foreach ($query as $key => $value)
+        {
+          $url .= $key . '=' . $value . '&';
+        }
+        rtrim($url, '&');
+
+        // Open connection.
+        $ch = curl_init();
+
+        // Configure the connection.
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_USERAGENT, $this->_whatsAppUserAgent);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: text/json'));
+        // This makes CURL accept any peer!
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+
+        // Get the response.
+        $response = curl_exec($ch);
+
+        // Close the connection.
+        curl_close($ch);
+
+        return json_decode($response);
+    }
+
+    /**
+     * Dissect country code from phone number.
+     */
+    public function dissectPhone()
+    {
+        if (($handle = fopen('countries.csv', 'rb')) !== FALSE)
+        {
+            while (($data = fgetcsv($handle, 1000)) !== FALSE)
+            {
+                if (strpos($this->_phoneNumber, $data[1]) === 0)
+                {
+                    // Return the first appearance.
+                    fclose($handle);
+                    return array(
+                        'cc' => $data[1],
+                        'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
+                    );
+                }
+            }
+            fclose($handle);
+        }
+
+        return FALSE;
+    }
 }
 
 ?>
