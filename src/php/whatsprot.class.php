@@ -12,7 +12,7 @@ class WhatsProt
     protected $_whatsAppHost = "c.whatsapp.net";
     protected $_whatsAppServer = "s.whatsapp.net";
     protected $_device = "iPhone";
-    protected $_whatsAppVer = "2.8.4";
+    protected $_whatsAppVer = "2.8.7";
     protected $_port = 5222;
     protected $_timeout = array("sec" => 2, "usec" => 0);
     protected $_incomplete_message = "";
