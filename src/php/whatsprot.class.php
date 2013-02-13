@@ -460,19 +460,28 @@ class WhatsProt
         // Build the url.
         $host = 'https://' . $this->_whatsAppReqHost;
         $query = array(
-          'cc' => $phone['cc'],
-          'in' => $phone['phone'],
-          'lc' => $countryCode,
-          'lg' => $langCode,
-          'mcc' => '000',
-          'mnc' => '000',
-          'method' => $method,
-          'id' => $this->identity,
-          'token' => $token,
-          'c' => 'cookie',
+            'cc' => $phone['cc'],
+            'in' => $phone['phone'],
+            'lc' => $countryCode,
+            'lg' => $langCode,
+            'mcc' => '000',
+            'mnc' => '000',
+            'method' => $method,
+            'id' => $this->identity,
+            'token' => $token,
+            'c' => 'cookie',
         );
 
-        return $this->getResponse($host, $query);
+        $rest = $this->getResponse($host, $query);
+
+        if ($rest->status != 'sent')
+        {
+            throw new Exception('There was a problem trying to request the code..');
+        }
+        else
+        {
+            return $rest;
+        }
     }
 
     /*
@@ -488,14 +497,21 @@ class WhatsProt
         // Build the url.
         $host = 'https://' . $this->_whatsAppRegHost;
         $query = array(
-          'cc' => $phone['cc'],
-          'in' => $phone['phone'],
-          'id' => $this->_identity,
-          'code' => $code,
-          'c' => 'cookie',
+            'cc' => $phone['cc'],
+            'in' => $phone['phone'],
+            'id' => $this->_identity,
+            'code' => $code,
+            'c' => 'cookie',
         );
 
-        return $this->getResponse($host, $query);
+        $rest = $this->getResponse($host, $query);
+
+        if ($rest->status != 'ok')
+        {
+            throw new Exception('An error occurred registering the registration code from WhatsApp.');
+        }
+
+        return $rest;
     }
 
     /*
@@ -557,19 +573,19 @@ class WhatsProt
     {
         if (($handle = fopen('countries.csv', 'rb')) !== FALSE)
         {
-          while (($data = fgetcsv($handle, 1000)) !== FALSE)
-          {
-            if (strpos($this->_phoneNumber, $data[1]) === 0)
+            while (($data = fgetcsv($handle, 1000)) !== FALSE)
             {
-              // Return the first appearance.
-              fclose($handle);
-              return array(
-                'cc' => $data[1],
-                'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
-              );
+                if (strpos($this->_phoneNumber, $data[1]) === 0)
+                {
+                    // Return the first appearance.
+                    fclose($handle);
+                    return array(
+                        'cc' => $data[1],
+                        'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
+                    );
+                }
             }
-          }
-          fclose($handle);
+            fclose($handle);
         }
 
         return FALSE;
