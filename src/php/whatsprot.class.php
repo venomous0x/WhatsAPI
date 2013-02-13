@@ -10,8 +10,6 @@ class WhatsProt
 
     protected $_whatsAppHost = "c.whatsapp.net";
     protected $_whatsAppServer = "s.whatsapp.net";
-    protected $_whatsAppRealm = "s.whatsapp.net";
-    protected $_whatsAppDigest = "xmpp/s.whatsapp.net";
     protected $_device = "iPhone";
     protected $_whatsAppVer = "2.8.4";
     protected $_port = 5222;
