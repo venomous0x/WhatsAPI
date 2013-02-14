@@ -465,7 +465,7 @@ class WhatsProt
             'mcc' => '000',
             'mnc' => '000',
             'method' => $method,
-            'id' => $this->identity,
+            'id' => $this->_identity,
             'token' => $token,
             'c' => 'cookie',
         );
