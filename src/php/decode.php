@@ -1,22 +1,30 @@
 <?php
 
-function decode($hex){
-	$hexarr = str_split($hex, 2);
-	$str = null;
-	foreach($hexarr as $k=>$v)	$str .= "  ".getToken(hexdec($v));
-	return $str;
+function decode($hex)
+{
+    $hexarr = str_split($hex, 2);
+    $str = NULL;
+    foreach ($hexarr as $k => $v) {
+        $str .= "  " . getToken(hexdec($v));
+    }
+
+    return $str;
 }
 
-function str2hex($string) {
-	$hexstr = unpack('H*', $string);
-	return array_shift($hexstr);
+function str2hex($string)
+{
+    $hexstr = unpack('H*', $string);
+
+    return array_shift($hexstr);
 }
 
-function hex2str($hexstr) {
-	$hexstr = str_replace(' ', '', $hexstr);
-	$hexstr = str_replace('\x', '', $hexstr);
-	$retstr = pack('H*', $hexstr);
-	return $retstr;
+function hex2str($hexstr)
+{
+    $hexstr = str_replace(' ', '', $hexstr);
+    $hexstr = str_replace('\x', '', $hexstr);
+    $retstr = pack('H*', $hexstr);
+
+    return $retstr;
 }
 
 function printhexstr($data, $name)
@@ -24,10 +32,8 @@ function printhexstr($data, $name)
     $data = str2hex($data);
     $len = strlen($data);
     print("Len: $len - $name\n");
-    for ($i = 0; $i < $len; $i += 2)
-    {
-        if ((($i-1) % 32) == 31)
-        {
+    for ($i = 0; $i < $len; $i += 2) {
+        if ((($i - 1) % 32) == 31) {
             print("\n");
         }
         printf(" %s%s", $data[$i], $data[$i+1]);
@@ -36,13 +42,14 @@ function printhexstr($data, $name)
     print("\n");
 }
 
-function getDictionary(){
+function getDictionary()
+{
     $dict = "WHATISTHIS";
-	$dic[0] = 0;
-	$dic[1] = 0;
-	$dic[2] = 0;
-	$dic[3] = 0;
-	$dic[4] = 0;
+    $dic[0] = 0;
+    $dic[1] = 0;
+    $dic[2] = 0;
+    $dic[3] = 0;
+    $dic[4] = 0;
     $dic[5] = "account";
     $dic[6] = "ack";
     $dic[7] = "action";
@@ -275,22 +282,25 @@ function getDictionary(){
     $dic[234] = "Xylophone.caf";
     $dic[235] = "1";
     $dic[236] = "WAUTH-1";
-	$dic[237] = 0;
-	$dic[238] = 0;
-	$dic[239] = 0;
-	$dic[240] = 0;
-	$dic[241] = 0;
-	$dic[242] = 0;
-	$dic[243] = 0;
-	$dic[244] = 0;
-	$dic[245] = 0;
-	$dic[246] = 0;
-	$dic[247] = 0;
+    $dic[237] = 0;
+    $dic[238] = 0;
+    $dic[239] = 0;
+    $dic[240] = 0;
+    $dic[241] = 0;
+    $dic[242] = 0;
+    $dic[243] = 0;
+    $dic[244] = 0;
+    $dic[245] = 0;
+    $dic[246] = 0;
+    $dic[247] = 0;
     $dic[248] = "XXX";
+
     return $dic;
 }
 
-function getToken($token){
+function getToken($token)
+{
     $dic = getDictionary();
-	return $dic[$token];
+
+    return $dic[$token];
 }

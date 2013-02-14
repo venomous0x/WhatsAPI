@@ -1,10 +1,8 @@
 <?php
-require "whatsprot.class.php";
-# phone number, IMEI, and name, the IMEI is reversed 
-# and hashed in whatsprot.class.php so just put your 
-# IMEI here as it is!
+require 'whatsprot.class.php';
+# phone number, IMEI, and name, the IMEI.
 $options = getopt("d::", array("debug::"));
-$debug = (array_key_exists("debug", $options) || array_key_exists("d", $options)) ? true : false;
+$debug = (array_key_exists("debug", $options) || array_key_exists("d", $options)) ? TRUE : FALSE;
 # Target phone number
 $target = "**********";
 
@@ -24,21 +22,20 @@ $w->Message($target, "5");
 $pn = new ProcessNode($w,$target);
 $w->setNewMessageBind($pn);
 
-while(1)
-{
+while (1) {
     $w->PollMessages();
     $msgs = $w->GetMessages();
-    foreach ($msgs as $m)
-    {
+    foreach ($msgs as $m) {
         # process inbound messages
         //print($m->NodeString("") . "\n");
     }
 }
 
-class ProcessNode{
+class ProcessNode
+{
     protected $_wp = false;
     protected $_target = false;
-    function __construct($wp,$target)
+    public function __construct($wp,$target)
     {
         $this->_wp = $wp;
         $this->_target = $target;
@@ -49,18 +46,16 @@ class ProcessNode{
         # If you guess it right you get a gift
         $text = $node->getChild('body');
         $text = $text->_data;
-        if($text && ($text == "5" || trim($text)=="5")){
+        if ($text && ($text == "5" || trim($text)=="5")) {
             $iconfile = "../../tests/Gift.jpgb64";
             $fp = fopen($iconfile, "r");
             $icon = fread($fp, filesize($iconfile));
             fclose($fp);
             $this->_wp->MessageImage($this->_target, "https://mms604.whatsapp.net/d11/26/09/8/5/85a13e7812a5e7ad1f8071319d9d1b43.jpg", "hero.jpg", 84712, $icon);
             $this->_wp->Message($this->_target, "¡Congratulations you guessed the right number!");
-        }else{
+        } else {
             $this->_wp->Message($this->_target, "¡I'm sorry, try again!");
         }
     }
 
 }
-?>
-
