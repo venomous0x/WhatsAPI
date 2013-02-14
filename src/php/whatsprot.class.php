@@ -12,6 +12,7 @@ class WhatsProt
 
     protected $_whatsAppHost = 'c.whatsapp.net';
     protected $_whatsAppServer = 's.whatsapp.net';
+    protected $_whatsAppGroupServer = "g.us";
     protected $_device = 'iPhone';
     protected $_whatsAppVer = '2.8.7';
     protected $_port = 5222;
@@ -327,8 +328,13 @@ class WhatsProt
         $request['xmlns'] = "urn:xmpp:receipts";
         $reqnode = new ProtocolNode("request", $request, NULL, "");
         $msgid = time().'-'.$this->_msgCounter;
+
+	$whatsAppServer = $this->whatsAppServer;
+        if (strpos($to, "-") !== FALSE) {
+            $whatsAppServer = $this->_whatsAppGroupServer;
+        }
         $messageHash = array();
-        $messageHash["to"] = $to . "@" . $this->_whatsAppServer;
+        $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
         $messageHash["t"] = time();
