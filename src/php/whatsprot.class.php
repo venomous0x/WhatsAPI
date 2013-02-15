@@ -418,9 +418,10 @@ class WhatsProt
             foreach ($msgs as $m) {
                 // Process inbound messages.
                 if ($m->_tag == "message") {
-                    // @todo: Check if get _attributeHash: "retry" and notice.
-                    if ($m->getChild('received') != NULL) {
+                    if ($m->getChild('received') != NULL && !isset($m->_attributeHas['retry'])) {
                         $received = TRUE;
+                    } elseif ($m->getChild('received') != NULL && isset($m->_attributeHas['retry'])) {
+                        throw new Exception('There was a problem trying to send the message, please retry.');
                     }
                 }
                 //print($m->NodeString("") . "\n");
