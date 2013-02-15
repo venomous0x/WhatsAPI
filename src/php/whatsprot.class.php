@@ -536,6 +536,84 @@ class WhatsProt
     }
 
     /**
+     * Send a video to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $file
+     *   The url/path to the video.
+     */
+    public function MessageVideo($to, $file)
+    {
+        $file_parts = pathinfo($file);
+        if ($file_parts['extensions'] != 'mp4') {
+            throw new Exception('Unsupported video format.');
+        } elseif ($image = file_get_contents($file)) {
+            $fileName = basename($file);
+            if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
+                $uri = "/tmp/" . md5(time()) . $fileName;
+                $tmpFile = file_put_contents($uri, $image);
+                $url = $this->uploadFile($uri);
+                unlink($uri);
+            } else {
+                $url = $file;
+            }
+
+            $mediaAttribs = array();
+            $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+            $mediaAttribs["type"] = "video";
+            $mediaAttribs["url"] = $url;
+            $mediaAttribs["file"] = $fileName;
+            $mediaAttribs["size"] = strlen($image);
+
+            $icon = createVideoIcon($image);
+
+            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
+            $this->SendMessageNode($to, $mediaNode);
+        } else {
+            throw new Exception('A problem has occurred trying to get the video.');
+        }
+    }
+
+    /**
+     * Send a audio to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $file
+     *   The url/path to the audio.
+     */
+    public function MessageAudio($to, $file)
+    {
+        $file_parts = pathinfo($file);
+        if ($file_parts['extensions'] != '3gp') {
+            throw new Exception('Unsupported audio format.');
+        } elseif ($image = file_get_contents($file)) {
+            $fileName = basename($file);
+            if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
+                $uri = "/tmp/" . md5(time()) . $fileName;
+                $tmpFile = file_put_contents($uri, $image);
+                $url = $this->uploadFile($uri);
+                unlink($uri);
+            } else {
+                $url = $file;
+            }
+
+            $mediaAttribs = array();
+            $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+            $mediaAttribs["type"] = "audio";
+            $mediaAttribs["url"] = $url;
+            $mediaAttribs["file"] = $fileName;
+            $mediaAttribs["size"] = strlen($image);
+
+            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, NULL);
+            $this->SendMessageNode($to, $mediaNode);
+        } else {
+            throw new Exception('A problem has occurred trying to get the audio.');
+        }
+    }
+
+    /**
      * Send a location to the user/group.
      *
      * @param $to
