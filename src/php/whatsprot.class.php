@@ -2,7 +2,6 @@
 require 'protocol.class.php';
 require 'func.php';
 require 'rc4.php';
-require 'vCard.php';
 
 class WhatsProt
 {
@@ -505,7 +504,7 @@ class WhatsProt
      * @param $to
      *   The reciepient to send.
      * @param $file
-     *   The url/path to the image.
+     *   The url/uri to the image.
      */
     public function MessageImage($to, $file)
     {
@@ -542,7 +541,7 @@ class WhatsProt
      * @param $to
      *   The reciepient to send.
      * @param $file
-     *   The url/path to the video.
+     *   The url/uri to the MP4 video.
      */
     public function MessageVideo($to, $file)
     {
@@ -582,7 +581,7 @@ class WhatsProt
      * @param $to
      *   The reciepient to send.
      * @param $file
-     *   The url/path to the audio.
+     *   The url/uri to the 3GP audio.
      */
     public function MessageAudio($to, $file)
     {
@@ -733,25 +732,6 @@ class WhatsProt
     }
 
     /**
-     * Send a pong to the whatsapp server.
-     *
-     * @param $msgid
-     *   The id of the message.
-     */
-    public function Pong($msgid)
-    {
-        $whatsAppServer = $this->_whatsAppServer;
-
-        $messageHash = array();
-        $messageHash["to"] = $whatsAppServer;
-        $messageHash["id"] = $msgid;
-        $messageHash["type"] = "result";
-
-        $messsageNode = new ProtocolNode("iq", $messageHash, NULL, "");
-        $this->sendNode($messsageNode);
-    }
-
-    /**
      * Send the nick name to the whatsapp server.
      */
     public function sendNickname()
@@ -790,6 +770,25 @@ class WhatsProt
     }
 
     /**
+     * Send a pong to the whatsapp server.
+     *
+     * @param $msgid
+     *   The id of the message.
+     */
+    public function Pong($msgid)
+    {
+        $whatsAppServer = $this->_whatsAppServer;
+
+        $messageHash = array();
+        $messageHash["to"] = $whatsAppServer;
+        $messageHash["id"] = $msgid;
+        $messageHash["type"] = "result";
+
+        $messsageNode = new ProtocolNode("iq", $messageHash, NULL, "");
+        $this->sendNode($messsageNode);
+    }
+
+    /**
      * Request a registration code from WhatsApp.
      *
      * @param $method
@@ -807,7 +806,7 @@ class WhatsProt
      *   - method: Used method.
      *   - retry_after: Waiting time before requesting a new code.
      */
-    public function requestCode($method = 'sms', $countryCody = 'US', $langCode = 'en')
+    public function requestCode($method = 'sms', $countryCode = 'US', $langCode = 'en')
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The prived phone number is not valid.');
