@@ -5,47 +5,88 @@ require 'rc4.php';
 
 class WhatsProt
 {
+    // The user phone number including the country code without '+' or '00'.
     protected $_phoneNumber;
+    // The IMEI/MAC adress.
     protected $_imei;
+    // The user password.
     protected $_password;
+    // The user name.
     protected $_name;
 
+    // The hostname of the whatsapp server.
     protected $_whatsAppHost = 'c.whatsapp.net';
+    // The hostnames used to login/send messages.
     protected $_whatsAppServer = 's.whatsapp.net';
     protected $_whatsAppGroupServer = "g.us";
+    // The device name.
     protected $_device = 'iPhone';
+    // The WhatsApp version.
     protected $_whatsAppVer = '2.8.7';
+    // The port of the whatsapp server.
     protected $_port = 5222;
+    // The timeout for the connection with the Whatsapp servers.
     protected $_timeout = array('sec' => 2, 'usec' => 0);
+    // A list of bytes for incomplete messages.
     protected $_incomplete_message = '';
 
+    // The request code host.
     protected $_whatsAppReqHost = 'v.whatsapp.net/v2/code';
+    // The register code host.
     protected $_whatsAppRegHost = 'v.whatsapp.net/v2/register';
+    // The check credentials host.
     protected $_whatsAppCheHost = 'v.whatsapp.net/v2/exist';
-
+    // User agent and token used in reques/registration code.
     protected $_whatsAppUserAgent = 'WhatsApp/2.3.53 S40Version/14.26 Device/Nokia302';
     protected $_whatsAppToken = 'PdA2DJyKoUrwLw1Bg6EIhzh502dF9noR9uFCllGk1354754753509';
 
+    // The upload host.
+    protected $_whatsAppUploadHost = 'https://mms.whatsapp.net/client/iphone/upload.php';
+
+    // Describes the connection status with the whatsapp server.
     protected $_disconnectedStatus = 'disconnected';
     protected $_connectedStatus = 'connected';
+    // Holds the login status.
     protected $_loginStatus;
+    // The AccountInfo object.
     protected $_accountinfo;
 
+    // Queue for received messages.
     protected $_messageQueue = array();
+    // Queue for outgoing messages.
     protected $_outQueue = array();
+    // Id to the last message sent.
     protected $_lastId = FALSE;
+    // Message counter for auto-id.
     protected $_msgCounter = 1;
+    // A socket to connect to the whatsapp network.
     protected $_socket;
+    // An instance of the BinaryTreeNodeWriter class.
     protected $_writer;
+    // An instance of the BinaryTreeNodeReader class.
     protected $_reader;
 
+    // Instances of the KeyStream class.
     protected $_inputKey;
     protected $_outputKey;
 
+    // Determines wether debug mode is on or off.
     protected $_debug;
 
     protected $_newmsgBind = FALSE;
 
+    /**
+     * Default class constructor.
+     *
+     * @param $Number
+     *   The user phone number including the country code without '+' or '00'.
+     * @param $imei
+     *   The IMEI/MAC adress.
+     * @param $Nickname
+     *   The user name.
+     * @param $debug
+     *   Debug on or off, false by default.
+     */
     public function __construct($Number, $imei, $Nickname, $debug = FALSE)
     {
         $this->_debug = $debug;
@@ -58,6 +99,12 @@ class WhatsProt
         $this->_loginStatus = $this->_disconnectedStatus;
     }
 
+    /**
+     * Add stream features.
+     *
+     * @return ProtocolNode
+     *   Return itself.
+     */
     protected function addFeatures()
     {
         $child = new ProtocolNode("receipt_acks", NULL, NULL, "");
@@ -66,6 +113,12 @@ class WhatsProt
         return $parent;
     }
 
+    /**
+     * Add the authenication nodes.
+     *
+     * @return ProtocolNode
+     *   Return itself.
+     */
     protected function addAuth()
     {
         $authHash = array();
@@ -77,6 +130,12 @@ class WhatsProt
         return $node;
     }
 
+    /**
+     * Encrypt the password.
+     *
+     * @return string
+     *   Return the encrypt password.
+     */
     public function encryptPassword()
     {
         return base64_decode($this->_password);
@@ -93,16 +152,28 @@ class WhatsProt
         return $response;
     }
 
+    /**
+     * Sets the bind of th new message.
+     */
     public function setNewMessageBind($bind)
     {
         $this->_newmsgBind = $bind;
     }
 
+    /**
+     * Add message to the outgoing queue.
+     */
     public function addOutQueue($node)
     {
         $this->_outQueue[] = $node;
     }
 
+    /**
+     * Add the auth response to protocoltreenode.
+     *
+     * @return ProtocolNode
+     *   Return itself.
+     */
     protected function addAuthResponse()
     {
         $resp = $this->authenticate();
@@ -113,21 +184,30 @@ class WhatsProt
         return $node;
     }
 
+    /**
+     * Send data to the whatsapp server.
+     */
     protected function sendData($data)
     {
-        socket_send( $this->_socket, $data, strlen($data), 0 );
+        socket_send($this->_socket, $data, strlen($data), 0);
     }
 
+    /**
+     * Send node to the whatsapp server.
+     */
     protected function sendNode($node)
     {
         $this->DebugPrint($node->NodeString("tx  ") . "\n");
         $this->sendData($this->_writer->write($node));
     }
 
+    /**
+     * Read 1024 bytes from the whatsapp server.
+     */
     protected function readData()
     {
         $buff = '';
-        $ret = socket_read( $this->_socket, 1024 );
+        $ret = socket_read($this->_socket, 1024);
         if ($ret) {
             $buff = $this->_incomplete_message . $ret;
             $this->_incomplete_message = '';
@@ -136,11 +216,23 @@ class WhatsProt
         return $buff;
     }
 
+    /**
+     * Process the challenge.
+     *
+     * @param $node
+     *   The node that contains the challenge.
+     */
     protected function processChallenge($node)
     {
         $this->challengeData = $node->_data;
     }
 
+    /**
+     * Tell the server we recieved the message.
+     *
+     * @param $msg
+     *   The ProtocolTreeNode that contains the message.
+     */
     protected function sendMessageReceived($msg)
     {
         $requestNode = $msg->getChild("request");
@@ -160,6 +252,12 @@ class WhatsProt
         }
     }
 
+    /**
+     * Process inbound data.
+     *
+     * @param $Data
+     *   The data to process.
+     */
     protected function processInboundData($data)
     {
         try {
@@ -200,9 +298,12 @@ class WhatsProt
         }
     }
 
+    /**
+     * Send the next message.
+     */
     public function sendNext()
     {
-        if (count($this->_outQueue)>0) {
+        if (count($this->_outQueue) > 0) {
             $msgnode = array_shift($this->_outQueue);
             $msgnode->refreshTimes();
             $this->_lastId = $msgnode->getAttribute('id');
@@ -212,6 +313,12 @@ class WhatsProt
         }
     }
 
+    /**
+     * Send the composing message.
+     *
+     * @param $msg
+     *   The ProtocolTreeNode that contains the message.
+     */
     public function sendComposing($msg)
     {
         $comphash = array();
@@ -236,6 +343,9 @@ class WhatsProt
         }
     }
 
+    /**
+     * Connect to the WhatsApp network.
+     */
     public function Connect()
     {
         $Socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -244,11 +354,14 @@ class WhatsProt
         socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, $this->_timeout);
     }
 
+    /**
+     * Logs us in to the server.
+     */
     public function Login()
     {
         $credentials = $this->checkCredentials();
         if ($credentials->status == 'ok') {
-            $this->_password($credentials->pw);
+            $this->_password = $credentials->pw;
         }
         $resource = "$this->_device-$this->_whatsAppVer-$this->_port";
         $data = $this->_writer->StartStream($this->_whatsAppServer, $resource);
@@ -271,13 +384,20 @@ class WhatsProt
         $this->SendPresence();
     }
 
-    # Pull from the socket, and place incoming messages in the message queue
+    /**
+     * Pull from the socket, and place incoming messages in the message queue.
+     */
     public function PollMessages()
     {
         $this->processInboundData($this->readData());
     }
 
-    # Drain the message queue for application processing
+    /**
+     * Drain the message queue for application processing.
+     *
+     * @return array
+     *   Return the message queue list.
+     */
     public function GetMessages()
     {
         $ret = $this->_messageQueue;
@@ -286,6 +406,9 @@ class WhatsProt
         return $ret;
     }
 
+    /**
+     * Wait for message delivery notification.
+     */
     public function WaitforReceipt()
     {
         $received = FALSE;
@@ -293,8 +416,9 @@ class WhatsProt
             $this->PollMessages();
             $msgs = $this->GetMessages();
             foreach ($msgs as $m) {
-                # process inbound messages
+                // Process inbound messages.
                 if ($m->_tag == "message") {
+                    // @todo: Check if get _attributeHash: "retry" and notice.
                     if ($m->getChild('received') != NULL) {
                         $received = TRUE;
                     }
@@ -302,10 +426,15 @@ class WhatsProt
                 //print($m->NodeString("") . "\n");
             }
         } while (!$received);
-        //echo "Received node!!\n";
     }
 
-    public function SendPresence($type="available")
+    /**
+     * Send presence status.
+     *
+     * @param $type
+     *   The presence status.
+     */
+    public function SendPresence($type = "available")
     {
         $presence = array();
         $presence['type'] = $type;
@@ -314,6 +443,14 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    /**
+     * Send node to the servers.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $node
+     *   The node that contains the message.
+     */
     protected function SendMessageNode($to, $node)
     {
         $serverNode = new ProtocolNode("server", NULL, NULL, "");
@@ -327,9 +464,9 @@ class WhatsProt
         $request = array();
         $request['xmlns'] = "urn:xmpp:receipts";
         $reqnode = new ProtocolNode("request", $request, NULL, "");
-        $msgid = time().'-'.$this->_msgCounter;
 
-	$whatsAppServer = $this->whatsAppServer;
+        $msgid = time() . '-' . $this->_msgCounter;
+        $whatsAppServer = $this->_whatsAppServer;
         if (strpos($to, "-") !== FALSE) {
             $whatsAppServer = $this->_whatsAppGroupServer;
         }
@@ -347,28 +484,73 @@ class WhatsProt
             $this->_outQueue[] = $messsageNode;
     }
 
+    /**
+     * Send a text message to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $txt
+     *   The text message.
+     */
     public function Message($to, $txt)
     {
         $bodyNode = new ProtocolNode("body", NULL, NULL, $txt);
         $this->SendMessageNode($to, $bodyNode);
     }
 
-    public function MessageImage($to, $url, $file, $size, $icon)
+    /**
+     * Send a image to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $file
+     *   The url/path to the image.
+     */
+    public function MessageImage($to, $file)
     {
-        $mediaAttribs = array();
-        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
-        $mediaAttribs["type"] = "image";
-        $mediaAttribs["url"] = $url;
-        $mediaAttribs["file"] = $file;
-        $mediaAttribs["size"] = $size;
+        if ($image = file_get_contents($file)) {
+            $fileName = basename($file);
+            if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
+                $uri = "/tmp/" . md5(time()) . $fileName;
+                $tmpFile = file_put_contents($uri, $image);
+                $url = $this->uploadFile($uri);
+                unlink($uri);
+            } else {
+                $url = $file;
+            }
 
-        $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
-        $this->SendMessageNode($to, $mediaNode);
+            $mediaAttribs = array();
+            $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+            $mediaAttribs["type"] = "image";
+            $mediaAttribs["url"] = $url;
+            $mediaAttribs["file"] = $fileName;
+            $mediaAttribs["size"] = strlen($image);
+
+            $icon = createIcon($image);
+
+            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
+            $this->SendMessageNode($to, $mediaNode);
+        } else {
+            throw new Exception('A problem has occurred trying to get the image.');
+        }
     }
 
-    public function Location($msgid, $to, $long, $lat)
+    /**
+     * Send a location to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $long
+     *   The logitude to send.
+     * @param $lat
+     *   The latitude to send.
+     */
+    public function Location($to, $long, $lat)
     {
         $whatsAppServer = $this->_whatsAppServer;
+        if (strpos($to, "-") !== FALSE) {
+            $whatsAppServer = $this->_whatsAppGroupServer;
+        }
 
         $mediaHash = array();
         $mediaHash['type'] = "location";
@@ -377,31 +559,81 @@ class WhatsProt
         $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
         $mediaNode = new ProtocolNode("media", $mediaHash, NULL, NULL);
 
+        $msgid = time() . '-' . $this->_msgCounter;
         $messageHash = array();
         $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
         $messageHash["author"] = $this->_phoneNumber . "@" . $this->_whatsAppServer;
+        $this->_msgCounter++;
 
         $messsageNode = new ProtocolNode("message", $messageHash, array($mediaNode), "");
         $this->sendNode($messsageNode);
     }
 
-    public function sendStatusUpdate($msgid, $txt)
+    /**
+     * Upload file to WhatsApp servers.
+     *
+     * @param $file
+     *   The uri of the file.
+     *
+     * @return string
+     *   Return the remote url.
+     */
+    public function uploadFile($file)
+    {
+        $data['file'] = "@" . $file;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array( 'Expect:' ) );
+        curl_setopt($ch, CURLOPT_URL, $this->_whatsAppUploadHost);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data); 
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $xml = simplexml_load_string($response);
+        $url = strip_tags($xml->dict->string[3]->asXML());
+
+        if (!empty($url)) {
+            return $url;
+        } else {
+            return FALSE;
+        }
+    }
+
+    /**
+     * Update de user status.
+     *
+     * @param $text
+     *   The text message status to send.
+     */
+    public function sendStatusUpdate($txt)
     {
         $bodyNode = new ProtocolNode("body", NULL, NULL, $txt);
         $serverNode = new ProtocolNode("server", NULL, NULL, "");
         $xHash = array();
         $xHash["xmlns"] = "jabber:x:event";
         $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
+
+        $msgid = time() . '-' . $this->_msgCounter;
         $messageHash = array();
         $messageHash["to"] = 's.us';
         $messageHash["type"] = "chat";
         $messageHash["id"] = $msgid;
+        $this->_msgCounter++;
+
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
         $this->sendNode($messsageNode);
     }
 
+    /**
+     * Send a pong to the whatsapp server.
+     *
+     * @param $msgid
+     *   The id of the message.
+     */
     public function Pong($msgid)
     {
         $whatsAppServer = $this->_whatsAppServer;
@@ -415,6 +647,9 @@ class WhatsProt
         $this->sendNode($messsageNode);
     }
 
+    /**
+     * Send the nick name to the whatsapp server.
+     */
     public function sendNickname()
     {
         $messageHash = array();
@@ -423,14 +658,13 @@ class WhatsProt
         $this->sendNode($messsageNode);
     }
 
-    protected function DebugPrint($debugMsg)
-    {
-        if ($this->_debug) {
-            print($debugMsg);
-        }
-    }
-
-    public function RequestLastSeen($msgid, $to)
+    /**
+     * Request to retrieve the last online string.
+     *
+     * @param $to
+     *   The reciepient to get the last seen.
+     */
+    public function RequestLastSeen($to)
     {
 
         $whatsAppServer = $this->_whatsAppServer;
@@ -439,11 +673,13 @@ class WhatsProt
         $queryHash['xmlns'] = "jabber:iq:last";
         $queryNode = new ProtocolNode("query", $queryHash, NULL, NULL);
 
+        $msgid = time() . '-' . $this->_msgCounter;
         $messageHash = array();
         $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "get";
         $messageHash["id"] = $msgid;
         $messageHash["from"] = $this->_phoneNumber . "@" . $this->_whatsAppServer;
+        $this->_msgCounter++;
 
         $messsageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
         $this->sendNode($messsageNode);
@@ -451,6 +687,21 @@ class WhatsProt
 
     /**
      * Request a registration code from WhatsApp.
+     *
+     * @param $method
+     *   Accepts only 'sms' or 'voice' as a value.
+     * @param $countryCody
+     *   ISO Country Code, 2 Digit.
+     * @param $langCode
+     *   ISO 639-1 Language Code: two-letter codes.
+     *
+     * @return object
+     *   An object with server response.
+     *   - status: Status of the request (sent/fail).
+     *   - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
+     *   - length: Registration code lenght.
+     *   - method: Used method.
+     *   - retry_after: Waiting time before requesting a new code.
      */
     public function requestCode($method = 'sms', $countryCody = 'US', $langCode = 'en')
     {
@@ -471,7 +722,7 @@ class WhatsProt
             'mcc' => '000',
             'mnc' => '000',
             'method' => $method,
-            'id' => $this->_identity,
+            'id' => $this->_imei,
             'token' => $token,
             'c' => 'cookie',
         );
@@ -479,7 +730,7 @@ class WhatsProt
         $rest = $this->getResponse($host, $query);
 
         if ($rest->status != 'sent') {
-            throw new Exception('There was a problem trying to request the code..');
+            throw new Exception('There was a problem trying to request the code.');
         } else {
             return $rest;
         }
@@ -487,6 +738,22 @@ class WhatsProt
 
     /*
      * Register account on WhatsApp using the provided code.
+     *
+     * @param integer $code
+     *   Numeric code value provided on requestCode().
+     *
+     * @return object
+     *   An object with server response.
+     *   - status: Account status.
+     *   - login: Phone number with country code.
+     *   - pw: Account password.
+     *   - type: Type of account.
+     *   - expiration: Expiration date in UNIX TimeStamp.
+     *   - kind: Kind of account.
+     *   - price: Formated price of account.
+     *   - cost: Decimal amount of account.
+     *   - currency: Currency price of account.
+     *   - price_expiration: Price expiration in UNIX TimeStamp.
      */
     public function registerCode($code)
     {
@@ -499,7 +766,7 @@ class WhatsProt
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
-            'id' => $this->_identity,
+            'id' => $this->_imei,
             'code' => $code,
             'c' => 'cookie',
         );
@@ -515,6 +782,23 @@ class WhatsProt
 
     /*
      * Check if account credentials are valid.
+     *
+     * WARNING: WhatsApp now changes your password everytime you use this.
+     * Make sure you update your config file if the output informs about
+     * a password change.
+     *
+     * @return object
+     *   An object with server response.
+     *   - status: Account status.
+     *   - login: Phone number with country code.
+     *   - pw: Account password.
+     *   - type: Type of account.
+     *   - expiration: Expiration date in UNIX TimeStamp.
+     *   - kind: Kind of account.
+     *   - price: Formated price of account.
+     *   - cost: Decimal amount of account.
+     *   - currency: Currency price of account.
+     *   - price_expiration: Price expiration in UNIX TimeStamp.
      */
     public function checkCredentials()
     {
@@ -523,11 +807,11 @@ class WhatsProt
         }
 
         // Build the url.
-        $host = 'https://' . $this->whatsAppCheHost;
+        $host = 'https://' . $this->_whatsAppCheHost;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
-            'id' => $this->_identity,
+            'id' => $this->_imei,
             'c' => 'cookie',
         );
 
@@ -566,6 +850,12 @@ class WhatsProt
 
     /**
      * Dissect country code from phone number.
+     *
+     * @return array
+     *   An associative array with country code and phone number.
+     *   - cc: The detected country code.
+     *   - phone: The phone number.
+     *   Return FALSE if country code is not found.
      */
     public function dissectPhone()
     {
@@ -585,5 +875,19 @@ class WhatsProt
         }
 
         return FALSE;
+    }
+
+
+    /**
+     * Print a message to the debug console.
+     *
+     * @param $debugMsg
+     *   The debug message.
+     */
+    protected function DebugPrint($debugMsg)
+    {
+        if ($this->_debug) {
+            print($debugMsg);
+        }
     }
 }
