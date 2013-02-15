@@ -606,7 +606,7 @@ class WhatsProt
             $mediaAttribs["file"] = $fileName;
             $mediaAttribs["size"] = strlen($image);
 
-            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, NULL);
+            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, "");
             $this->SendMessageNode($to, $mediaNode);
         } else {
             throw new Exception('A problem has occurred trying to get the audio.');
