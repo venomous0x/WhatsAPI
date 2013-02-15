@@ -2,6 +2,7 @@
 require 'protocol.class.php';
 require 'func.php';
 require 'rc4.php';
+require 'vCard.php';
 
 class WhatsProt
 {
@@ -476,7 +477,7 @@ class WhatsProt
         $messageHash["id"] = $msgid;
         $messageHash["t"] = time();
         $this->_msgCounter++;
-        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode,$reqnode,$node), "");
+        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
         if (!$this->_lastId) {
             $this->_lastId = $msgid;
             $this->sendNode($messsageNode);
@@ -611,6 +612,31 @@ class WhatsProt
         } else {
             throw new Exception('A problem has occurred trying to get the audio.');
         }
+    }
+
+    /**
+     * Send a vCard to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $name
+     *   The contact name.
+     * @param $vCard
+     *   The contact vCard to send.
+     */
+    public function vCard($to, $name, $vCard)
+    {
+        $vCardAttribs = array();
+        $vCardAttribs['name'] = $name;
+        $vCardNode = new ProtocolNode("vcard", $vCardAttribs, NULL, $vCard);
+
+        $mediaAttribs = array();
+        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+        $mediaAttribs["type"] = "vcard";
+        $mediaAttribs["encoding"] = "text";
+
+        $mediaNode = new ProtocolNode("media", $mediaAttribs, array($vCardNode), "");
+        $this->SendMessageNode($to, $mediaNode);
     }
 
     /**
