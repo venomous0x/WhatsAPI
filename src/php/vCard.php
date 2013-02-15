@@ -236,7 +236,7 @@ class vCard
      * Show the vcard.
      */
     function show()
-    {print_r($data);
+    {
         if (!$this->card) {
             $this->build();
         }
