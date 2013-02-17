@@ -6,7 +6,7 @@ require 'rc4.php';
 class WhatsProt
 {
     // The user phone number including the country code without '+' or '00'.
-    protected $_phoneNumber;
+    protected +41794101138er;
     // The IMEI/MAC adress.
     protected $_imei;
     // The user password.
