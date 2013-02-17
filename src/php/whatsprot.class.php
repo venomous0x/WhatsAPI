@@ -418,9 +418,10 @@ class WhatsProt
             foreach ($msgs as $m) {
                 // Process inbound messages.
                 if ($m->_tag == "message") {
-                    // @todo: Check if get _attributeHash: "retry" and notice.
-                    if ($m->getChild('received') != NULL) {
+                    if ($m->getChild('received') != NULL && !isset($m->_attributeHas['retry'])) {
                         $received = TRUE;
+                    } elseif ($m->getChild('received') != NULL && isset($m->_attributeHas['retry'])) {
+                        throw new Exception('There was a problem trying to send the message, please retry.');
                     }
                 }
                 //print($m->NodeString("") . "\n");
@@ -476,7 +477,7 @@ class WhatsProt
         $messageHash["id"] = $msgid;
         $messageHash["t"] = time();
         $this->_msgCounter++;
-        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode,$reqnode,$node), "");
+        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
         if (!$this->_lastId) {
             $this->_lastId = $msgid;
             $this->sendNode($messsageNode);
@@ -504,7 +505,7 @@ class WhatsProt
      * @param $to
      *   The reciepient to send.
      * @param $file
-     *   The url/path to the image.
+     *   The url/uri to the image.
      */
     public function MessageImage($to, $file)
     {
@@ -533,6 +534,109 @@ class WhatsProt
         } else {
             throw new Exception('A problem has occurred trying to get the image.');
         }
+    }
+
+    /**
+     * Send a video to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $file
+     *   The url/uri to the MP4 video.
+     */
+    public function MessageVideo($to, $file)
+    {
+        $file_parts = pathinfo($file);
+        if ($file_parts['extensions'] != 'mp4') {
+            throw new Exception('Unsupported video format.');
+        } elseif ($image = file_get_contents($file)) {
+            $fileName = basename($file);
+            if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
+                $uri = "/tmp/" . md5(time()) . $fileName;
+                $tmpFile = file_put_contents($uri, $image);
+                $url = $this->uploadFile($uri);
+                unlink($uri);
+            } else {
+                $url = $file;
+            }
+
+            $mediaAttribs = array();
+            $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+            $mediaAttribs["type"] = "video";
+            $mediaAttribs["url"] = $url;
+            $mediaAttribs["file"] = $fileName;
+            $mediaAttribs["size"] = strlen($image);
+
+            $icon = createVideoIcon($image);
+
+            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
+            $this->SendMessageNode($to, $mediaNode);
+        } else {
+            throw new Exception('A problem has occurred trying to get the video.');
+        }
+    }
+
+    /**
+     * Send a audio to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $file
+     *   The url/uri to the 3GP audio.
+     */
+    public function MessageAudio($to, $file)
+    {
+        $file_parts = pathinfo($file);
+        if ($file_parts['extensions'] != '3gp') {
+            throw new Exception('Unsupported audio format.');
+        } elseif ($image = file_get_contents($file)) {
+            $fileName = basename($file);
+            if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
+                $uri = "/tmp/" . md5(time()) . $fileName;
+                $tmpFile = file_put_contents($uri, $image);
+                $url = $this->uploadFile($uri);
+                unlink($uri);
+            } else {
+                $url = $file;
+            }
+
+            $mediaAttribs = array();
+            $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+            $mediaAttribs["type"] = "audio";
+            $mediaAttribs["url"] = $url;
+            $mediaAttribs["file"] = $fileName;
+            $mediaAttribs["size"] = strlen($image);
+
+            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, "");
+            $this->SendMessageNode($to, $mediaNode);
+        } else {
+            throw new Exception('A problem has occurred trying to get the audio.');
+        }
+    }
+
+    /**
+     * Send a vCard to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $name
+     *   The contact name.
+     * @param $vCard
+     *   The contact vCard to send.
+     */
+    public function vCard($to, $name, $vCard)
+    {
+        $vCardAttribs = array();
+        $vCardAttribs['name'] = $name;
+        $vCardNode = new ProtocolNode("vcard", $vCardAttribs, NULL, $vCard);
+
+        $mediaAttribs = array();
+        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+        $mediaAttribs["type"] = "vcard";
+        $mediaAttribs["encoding"] = "text";
+
+        $mediaNode = new ProtocolNode("media", $mediaAttribs, array($vCardNode), "");
+        $this->SendMessageNode($to, $mediaNode);
     }
 
     /**
@@ -629,25 +733,6 @@ class WhatsProt
     }
 
     /**
-     * Send a pong to the whatsapp server.
-     *
-     * @param $msgid
-     *   The id of the message.
-     */
-    public function Pong($msgid)
-    {
-        $whatsAppServer = $this->_whatsAppServer;
-
-        $messageHash = array();
-        $messageHash["to"] = $whatsAppServer;
-        $messageHash["id"] = $msgid;
-        $messageHash["type"] = "result";
-
-        $messsageNode = new ProtocolNode("iq", $messageHash, NULL, "");
-        $this->sendNode($messsageNode);
-    }
-
-    /**
      * Send the nick name to the whatsapp server.
      */
     public function sendNickname()
@@ -686,6 +771,25 @@ class WhatsProt
     }
 
     /**
+     * Send a pong to the whatsapp server.
+     *
+     * @param $msgid
+     *   The id of the message.
+     */
+    public function Pong($msgid)
+    {
+        $whatsAppServer = $this->_whatsAppServer;
+
+        $messageHash = array();
+        $messageHash["to"] = $whatsAppServer;
+        $messageHash["id"] = $msgid;
+        $messageHash["type"] = "result";
+
+        $messsageNode = new ProtocolNode("iq", $messageHash, NULL, "");
+        $this->sendNode($messsageNode);
+    }
+
+    /**
      * Request a registration code from WhatsApp.
      *
      * @param $method
@@ -703,7 +807,7 @@ class WhatsProt
      *   - method: Used method.
      *   - retry_after: Waiting time before requesting a new code.
      */
-    public function requestCode($method = 'sms', $countryCody = 'US', $langCode = 'en')
+    public function requestCode($method = 'sms', $countryCode = 'US', $langCode = 'en')
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The prived phone number is not valid.');
