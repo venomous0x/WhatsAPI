@@ -986,6 +986,7 @@ class WhatsProt
      *
      * @return array
      *   An associative array with country code and phone number.
+     *   - country: The detected country name.
      *   - cc: The detected country code.
      *   - phone: The phone number.
      *   Return FALSE if country code is not found.
@@ -999,6 +1000,7 @@ class WhatsProt
                     fclose($handle);
 
                     $phone = array(
+                        'country' => $data[0],
                         'cc' => $data[1],
                         'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
                     );

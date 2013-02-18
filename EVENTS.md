@@ -27,7 +27,8 @@ Available events and arguments
   - to: The reciepient to get the last seen.
 - onDissectPhone
   - phone: The user phone number including the country code.
-  - cc: The user country code.
+  - country: The detected country name.
+  - cc: The user country code without the country code.
   - phone: The user phone number.
 - onFailedDissectPhone:
   - phone: The user phone number including the country code.
