@@ -355,6 +355,14 @@ class WhatsProt
     }
 
     /**
+     * Disconnect to the WhatsApp network.
+     */
+    public function Disconnect()
+    {
+        socket_close($this->_socket);
+    }
+
+    /**
      * Logs us in to the server.
      */
     public function Login()
@@ -986,7 +994,6 @@ class WhatsProt
 
         return FALSE;
     }
-
 
     /**
      * Print a message to the debug console.
