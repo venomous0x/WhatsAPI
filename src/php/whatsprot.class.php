@@ -242,7 +242,7 @@ class WhatsProt
     }
 
     /**
-     * Tell the server we recieved the message.
+     * Tell the server we received the message.
      *
      * @param $msg
      *   The ProtocolTreeNode that contains the message.
@@ -263,6 +263,7 @@ class WhatsProt
             $messageHash["t"] = time();
             $messageNode = new ProtocolNode("message", $messageHash, array($receivedNode), "");
             $this->sendNode($messageNode);
+            $this->eventManager()->fire('onSendMessageReceived', array($this->_phoneNumber, $messageHash["t"], $msg->getAttribute("from")));
         }
     }
 
