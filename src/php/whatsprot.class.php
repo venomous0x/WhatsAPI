@@ -327,9 +327,9 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = $msg->getAttribute("from");
         $messageHash["type"] = "chat";
-        $messageHash["id"] = time().'-'.$this->_msgCounter;
+        $messageHash["id"] = $this->msgId();
         $messageHash["t"] = time();
-        $this->_msgCounter++;
+
         $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
         $this->sendNode($messageNode);
     }
@@ -466,7 +466,6 @@ class WhatsProt
         $request['xmlns'] = "urn:xmpp:receipts";
         $reqnode = new ProtocolNode("request", $request, NULL, "");
 
-        $msgid = time() . '-' . $this->_msgCounter;
         $whatsAppServer = $this->_whatsAppServer;
         if (strpos($to, "-") !== FALSE) {
             $whatsAppServer = $this->_whatsAppGroupServer;
@@ -474,9 +473,9 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $msgid;
+        $messageHash["id"] = $this->msgId();
         $messageHash["t"] = time();
-        $this->_msgCounter++;
+
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
         if (!$this->_lastId) {
             $this->_lastId = $msgid;
@@ -663,13 +662,11 @@ class WhatsProt
         $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
         $mediaNode = new ProtocolNode("media", $mediaHash, NULL, NULL);
 
-        $msgid = time() . '-' . $this->_msgCounter;
         $messageHash = array();
         $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $msgid;
+        $messageHash["id"] = $this->msgId();
         $messageHash["author"] = $this->_phoneNumber . "@" . $this->_whatsAppServer;
-        $this->_msgCounter++;
 
         $messsageNode = new ProtocolNode("message", $messageHash, array($mediaNode), "");
         $this->sendNode($messsageNode);
@@ -721,12 +718,10 @@ class WhatsProt
         $xHash["xmlns"] = "jabber:x:event";
         $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
 
-        $msgid = time() . '-' . $this->_msgCounter;
         $messageHash = array();
         $messageHash["to"] = 's.us';
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $msgid;
-        $this->_msgCounter++;
+        $messageHash["id"] = $this->msgId();
 
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
         $this->sendNode($messsageNode);
@@ -758,13 +753,11 @@ class WhatsProt
         $queryHash['xmlns'] = "jabber:iq:last";
         $queryNode = new ProtocolNode("query", $queryHash, NULL, NULL);
 
-        $msgid = time() . '-' . $this->_msgCounter;
         $messageHash = array();
         $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "get";
-        $messageHash["id"] = $msgid;
+        $messageHash["id"] = $this->msgId();
         $messageHash["from"] = $this->_phoneNumber . "@" . $this->_whatsAppServer;
-        $this->_msgCounter++;
 
         $messsageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
         $this->sendNode($messsageNode);
@@ -787,6 +780,19 @@ class WhatsProt
 
         $messsageNode = new ProtocolNode("iq", $messageHash, NULL, "");
         $this->sendNode($messsageNode);
+    }
+
+    /**
+     * Control msg id.
+     *
+     * @return string
+     *   A message id string.
+     */
+    protected function msgId()
+    {
+        $msgid = time() . '-' . $this->_msgCounter;
+        $this->_msgCounter++;
+        return $msgid;
     }
 
     /**
