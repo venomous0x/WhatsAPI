@@ -436,6 +436,30 @@ class WhatsProt
     }
 
     /**
+     * Update de user status.
+     *
+     * @param $text
+     *   The text message status to send.
+     */
+    public function sendStatusUpdate($txt)
+    {
+        $bodyNode = new ProtocolNode("body", NULL, NULL, $txt);
+        $serverNode = new ProtocolNode("server", NULL, NULL, "");
+        $xHash = array();
+        $xHash["xmlns"] = "jabber:x:event";
+        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
+
+        $messageHash = array();
+        $messageHash["to"] = 's.us';
+        $messageHash["type"] = "chat";
+        $messageHash["id"] = $this->msgId();
+
+        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
+        $this->sendNode($messsageNode);
+        $this->eventManager()->fire('onSendStatusUpdate', array($this->_phoneNumber, $txt));
+    }
+
+    /**
      * Send node to the servers.
      *
      * @param $to
@@ -684,30 +708,6 @@ class WhatsProt
             $this->eventManager()->fire('onFailedUploadFile', array($this->_phoneNumber, basename($file)));
             return FALSE;
         }
-    }
-
-    /**
-     * Update de user status.
-     *
-     * @param $text
-     *   The text message status to send.
-     */
-    public function sendStatusUpdate($txt)
-    {
-        $bodyNode = new ProtocolNode("body", NULL, NULL, $txt);
-        $serverNode = new ProtocolNode("server", NULL, NULL, "");
-        $xHash = array();
-        $xHash["xmlns"] = "jabber:x:event";
-        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
-
-        $messageHash = array();
-        $messageHash["to"] = 's.us';
-        $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->msgId();
-
-        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
-        $this->sendNode($messsageNode);
-        $this->eventManager()->fire('onSendStatusUpdate', array($this->_phoneNumber, $txt));
     }
 
     /**
@@ -992,7 +992,7 @@ class WhatsProt
                         'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
                     );
 
-                    $this->eventManager()->fire('onDissectPhone', array_merge($this->_phoneNumber, $phone));
+                    $this->eventManager()->fire('onDissectPhone', array_merge(array($this->_phoneNumber), $phone));
 
                     return $phone;
                 }
