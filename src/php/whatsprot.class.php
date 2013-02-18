@@ -303,6 +303,15 @@ class WhatsProt
                                 $node->_attributeHash['t']
                             ));
                         }
+                        if ($node->getChild('received') != NULL) {
+                            $this->eventManager()->fire('onMessageReceivedClient', array(
+                                $this->_phoneNumber,
+                                $node->_attributeHash['from'],
+                                $node->_attributeHash['id'],
+                                $node->_attributeHash['type'],
+                                $node->_attributeHash['t']
+                            ));
+                        }
                     }
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "get") == 0 && strcmp($node->_children[0]->_tag, "ping") == 0) {
