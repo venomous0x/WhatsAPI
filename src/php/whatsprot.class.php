@@ -211,6 +211,8 @@ class WhatsProt
         if ($ret) {
             $buff = $this->_incomplete_message . $ret;
             $this->_incomplete_message = '';
+        } else {
+            $error = socket_strerror(socket_last_error($sock));
         }
 
         return $buff;
@@ -287,6 +289,7 @@ class WhatsProt
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "get") == 0 && strcmp($node->_children[0]->_tag, "ping") == 0) {
                     $this->Pong($node->_attributeHash['id']);
+                    $this->event('onPing', $node->_attributeHash['id']);
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "query") == 0) {
                     array_push($this->_messageQueue, $node);
@@ -352,6 +355,7 @@ class WhatsProt
         socket_connect($Socket, $this->_whatsAppHost, $this->_port);
         $this->_socket = $Socket;
         socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, $this->_timeout);
+        $this->event('onConnect', $this->_socket);
     }
 
     /**
@@ -360,6 +364,7 @@ class WhatsProt
     public function Disconnect()
     {
         socket_close($this->_socket);
+        $this->event('onDisconnect', $this->_socket);
     }
 
     /**
@@ -388,6 +393,7 @@ class WhatsProt
         do {
             $this->processInboundData($this->readData());
         } while (($cnt++ < 100) && (strcmp($this->_loginStatus, $this->_disconnectedStatus) == 0));
+        $this->event('onLogin');
         $this->sendNickname();
         $this->SendPresence();
     }
@@ -450,6 +456,7 @@ class WhatsProt
         $presence['name'] = $this->_name;
         $node = new ProtocolNode("presence", $presence, NULL, "");
         $this->sendNode($node);
+        $this->event('onSendPresence', $presence);
     }
 
     /**
@@ -488,8 +495,9 @@ class WhatsProt
         if (!$this->_lastId) {
             $this->_lastId = $msgid;
             $this->sendNode($messsageNode);
-        }else
+        } else {
             $this->_outQueue[] = $messsageNode;
+        }
     }
 
     /**
@@ -658,26 +666,14 @@ class WhatsProt
      */
     public function Location($to, $long, $lat)
     {
-        $whatsAppServer = $this->_whatsAppServer;
-        if (strpos($to, "-") !== FALSE) {
-            $whatsAppServer = $this->_whatsAppGroupServer;
-        }
-
         $mediaHash = array();
+        $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
         $mediaHash['type'] = "location";
         $mediaHash['longitude'] = $long;
         $mediaHash['latitude'] = $lat;
-        $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
+
         $mediaNode = new ProtocolNode("media", $mediaHash, NULL, NULL);
-
-        $messageHash = array();
-        $messageHash["to"] = $to . "@" . $whatsAppServer;
-        $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->msgId();
-        $messageHash["author"] = $this->_phoneNumber . "@" . $this->_whatsAppServer;
-
-        $messsageNode = new ProtocolNode("message", $messageHash, array($mediaNode), "");
-        $this->sendNode($messsageNode);
+        $this->SendMessageNode($to, $mediaNode);
     }
 
     /**
@@ -744,6 +740,7 @@ class WhatsProt
         $messageHash["name"] = $this->_name;
         $messsageNode = new ProtocolNode("presence", $messageHash, NULL, "");
         $this->sendNode($messsageNode);
+        $this->event('onSendNickname', $this->_name);
     }
 
     /**
@@ -788,6 +785,7 @@ class WhatsProt
 
         $messsageNode = new ProtocolNode("iq", $messageHash, NULL, "");
         $this->sendNode($messsageNode);
+        $this->event('onPong', $msgid);
     }
 
     /**
@@ -800,6 +798,7 @@ class WhatsProt
     {
         $msgid = time() . '-' . $this->_msgCounter;
         $this->_msgCounter++;
+
         return $msgid;
     }
 
@@ -816,9 +815,10 @@ class WhatsProt
      * @return object
      *   An object with server response.
      *   - status: Status of the request (sent/fail).
-     *   - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
      *   - length: Registration code lenght.
      *   - method: Used method.
+     *   - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
+     *   - param: The missing_param/bad_param.
      *   - retry_after: Waiting time before requesting a new code.
      */
     public function requestCode($method = 'sms', $countryCode = 'US', $langCode = 'en')
@@ -933,7 +933,11 @@ class WhatsProt
             'c' => 'cookie',
         );
 
-        return $this->getResponse($host, $query);
+        $response = $this->getResponse($host, $query);
+
+        $this->event($response->status == 'ok' ? 'onGoodCredentials' : 'onBadCredentials', $response);
+
+        return $response;
     }
 
     protected function getResponse($host, $query)
@@ -983,15 +987,20 @@ class WhatsProt
                     // Return the first appearance.
                     fclose($handle);
 
-                    return array(
+                    $phone = array(
                         'cc' => $data[1],
                         'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
                     );
+
+                    $this->event('onDissectPhone', $phone);
+
+                    return $phone;
                 }
             }
             fclose($handle);
         }
 
+        $this->event('onFailedDissectPhone', $this->_phoneNumber);
         return FALSE;
     }
 
@@ -1005,6 +1014,104 @@ class WhatsProt
     {
         if ($this->_debug) {
             print($debugMsg);
+        }
+    }
+
+    /**
+     * Event callback implementation.
+     *
+     * @param string $event
+     *   The event name
+     * @param mixed $value
+     *   The optional value to pass to each callback.
+     * @param mixed $callback
+     *   The method or function to call - FALSE to remove all callbacks for event.
+     */
+    protected function event($event, $value = NULL, $callback = NULL)
+    {
+        static $events;
+
+        if($callback !== NULL) {
+            if ($callback) {
+                $events[$event][] = $callback;
+            } else {
+                unset($events[$event]);
+            }
+        } elseif (isset($events[$event])) {
+            foreach($events[$event] as $function) {
+                switch ($event) {
+                    /**
+                     * onConnect:
+                     * onDisconnect:
+                     *   - sokect: The socket.
+                     * onSendNickname:
+                     *   - name: User name.
+                     * onPing:
+                     * onPong:
+                     *   - msgid: The message id.
+                     * onFailedDissectPhone:
+                     *   - phone: The phone.
+                     */
+                    case 'onConnect':
+                    case 'onDisconnect':
+                    case 'onSendNickname':
+                    case 'onPing':
+                    case 'onPong':
+                    case 'onFailedDissectPhone':
+                        call_user_func($function, $value);
+                        break;
+
+                    /**
+                     * onGoodCredentials:
+                     *   - status: Account status.
+                     *   - login: Phone number with country code.
+                     *   - pw: Account password.
+                     *   - type: Type of account.
+                     *   - expiration: Expiration date in UNIX TimeStamp.
+                     *   - kind: Kind of account.
+                     *   - price: Formated price of account.
+                     *   - cost: Decimal amount of account.
+                     *   - currency: Currency price of account.
+                     *   - price_expiration: Price expiration in UNIX TimeStamp.
+                     */
+                    case 'onGoodCredentials':
+                        call_user_func($value->function, $value->status, $value->login, $value->pw, $value->type, $value->expiration, $value->kind, $value->price, $value->cost, $value->currency, $value->price_expiration);
+                        break;
+
+                    /**
+                     * onBadCredentials:
+                     *   - status: Account status.
+                     *   - reason: The reason.
+                     */
+                    case 'onBadCredentials':
+                        call_user_func($value->function, $value->status, $value->reason);
+                        break;
+
+                    /**
+                     * onSendPresence:
+                     *   - type: Presence type.
+                     *   - name: User name.
+                     */
+                    case 'onSendPresence':
+                        call_user_func($function, $value['type'], $value['name']);
+                        break;
+
+                    /**
+                     * onDissectPhone:
+                     *   - cc: The user country code.
+                     *   - phone: The user phone number.
+                     */
+                    case 'onDissectPhone':
+                        call_user_func($function, $value['cc'], $value['phone']);
+                        break;
+
+                    /**
+                     * onLogin
+                     */
+                    default:
+                        call_user_func($function);
+                }
+            }
         }
     }
 }
