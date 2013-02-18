@@ -85,6 +85,12 @@ Available events and arguments
   - msgid: The message id.
   - type: The message type.
   - time: The unix time when send message notification.
+- onUserPaused:
+  - phone: The user phone number including the country code.
+  - from: The sender phone number.
+  - msgid: The message id.
+  - type: The message type.
+  - time: The unix time when send message notification.
 - onMessageReceivedServer:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
