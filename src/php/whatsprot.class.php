@@ -371,7 +371,6 @@ class WhatsProt
             $this->processInboundData($this->readData());
         } while (($cnt++ < 100) && (strcmp($this->_loginStatus, WhatsProt::_disconnectedStatus) == 0));
         $this->eventManager()->fire('onLogin', array($this->_phoneNumber));
-        $this->sendNickname();
         $this->SendPresence();
     }
 
@@ -709,18 +708,6 @@ class WhatsProt
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
         $this->sendNode($messsageNode);
         $this->eventManager()->fire('onSendStatusUpdate', array($this->_phoneNumber, $txt));
-    }
-
-    /**
-     * Send the nick name to the whatsapp server.
-     */
-    public function sendNickname()
-    {
-        $messageHash = array();
-        $messageHash["name"] = $this->_name;
-        $messsageNode = new ProtocolNode("presence", $messageHash, NULL, "");
-        $this->sendNode($messsageNode);
-        $this->eventManager()->fire('onSendNickname', array($this->_phoneNumber, $this->_name));
     }
 
     /**

@@ -11,9 +11,6 @@ Available events and arguments
 - onPong:
   - phone: The user phone number including the country code.
   - msgid: The message id.
-- onSendNickname:
-  - phone: The user phone number including the country code.
-  - name: User name.
 - onSendPresence:
   - phone: The user phone number including the country code.
   - type: Presence type.
