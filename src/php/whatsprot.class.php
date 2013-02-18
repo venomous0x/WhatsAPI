@@ -288,8 +288,8 @@ class WhatsProt
                     }
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "get") == 0 && strcmp($node->_children[0]->_tag, "ping") == 0) {
-                    $this->Pong($node->_attributeHash['id']);
                     $this->event('onPing', $node->_attributeHash['id']);
+                    $this->Pong($node->_attributeHash['id']);
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "query") == 0) {
                     array_push($this->_messageQueue, $node);
