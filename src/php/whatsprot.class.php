@@ -1,5 +1,6 @@
 <?php
 require 'protocol.class.php';
+require 'WhatsAppEvent.php';
 require 'func.php';
 require 'rc4.php';
 
@@ -73,6 +74,8 @@ class WhatsProt
     protected $_writer;
     // An instance of the BinaryTreeNodeReader class.
     protected $_reader;
+    // An instance of the WhatsAppEvent class.
+    protected $event;
 
     // Instances of the KeyStream class.
     protected $_inputKey;
@@ -290,7 +293,7 @@ class WhatsProt
                     }
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "get") == 0 && strcmp($node->_children[0]->_tag, "ping") == 0) {
-                    $this->event('onPing', $node->_attributeHash['id']);
+                    $this->eventManager()->fire('onPing', array($node->_attributeHash['id']));
                     $this->Pong($node->_attributeHash['id']);
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "query") == 0) {
@@ -327,7 +330,7 @@ class WhatsProt
         socket_connect($Socket, WhatsProt::_whatsAppHost, WhatsProt::_port);
         $this->_socket = $Socket;
         socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => WhatsProt::_timeoutSec, 'usec' => WhatsProt::_timeoutUsec));
-        $this->event('onConnect', $this->_socket);
+        $this->eventManager()->fire('onConnect', array($this->_socket));
     }
 
     /**
@@ -336,7 +339,7 @@ class WhatsProt
     public function Disconnect()
     {
         socket_close($this->_socket);
-        $this->event('onDisconnect', $this->_socket);
+        $this->eventManager()->fire('onDisconnect', array($this->_socket));
     }
 
     /**
@@ -365,7 +368,7 @@ class WhatsProt
         do {
             $this->processInboundData($this->readData());
         } while (($cnt++ < 100) && (strcmp($this->_loginStatus, WhatsProt::_disconnectedStatus) == 0));
-        $this->event('onLogin');
+        $this->eventManager()->fire('onLogin', array());
         $this->sendNickname();
         $this->SendPresence();
     }
@@ -428,7 +431,7 @@ class WhatsProt
         $presence['name'] = $this->_name;
         $node = new ProtocolNode("presence", $presence, NULL, "");
         $this->sendNode($node);
-        $this->event('onSendPresence', $presence);
+        $this->eventManager()->fire('onSendPresence', $presence);
     }
 
     /**
@@ -712,7 +715,7 @@ class WhatsProt
         $messageHash["name"] = $this->_name;
         $messsageNode = new ProtocolNode("presence", $messageHash, NULL, "");
         $this->sendNode($messsageNode);
-        $this->event('onSendNickname', $this->_name);
+        $this->eventManager()->fire('onSendNickname', array($this->_name));
     }
 
     /**
@@ -757,7 +760,7 @@ class WhatsProt
 
         $messsageNode = new ProtocolNode("iq", $messageHash, NULL, "");
         $this->sendNode($messsageNode);
-        $this->event('onPong', $msgid);
+        $this->eventManager()->fire('onPong', array($msgid));
     }
 
     /**
@@ -907,7 +910,7 @@ class WhatsProt
 
         $response = $this->getResponse($host, $query);
 
-        $this->event($response->status == 'ok' ? 'onGoodCredentials' : 'onBadCredentials', $response);
+        $this->eventManager()->fire($response->status == 'ok' ? 'onGoodCredentials' : 'onBadCredentials', (array) $response);
 
         return $response;
     }
@@ -964,7 +967,7 @@ class WhatsProt
                         'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
                     );
 
-                    $this->event('onDissectPhone', $phone);
+                    $this->eventManager()->fire('onDissectPhone', $phone);
 
                     return $phone;
                 }
@@ -972,7 +975,7 @@ class WhatsProt
             fclose($handle);
         }
 
-        $this->event('onFailedDissectPhone', $this->_phoneNumber);
+        $this->eventManager()->fire('onFailedDissectPhone', array($this->_phoneNumber));
         return FALSE;
     }
 
@@ -990,100 +993,14 @@ class WhatsProt
     }
 
     /**
-     * Event callback implementation.
-     *
-     * @param string $event
-     *   The event name
-     * @param mixed $value
-     *   The optional value to pass to each callback.
-     * @param mixed $callback
-     *   The method or function to call - FALSE to remove all callbacks for event.
+     * Gets a new micro event dispatcher.
      */
-    protected function event($event, $value = NULL, $callback = NULL)
+    public function eventManager()
     {
-        static $events;
-
-        if($callback !== NULL) {
-            if ($callback) {
-                $events[$event][] = $callback;
-            } else {
-                unset($events[$event]);
-            }
-        } elseif (isset($events[$event])) {
-            foreach($events[$event] as $function) {
-                switch ($event) {
-                    /**
-                     * onConnect:
-                     * onDisconnect:
-                     *   - sokect: The socket.
-                     * onSendNickname:
-                     *   - name: User name.
-                     * onPing:
-                     * onPong:
-                     *   - msgid: The message id.
-                     * onFailedDissectPhone:
-                     *   - phone: The phone.
-                     */
-                    case 'onConnect':
-                    case 'onDisconnect':
-                    case 'onSendNickname':
-                    case 'onPing':
-                    case 'onPong':
-                    case 'onFailedDissectPhone':
-                        call_user_func($function, $value);
-                        break;
-
-                    /**
-                     * onGoodCredentials:
-                     *   - status: Account status.
-                     *   - login: Phone number with country code.
-                     *   - pw: Account password.
-                     *   - type: Type of account.
-                     *   - expiration: Expiration date in UNIX TimeStamp.
-                     *   - kind: Kind of account.
-                     *   - price: Formated price of account.
-                     *   - cost: Decimal amount of account.
-                     *   - currency: Currency price of account.
-                     *   - price_expiration: Price expiration in UNIX TimeStamp.
-                     */
-                    case 'onGoodCredentials':
-                        call_user_func($function, $value->status, $value->login, $value->pw, $value->type, $value->expiration, $value->kind, $value->price, $value->cost, $value->currency, $value->price_expiration);
-                        break;
-
-                    /**
-                     * onBadCredentials:
-                     *   - status: Account status.
-                     *   - reason: The reason.
-                     */
-                    case 'onBadCredentials':
-                        call_user_func($function, $value->status, $value->reason);
-                        break;
-
-                    /**
-                     * onSendPresence:
-                     *   - type: Presence type.
-                     *   - name: User name.
-                     */
-                    case 'onSendPresence':
-                        call_user_func($function, $value['type'], $value['name']);
-                        break;
-
-                    /**
-                     * onDissectPhone:
-                     *   - cc: The user country code.
-                     *   - phone: The user phone number.
-                     */
-                    case 'onDissectPhone':
-                        call_user_func($function, $value['cc'], $value['phone']);
-                        break;
-
-                    /**
-                     * onLogin
-                     */
-                    default:
-                        call_user_func($function);
-                }
-            }
+        if (!is_object($this->event)) {
+            $this->event = new WhatsAppEvent();
         }
+
+        return $this->event;
     }
 }
