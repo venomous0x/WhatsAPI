@@ -293,6 +293,17 @@ class WhatsProt
                     if ($this->_newmsgBind && $node->getChild('body')) {
                         $this->_newmsgBind->process($node);
                     }
+                    if ($node->_tag == "message") {
+                        if ($node->getChild('x') != NULL) {
+                            $this->eventManager()->fire('onMessageReceivedServer', array(
+                                $this->_phoneNumber,
+                                $node->_attributeHash['from'],
+                                $node->_attributeHash['id'],
+                                $node->_attributeHash['type'],
+                                $node->_attributeHash['t']
+                            ));
+                        }
+                    }
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "get") == 0 && strcmp($node->_children[0]->_tag, "ping") == 0) {
                     $this->eventManager()->fire('onPing', array($this->_phoneNumber, $node->_attributeHash['id']));
