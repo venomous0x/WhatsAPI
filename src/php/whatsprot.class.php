@@ -8,7 +8,7 @@ class WhatsProt
     // The user phone number including the country code without '+' or '00'.
     protected $_phoneNumber;
     // The IMEI/MAC adress.
-    protected $_imei;
+    protected $_identity;
     // The user password.
     protected $_password;
     // The user name.
@@ -87,14 +87,14 @@ class WhatsProt
      * @param $debug
      *   Debug on or off, false by default.
      */
-    public function __construct($Number, $imei, $Nickname, $debug = FALSE)
+    public function __construct($Number, $identity, $Nickname, $debug = FALSE)
     {
         $this->_debug = $debug;
         $dict = getDictionary();
         $this->_writer = new BinTreeNodeWriter($dict);
         $this->_reader = new BinTreeNodeReader($dict);
         $this->_phoneNumber = $Number;
-        $this->_imei = $imei;
+        $this->_identity = $identity;
         $this->_name = $Nickname;
         $this->_loginStatus = $this->_disconnectedStatus;
     }
@@ -840,7 +840,7 @@ class WhatsProt
             'mcc' => '000',
             'mnc' => '000',
             'method' => $method,
-            'id' => $this->_imei,
+            'id' => $this->_identity,
             'token' => $token,
             'c' => 'cookie',
         );
@@ -884,7 +884,7 @@ class WhatsProt
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
-            'id' => $this->_imei,
+            'id' => $this->_identity,
             'code' => $code,
             'c' => 'cookie',
         );
@@ -929,7 +929,7 @@ class WhatsProt
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
-            'id' => $this->_imei,
+            'id' => $this->_identity,
             'c' => 'cookie',
         );
 
