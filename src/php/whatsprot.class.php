@@ -213,6 +213,47 @@ class WhatsProt
     }
 
     /**
+     * Send node to the servers.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $node
+     *   The node that contains the message.
+     */
+    protected function SendMessageNode($to, $node)
+    {
+        $serverNode = new ProtocolNode("server", NULL, NULL, "");
+        $xHash = array();
+        $xHash["xmlns"] = "jabber:x:event";
+        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
+        $notify = array();
+        $notify['xmlns'] = 'urn:xmpp:whatsapp';
+        $notify['name'] = $this->_name;
+        $notnode = new ProtocolNode("notify", $notify, NULL, "");
+        $request = array();
+        $request['xmlns'] = "urn:xmpp:receipts";
+        $reqnode = new ProtocolNode("request", $request, NULL, "");
+
+        $whatsAppServer = WhatsProt::_whatsAppServer;
+        if (strpos($to, "-") !== FALSE) {
+            $whatsAppServer = WhatsProt::_whatsAppGroupServer;
+        }
+        $messageHash = array();
+        $messageHash["to"] = $to . "@" . $whatsAppServer;
+        $messageHash["type"] = "chat";
+        $messageHash["id"] = $this->msgId();
+        $messageHash["t"] = time();
+
+        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
+        if (!$this->_lastId) {
+            $this->_lastId = $messageHash["id"];
+            $this->sendNode($messsageNode);
+        } else {
+            $this->_outQueue[] = $messsageNode;
+        }
+    }
+
+    /**
      * Read 1024 bytes from the whatsapp server.
      */
     protected function readData()
@@ -498,44 +539,47 @@ class WhatsProt
     }
 
     /**
-     * Send node to the servers.
+     * Send the composing message status. When typing a message.
      *
-     * @param $to
-     *   The reciepient to send.
-     * @param $node
-     *   The node that contains the message.
+     * @param $msg	  	
+     *   The ProtocolTreeNode that contains the message.	  	
      */
-    protected function SendMessageNode($to, $node)
+    public function sendComposingMessage($msg)
     {
-        $serverNode = new ProtocolNode("server", NULL, NULL, "");
-        $xHash = array();
-        $xHash["xmlns"] = "jabber:x:event";
-        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
-        $notify = array();
-        $notify['xmlns'] = 'urn:xmpp:whatsapp';
-        $notify['name'] = $this->_name;
-        $notnode = new ProtocolNode("notify", $notify, NULL, "");
-        $request = array();
-        $request['xmlns'] = "urn:xmpp:receipts";
-        $reqnode = new ProtocolNode("request", $request, NULL, "");
+        $comphash = array();
+        $comphash['xmlns'] = 'http://jabber.org/protocol/chatstates';
+        $compose = new ProtocolNode("composing", $comphash, NULL, "");
 
-        $whatsAppServer = WhatsProt::_whatsAppServer;
-        if (strpos($to, "-") !== FALSE) {
-            $whatsAppServer = WhatsProt::_whatsAppGroupServer;
-        }
         $messageHash = array();
-        $messageHash["to"] = $to . "@" . $whatsAppServer;
+        $messageHash["to"] = $msg->getAttribute("from");
         $messageHash["type"] = "chat";
         $messageHash["id"] = $this->msgId();
         $messageHash["t"] = time();
 
-        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
-        if (!$this->_lastId) {
-            $this->_lastId = $messageHash["id"];
-            $this->sendNode($messsageNode);
-        } else {
-            $this->_outQueue[] = $messsageNode;
-        }
+        $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
+        $this->sendNode($messageNode);
+    }
+
+    /**
+     * Send the composing message status. When make a pause typing a message.
+     *
+     * @param $msg	  	
+     *   The ProtocolTreeNode that contains the message.	  	
+     */
+    public function sendPausedMessage($msg)
+    {
+        $comphash = array();
+        $comphash['xmlns'] = 'http://jabber.org/protocol/chatstates';
+        $compose = new ProtocolNode("paused", $comphash, NULL, "");
+
+        $messageHash = array();
+        $messageHash["to"] = $msg->getAttribute("from");
+        $messageHash["type"] = "chat";
+        $messageHash["id"] = $this->msgId();
+        $messageHash["t"] = time();
+
+        $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
+        $this->sendNode($messageNode);
     }
 
     /**
