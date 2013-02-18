@@ -224,6 +224,7 @@ class WhatsProt
             $this->_incomplete_message = '';
         } else {
             $error = socket_strerror(socket_last_error($sock));
+            $this->eventManager()->fire('onClose', array($error));
         }
 
         return $buff;

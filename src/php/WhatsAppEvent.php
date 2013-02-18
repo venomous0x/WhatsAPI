@@ -24,19 +24,6 @@ class WhatsAppEvent
         if (!empty($event)) {
             $this->register($event);
         }
-
-        // $default_events = array(
-        //   'onConnect',
-        //   'onDisconnect',
-        //   'onPing',
-        //   'onPong',
-        //   'onSendNickname',
-        //   'onSendPresence',
-        //   'onDissectPhone'
-        //   'onFailedDissectPhone',
-        //   'onGoodCredentials',
-        //   'onBadCredentials',
-        // );
     }
   
     /**
