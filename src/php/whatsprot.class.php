@@ -224,7 +224,7 @@ class WhatsProt
             $this->_incomplete_message = '';
         } else {
             $error = socket_strerror(socket_last_error($sock));
-            $this->eventManager()->fire('onClose', array($error));
+            $this->eventManager()->fire('onClose', array($this->_phoneNumber, $error));
         }
 
         return $buff;
@@ -294,7 +294,7 @@ class WhatsProt
                     }
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "get") == 0 && strcmp($node->_children[0]->_tag, "ping") == 0) {
-                    $this->eventManager()->fire('onPing', array($node->_attributeHash['id']));
+                    $this->eventManager()->fire('onPing', array($this->_phoneNumber, $node->_attributeHash['id']));
                     $this->Pong($node->_attributeHash['id']);
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "query") == 0) {
@@ -331,7 +331,7 @@ class WhatsProt
         socket_connect($Socket, WhatsProt::_whatsAppHost, WhatsProt::_port);
         $this->_socket = $Socket;
         socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => WhatsProt::_timeoutSec, 'usec' => WhatsProt::_timeoutUsec));
-        $this->eventManager()->fire('onConnect', array($this->_socket));
+        $this->eventManager()->fire('onConnect', array($this->_phoneNumber, $this->_socket));
     }
 
     /**
@@ -340,7 +340,7 @@ class WhatsProt
     public function Disconnect()
     {
         socket_close($this->_socket);
-        $this->eventManager()->fire('onDisconnect', array($this->_socket));
+        $this->eventManager()->fire('onDisconnect', array($this->_phoneNumber, $this->_socket));
     }
 
     /**
@@ -369,7 +369,7 @@ class WhatsProt
         do {
             $this->processInboundData($this->readData());
         } while (($cnt++ < 100) && (strcmp($this->_loginStatus, WhatsProt::_disconnectedStatus) == 0));
-        $this->eventManager()->fire('onLogin', array());
+        $this->eventManager()->fire('onLogin', array($this->_phoneNumber));
         $this->sendNickname();
         $this->SendPresence();
     }
@@ -432,7 +432,7 @@ class WhatsProt
         $presence['name'] = $this->_name;
         $node = new ProtocolNode("presence", $presence, NULL, "");
         $this->sendNode($node);
-        $this->eventManager()->fire('onSendPresence', $presence);
+        $this->eventManager()->fire('onSendPresence', array($this->_phoneNumber, $presence['type'], $presence['name']));
     }
 
     /**
@@ -678,10 +678,10 @@ class WhatsProt
         $url = strip_tags($xml->dict->string[3]->asXML());
 
         if (!empty($url)) {
-            $this->eventManager()->fire('onUploadFile', array(basename($file), $url));
+            $this->eventManager()->fire('onUploadFile', array($this->_phoneNumber, basename($file), $url));
             return $url;
         } else {
-            $this->eventManager()->fire('onFailedUploadFile', array(basename($file)));
+            $this->eventManager()->fire('onFailedUploadFile', array($this->_phoneNumber, basename($file)));
             return FALSE;
         }
     }
@@ -707,7 +707,7 @@ class WhatsProt
 
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
         $this->sendNode($messsageNode);
-        $this->eventManager()->fire('onSendStatusUpdate', array($txt));
+        $this->eventManager()->fire('onSendStatusUpdate', array($this->_phoneNumber, $txt));
     }
 
     /**
@@ -719,7 +719,7 @@ class WhatsProt
         $messageHash["name"] = $this->_name;
         $messsageNode = new ProtocolNode("presence", $messageHash, NULL, "");
         $this->sendNode($messsageNode);
-        $this->eventManager()->fire('onSendNickname', array($this->_name));
+        $this->eventManager()->fire('onSendNickname', array($this->_phoneNumber, $this->_name));
     }
 
     /**
@@ -745,7 +745,7 @@ class WhatsProt
 
         $messsageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
         $this->sendNode($messsageNode);
-        $this->eventManager()->fire('onRequestLastSeen', array($messageHash["id"], $to));
+        $this->eventManager()->fire('onRequestLastSeen', array($this->_phoneNumber, $messageHash["id"], $to));
     }
 
     /**
@@ -765,7 +765,7 @@ class WhatsProt
 
         $messsageNode = new ProtocolNode("iq", $messageHash, NULL, "");
         $this->sendNode($messsageNode);
-        $this->eventManager()->fire('onPong', array($msgid));
+        $this->eventManager()->fire('onPong', array($this->_phoneNumber, $msgid));
     }
 
     /**
@@ -828,10 +828,10 @@ class WhatsProt
         $rest = $this->getResponse($host, $query);
 
         if ($rest->status != 'sent') {
-            $this->eventManager()->fire('onFailedRequestCode', array($method, $rest->reason, $rest->param));
+            $this->eventManager()->fire('onFailedRequestCode', array($this->_phoneNumber, $method, $rest->reason, $rest->param));
             throw new Exception('There was a problem trying to request the code.');
         } else {
-            $this->eventManager()->fire('onRequestCode', array($method, $rest->length));
+            $this->eventManager()->fire('onRequestCode', array($this->_phoneNumber, $method, $rest->length));
             return $rest;
         }
     }
@@ -917,7 +917,7 @@ class WhatsProt
 
         $response = $this->getResponse($host, $query);
 
-        $this->eventManager()->fire($response->status == 'ok' ? 'onGoodCredentials' : 'onBadCredentials', (array) $response);
+        $this->eventManager()->fire($response->status == 'ok' ? 'onGoodCredentials' : 'onBadCredentials', array_merge($this->_phoneNumber, (array) $response));
 
         return $response;
     }
@@ -974,7 +974,7 @@ class WhatsProt
                         'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
                     );
 
-                    $this->eventManager()->fire('onDissectPhone', $phone);
+                    $this->eventManager()->fire('onDissectPhone', array_merge($this->_phoneNumber, $phone));
 
                     return $phone;
                 }

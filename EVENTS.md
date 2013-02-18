@@ -2,59 +2,73 @@ Available events and arguments
 ==============================
 - onConnect:
 - onDisconnect:
+  - phone: The user phone number including the country code.
   - sokect: The resource socket id.
 - onClose:
+  - phone: The user phone number including the country code.
   - error: The message error.
 - onPing:
 - onPong:
+  - phone: The user phone number including the country code.
   - msgid: The message id.
 - onSendNickname:
+  - phone: The user phone number including the country code.
   - name: User name.
 - onSendPresence:
-   - type: Presence type.
-   - name: User name.
+  - phone: The user phone number including the country code.
+  - type: Presence type.
+  - name: User name.
 - onSendStatusUpdate:
-   - msg: The text message status.
+  - phone: The user phone number including the country code.
+  - msg: The text message status.
 - onRequestLastSeen:
-   - msgid: The message id.
-   - to: The reciepient to get the last seen.
+  - phone: The user phone number including the country code.
+  - msgid: The message id.
+  - to: The reciepient to get the last seen.
 - onDissectPhone
-   - cc: The user country code.
-   - phone: The user phone number.
+  - phone: The user phone number including the country code.
+  - cc: The user country code.
+  - phone: The user phone number.
 - onFailedDissectPhone:
-   - phone: The user phone number including the country code.
+  - phone: The user phone number including the country code.
 - onGoodCredentials:
-   - status: Account status.
-   - login: Phone number with country code.
-   - pw: Account password.
-   - type: Type of account.
-   - expiration: Expiration date in UNIX TimeStamp.
-   - kind: Kind of account.
-   - price: Formated price of account.
-   - cost: Decimal amount of account.
-   - currency: Currency price of account.
-   - price_expiration: Price expiration in UNIX TimeStamp.
+  - phone: The user phone number including the country code.
+  - status: Account status.
+  - login: Phone number with country code.
+  - pw: Account password.
+  - type: Type of account.
+  - expiration: Expiration date in UNIX TimeStamp.
+  - kind: Kind of account.
+  - price: Formated price of account.
+  - cost: Decimal amount of account.
+  - currency: Currency price of account.
+  - price_expiration: Price expiration in UNIX TimeStamp.
 - onBadCredentials:
-   - status: Account status.
-   - reason: The reason.
+  - phone: The user phone number including the country code.
+  - status: Account status.
+  - reason: The reason.
 - onRequestCode:
-   - method: Used method.
-   - length: Registration code lenght.
+  - phone: The user phone number including the country code.
+  - method: Used method.
+  - length: Registration code lenght.
 - onFailedRequestCode:
-   - method: Used method.
-   - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
-   - value: The missing_param/bad_param or waiting time before requesting a new code.
+  - phone: The user phone number including the country code.
+  - method: Used method.
+  - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
+  - value: The missing_param/bad_param or waiting time before requesting a new code.
 - onUploadFile:
-   - name: The name.
-   - url: The remote url on WhatsApp servers.
+  - phone: The user phone number including the country code.
+  - name: The name.
+  - url: The remote url on WhatsApp servers.
 - onFailedUploadFile:
-   - name: The name.
+  - phone: The user phone number including the country code.
+  - name: The name.
 
 How to binds a callback to a event
 ==================================
 
 # Events functions declarations
-function MyFunction_onConnect($socket) {
+function MyFunction_onConnect($phone, $socket) {
     print("$socket\n");
 }
 
