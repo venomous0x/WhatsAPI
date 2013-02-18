@@ -918,7 +918,7 @@ class WhatsProt
 
         $response = $this->getResponse($host, $query);
 
-        if ($rest->status != 'ok') {
+        if ($response->status != 'ok') {
             $this->eventManager()->fire('onBadCredentials', array($this->_phoneNumber, $response->status, $response->reason));
             throw new Exception('There was a problem trying to request the code.');
         } else {
