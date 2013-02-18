@@ -1075,7 +1075,7 @@ class WhatsProt
                      *   - price_expiration: Price expiration in UNIX TimeStamp.
                      */
                     case 'onGoodCredentials':
-                        call_user_func($value->function, $value->status, $value->login, $value->pw, $value->type, $value->expiration, $value->kind, $value->price, $value->cost, $value->currency, $value->price_expiration);
+                        call_user_func($function, $value->status, $value->login, $value->pw, $value->type, $value->expiration, $value->kind, $value->price, $value->cost, $value->currency, $value->price_expiration);
                         break;
 
                     /**
@@ -1084,7 +1084,7 @@ class WhatsProt
                      *   - reason: The reason.
                      */
                     case 'onBadCredentials':
-                        call_user_func($value->function, $value->status, $value->reason);
+                        call_user_func($function, $value->status, $value->reason);
                         break;
 
                     /**
