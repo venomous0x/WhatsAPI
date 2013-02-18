@@ -32,6 +32,11 @@ Available events and arguments
 - onBadCredentials:
    - status: Account status.
    - reason: The reason.
+- onUploadFile:
+   - name: The name.
+   - url: The remote url on WhatsApp servers.
+- onFailedUploadFile:
+   - name: The name.
 
 How to binds a callback to a event
 ==================================

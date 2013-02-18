@@ -678,8 +678,10 @@ class WhatsProt
         $url = strip_tags($xml->dict->string[3]->asXML());
 
         if (!empty($url)) {
+            $this->eventManager()->fire('onUploadFile', array(basename($file), $url));
             return $url;
         } else {
+            $this->eventManager()->fire('onFailedUploadFile', array(basename($file)));
             return FALSE;
         }
     }
