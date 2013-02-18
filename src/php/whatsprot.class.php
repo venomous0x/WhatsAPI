@@ -707,6 +707,7 @@ class WhatsProt
 
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
         $this->sendNode($messsageNode);
+        $this->eventManager()->fire('onSendStatusUpdate', array($txt));
     }
 
     /**

@@ -13,6 +13,8 @@ Available events and arguments
 - onSendPresence:
    - type: Presence type.
    - name: User name.
+- onSendStatusUpdate:
+   - msg: The text message status.
 - onDissectPhone
    - cc: The user country code.
    - phone: The user phone number.
