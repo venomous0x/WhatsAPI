@@ -793,6 +793,7 @@ class WhatsProt
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The prived phone number is not valid.');
+            return FALSE;
         }
 
         // Build the token.
@@ -820,8 +821,8 @@ class WhatsProt
             throw new Exception('There was a problem trying to request the code.');
         } else {
             $this->eventManager()->fire('onRequestCode', array($this->_phoneNumber, $method, $response->length));
-            return $response;
         }
+        return $response;
     }
 
     /*
@@ -847,6 +848,7 @@ class WhatsProt
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The prived phone number is not valid.');
+            return FALSE;
         }
 
         // Build the url.
@@ -863,6 +865,7 @@ class WhatsProt
 
 
         if ($response->status != 'ok') {
+            $this->eventManager()->fire('onFailedRegisterCode', array($this->_phoneNumber, $response->status, $response->reason, $response->retry_after));
             throw new Exception('An error occurred registering the registration code from WhatsApp.');
         } else {
             $this->eventManager()->fire('onRegisterCode', array(
@@ -877,8 +880,8 @@ class WhatsProt
                 $response->currency,
                 $response->price_expiration
             ));
-            return $response;
         }
+        return $response;
     }
 
     /*
@@ -905,6 +908,7 @@ class WhatsProt
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The prived phone number is not valid.');
+            return FALSE;
         }
 
         // Build the url.
@@ -934,8 +938,8 @@ class WhatsProt
                 $response->currency,
                 $response->price_expiration
             ));
-            return $response;
         }
+        return $response;
     }
 
     protected function getResponse($host, $query)

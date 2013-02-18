@@ -31,7 +31,6 @@ Available events and arguments
   - phone: The user phone number including the country code.
 - onGoodCredentials:
   - phone: The user phone number including the country code.
-  - status: Account status.
   - login: Phone number with country code.
   - pw: Account password.
   - type: Type of account.
@@ -54,6 +53,21 @@ Available events and arguments
   - method: Used method.
   - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
   - value: The missing_param/bad_param or waiting time before requesting a new code.
+- onRegisterCode:
+  - phone: The user phone number including the country code.
+  - login: Phone number with country code.
+  - pw: Account password.
+  - type: Type of account.
+  - expiration: Expiration date in UNIX TimeStamp.
+  - kind: Kind of account.
+  - price: Formated price of account.
+  - cost: Decimal amount of account.
+  - currency: Currency price of account.
+  - price_expiration: Price expiration in UNIX TimeStamp.
+- onFailedRegisterCode:
+  - phone: The user phone number including the country code.
+  - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
+  - retry_after: Waiting time before requesting a new code.
 - onUploadFile:
   - phone: The user phone number including the country code.
   - name: The name.

@@ -25,11 +25,6 @@ $debug = TRUE;
 # Create a instance of WhastPort.
 $w = new WhatsProt($userPhone, $userIdentity, $userName, $debug);
 
-# Connect to WhatsApp servers.
-$w->Connect();
-# Now Login function sends Nickname and (Available) Presence.
-$w->Login();
-
 # How to create an account __ONLY__ if you do not have a associated to our phone number.
 # You can test your credentials with: $w->checkCredentials();
 
@@ -73,6 +68,11 @@ $w->requestCode('sms', 'ES', 'es');
  *   - price_expiration: Price expiration in UNIX TimeStamp.
  */
 $w->registerCode('123456');
+
+# Connect to WhatsApp servers.
+$w->Connect();
+# Now Login function sends Nickname and (Available) Presence.
+$w->Login();
 
 # Send messages:
 
