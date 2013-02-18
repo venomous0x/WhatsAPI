@@ -465,7 +465,7 @@ class WhatsProt
 
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
         if (!$this->_lastId) {
-            $this->_lastId = $msgid;
+            $this->_lastId = $messageHash["id"];
             $this->sendNode($messsageNode);
         } else {
             $this->_outQueue[] = $messsageNode;
