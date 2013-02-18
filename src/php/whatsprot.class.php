@@ -961,7 +961,7 @@ class WhatsProt
      *   - phone: The phone number.
      *   Return FALSE if country code is not found.
      */
-    public function dissectPhone()
+    protected function dissectPhone()
     {
         if (($handle = fopen('countries.csv', 'rb')) !== FALSE) {
             while (($data = fgetcsv($handle, 1000)) !== FALSE) {
