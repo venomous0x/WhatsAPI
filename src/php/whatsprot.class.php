@@ -5,6 +5,42 @@ require 'rc4.php';
 
 class WhatsProt
 {
+    /**
+     * Constant declarations.
+     */
+    // The hostname of the whatsapp server.
+    const _whatsAppHost = 'c.whatsapp.net';
+    // The hostnames used to login/send messages.
+    const _whatsAppServer = 's.whatsapp.net';
+    const _whatsAppGroupServer = 'g.us';
+    // The device name.
+    const _device = 'iPhone';
+    // The WhatsApp version.
+    const _whatsAppVer = '2.8.7';
+    // The port of the whatsapp server.
+    const _port = 5222;
+    // The timeout for the connection with the Whatsapp servers.
+    const _timeout = array('sec' => 2, 'usec' => 0);
+    // The request code host.
+    const _whatsAppReqHost = 'v.whatsapp.net/v2/code';
+    // The register code host.
+    const _whatsAppRegHost = 'v.whatsapp.net/v2/register';
+    // The check credentials host.
+    const _whatsAppCheHost = 'v.whatsapp.net/v2/exist';
+    // User agent and token used in reques/registration code.
+    const _whatsAppUserAgent = 'WhatsApp/2.3.53 S40Version/14.26 Device/Nokia302';
+    const _whatsAppToken = 'PdA2DJyKoUrwLw1Bg6EIhzh502dF9noR9uFCllGk1354754753509';
+
+    // The upload host.
+    const _whatsAppUploadHost = 'https://mms.whatsapp.net/client/iphone/upload.php';
+
+    // Describes the connection status with the whatsapp server.
+    const _disconnectedStatus = 'disconnected';
+    const _connectedStatus = 'connected';
+
+    /**
+     * Property declarations.
+     */
     // The user phone number including the country code without '+' or '00'.
     protected $_phoneNumber;
     // The IMEI/MAC adress.
@@ -14,38 +50,9 @@ class WhatsProt
     // The user name.
     protected $_name;
 
-    // The hostname of the whatsapp server.
-    protected $_whatsAppHost = 'c.whatsapp.net';
-    // The hostnames used to login/send messages.
-    protected $_whatsAppServer = 's.whatsapp.net';
-    protected $_whatsAppGroupServer = "g.us";
-    // The device name.
-    protected $_device = 'iPhone';
-    // The WhatsApp version.
-    protected $_whatsAppVer = '2.8.7';
-    // The port of the whatsapp server.
-    protected $_port = 5222;
-    // The timeout for the connection with the Whatsapp servers.
-    protected $_timeout = array('sec' => 2, 'usec' => 0);
     // A list of bytes for incomplete messages.
     protected $_incomplete_message = '';
 
-    // The request code host.
-    protected $_whatsAppReqHost = 'v.whatsapp.net/v2/code';
-    // The register code host.
-    protected $_whatsAppRegHost = 'v.whatsapp.net/v2/register';
-    // The check credentials host.
-    protected $_whatsAppCheHost = 'v.whatsapp.net/v2/exist';
-    // User agent and token used in reques/registration code.
-    protected $_whatsAppUserAgent = 'WhatsApp/2.3.53 S40Version/14.26 Device/Nokia302';
-    protected $_whatsAppToken = 'PdA2DJyKoUrwLw1Bg6EIhzh502dF9noR9uFCllGk1354754753509';
-
-    // The upload host.
-    protected $_whatsAppUploadHost = 'https://mms.whatsapp.net/client/iphone/upload.php';
-
-    // Describes the connection status with the whatsapp server.
-    protected $_disconnectedStatus = 'disconnected';
-    protected $_connectedStatus = 'connected';
     // Holds the login status.
     protected $_loginStatus;
     // The AccountInfo object.
@@ -96,7 +103,7 @@ class WhatsProt
         $this->_phoneNumber = $Number;
         $this->_identity = $identity;
         $this->_name = $Nickname;
-        $this->_loginStatus = $this->_disconnectedStatus;
+        $this->_loginStatus = WhatsPort::_disconnectedStatus;
     }
 
     /**
@@ -269,7 +276,7 @@ class WhatsProt
                 if (strcmp($node->_tag, "challenge") == 0) {
                     $this->processChallenge($node);
                 } elseif (strcmp($node->_tag, "success") == 0) {
-                    $this->_loginStatus = $this->_connectedStatus;
+                    $this->_loginStatus = WhatsPort::_connectedStatus;
                 }
                 if (strcmp($node->_tag, "message") == 0) {
                     array_push($this->_messageQueue, $node);
@@ -316,9 +323,9 @@ class WhatsProt
     public function Connect()
     {
         $Socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        socket_connect($Socket, $this->_whatsAppHost, $this->_port);
+        socket_connect($Socket, WhatsProt::_whatsAppHost, WhatsProt::_port);
         $this->_socket = $Socket;
-        socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, $this->_timeout);
+        socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, WhatsProt::_timeout);
         $this->event('onConnect', $this->_socket);
     }
 
@@ -340,8 +347,8 @@ class WhatsProt
         if ($this->_accountinfo['status'] == 'ok') {
             $this->_password = $this->_accountinfo['pw'];
         }
-        $resource = "$this->_device-$this->_whatsAppVer-$this->_port";
-        $data = $this->_writer->StartStream($this->_whatsAppServer, $resource);
+        $resource = WhatsProt::_device . '-' . WhatsProt::_whatsAppVer . '-' . WhatsProt::_port;
+        $data = $this->_writer->StartStream(WhatsProt::_whatsAppServer, $resource);
         $feat = $this->addFeatures();
         $auth = $this->addAuth();
         $this->sendData($data);
@@ -356,7 +363,7 @@ class WhatsProt
         $cnt = 0;
         do {
             $this->processInboundData($this->readData());
-        } while (($cnt++ < 100) && (strcmp($this->_loginStatus, $this->_disconnectedStatus) == 0));
+        } while (($cnt++ < 100) && (strcmp($this->_loginStatus, WhatsPort::_disconnectedStatus) == 0));
         $this->event('onLogin');
         $this->sendNickname();
         $this->SendPresence();
@@ -445,9 +452,9 @@ class WhatsProt
         $request['xmlns'] = "urn:xmpp:receipts";
         $reqnode = new ProtocolNode("request", $request, NULL, "");
 
-        $whatsAppServer = $this->_whatsAppServer;
+        $whatsAppServer = WhatsProt::_whatsAppServer;
         if (strpos($to, "-") !== FALSE) {
-            $whatsAppServer = $this->_whatsAppGroupServer;
+            $whatsAppServer = WhatsProt::_whatsAppGroupServer;
         }
         $messageHash = array();
         $messageHash["to"] = $to . "@" . $whatsAppServer;
@@ -716,7 +723,7 @@ class WhatsProt
     public function RequestLastSeen($to)
     {
 
-        $whatsAppServer = $this->_whatsAppServer;
+        $whatsAppServer = WhatsProt::_whatsAppServer;
 
         $queryHash = array();
         $queryHash['xmlns'] = "jabber:iq:last";
@@ -726,7 +733,7 @@ class WhatsProt
         $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "get";
         $messageHash["id"] = $this->msgId();
-        $messageHash["from"] = $this->_phoneNumber . "@" . $this->_whatsAppServer;
+        $messageHash["from"] = $this->_phoneNumber . "@" . WhatsProt::_whatsAppServer;
 
         $messsageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
         $this->sendNode($messsageNode);
@@ -740,7 +747,7 @@ class WhatsProt
      */
     public function Pong($msgid)
     {
-        $whatsAppServer = $this->_whatsAppServer;
+        $whatsAppServer = WhatsProt::_whatsAppServer;
 
         $messageHash = array();
         $messageHash["to"] = $whatsAppServer;
@@ -792,10 +799,10 @@ class WhatsProt
         }
 
         // Build the token.
-        $token = md5($this->_whatsAppToken . $phone['phone']);
+        $token = md5(WhatsProt::_whatsAppToken . $phone['phone']);
 
         // Build the url.
-        $host = 'https://' . $this->_whatsAppReqHost;
+        $host = 'https://' . WhatsProt::_whatsAppReqHost;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
@@ -844,7 +851,7 @@ class WhatsProt
         }
 
         // Build the url.
-        $host = 'https://' . $this->_whatsAppRegHost;
+        $host = 'https://' . WhatsProt::_whatsAppRegHost;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
@@ -889,7 +896,7 @@ class WhatsProt
         }
 
         // Build the url.
-        $host = 'https://' . $this->_whatsAppCheHost;
+        $host = 'https://' . WhatsProt::_whatsAppCheHost;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
@@ -920,7 +927,7 @@ class WhatsProt
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_USERAGENT, $this->_whatsAppUserAgent);
+        curl_setopt($ch, CURLOPT_USERAGENT, WhatsProt::_whatsAppUserAgent);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: text/json'));
         // This makes CURL accept any peer!
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
