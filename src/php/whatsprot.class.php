@@ -223,7 +223,7 @@ class WhatsProt
             $buff = $this->_incomplete_message . $ret;
             $this->_incomplete_message = '';
         } else {
-            $error = socket_strerror(socket_last_error($sock));
+            $error = socket_strerror(socket_last_error($this->_socket));
             $this->eventManager()->fire('onClose', array($this->_phoneNumber, $error));
         }
 
