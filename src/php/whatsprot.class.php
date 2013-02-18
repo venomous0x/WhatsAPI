@@ -825,14 +825,14 @@ class WhatsProt
             'c' => 'cookie',
         );
 
-        $rest = $this->getResponse($host, $query);
+        $response = $this->getResponse($host, $query);
 
-        if ($rest->status != 'sent') {
-            $this->eventManager()->fire('onFailedRequestCode', array($this->_phoneNumber, $method, $rest->reason, $rest->param));
+        if ($response->status != 'sent') {
+            $this->eventManager()->fire('onFailedRequestCode', array($this->_phoneNumber, $method, $response->reason, $response->reason == 'too_recent' ? $response->reason : $response->param));
             throw new Exception('There was a problem trying to request the code.');
         } else {
-            $this->eventManager()->fire('onRequestCode', array($this->_phoneNumber, $method, $rest->length));
-            return $rest;
+            $this->eventManager()->fire('onRequestCode', array($this->_phoneNumber, $method, $response->length));
+            return $response;
         }
     }
 
@@ -871,13 +871,26 @@ class WhatsProt
             'c' => 'cookie',
         );
 
-        $rest = $this->getResponse($host, $query);
+        $response = $this->getResponse($host, $query);
 
-        if ($rest->status != 'ok') {
+
+        if ($response->status != 'ok') {
             throw new Exception('An error occurred registering the registration code from WhatsApp.');
+        } else {
+            $this->eventManager()->fire('onRegisterCode', array(
+                $this->_phoneNumber,
+                $response->login,
+                $response->pw,
+                $response->type,
+                $response->expiration,
+                $response->kind,
+                $response->price,
+                $response->cost,
+                $response->currency,
+                $response->price_expiration
+            ));
+            return $response;
         }
-
-        return $rest;
     }
 
     /*
@@ -917,9 +930,24 @@ class WhatsProt
 
         $response = $this->getResponse($host, $query);
 
-        $this->eventManager()->fire($response->status == 'ok' ? 'onGoodCredentials' : 'onBadCredentials', array_merge($this->_phoneNumber, (array) $response));
-
-        return $response;
+        if ($rest->status != 'ok') {
+            $this->eventManager()->fire('onBadCredentials', array($this->_phoneNumber, $method, $response->status, $response->reason));
+            throw new Exception('There was a problem trying to request the code.');
+        } else {
+            $this->eventManager()->fire('onGoodCredentials', array(
+                $this->_phoneNumber,
+                $response->login,
+                $response->pw,
+                $response->type,
+                $response->expiration,
+                $response->kind,
+                $response->price,
+                $response->cost,
+                $response->currency,
+                $response->price_expiration
+            ));
+            return $response;
+        }
     }
 
     protected function getResponse($host, $query)
