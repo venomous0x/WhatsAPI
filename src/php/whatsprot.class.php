@@ -316,27 +316,6 @@ class WhatsProt
         }
     }
 
-    /**
-     * Send the composing message.
-     *
-     * @param $msg
-     *   The ProtocolTreeNode that contains the message.
-     */
-    public function sendComposing($msg)
-    {
-        $comphash = array();
-        $comphash['xmlns'] = 'http://jabber.org/protocol/chatstates';
-        $compose = new ProtocolNode("composing", $comphash, NULL, "");
-        $messageHash = array();
-        $messageHash["to"] = $msg->getAttribute("from");
-        $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->msgId();
-        $messageHash["t"] = time();
-
-        $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
-        $this->sendNode($messageNode);
-    }
-
     public function accountInfo()
     {
         if (is_array($this->_accountinfo)) {
