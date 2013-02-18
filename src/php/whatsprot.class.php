@@ -270,12 +270,6 @@ class WhatsProt
                     $this->processChallenge($node);
                 } elseif (strcmp($node->_tag, "success") == 0) {
                     $this->_loginStatus = $this->_connectedStatus;
-                    $this->_accountinfo = array(
-                        'status' => $node->getAttribute('status'),
-                        'kind' => $node->getAttribute('kind'),
-                        'creation' => $node->getAttribute('creation'),
-                        'expiration' => $node->getAttribute('expiration'),
-                    );
                 }
                 if (strcmp($node->_tag, "message") == 0) {
                     array_push($this->_messageQueue, $node);
@@ -316,15 +310,6 @@ class WhatsProt
         }
     }
 
-    public function accountInfo()
-    {
-        if (is_array($this->_accountinfo)) {
-            print_r($this->_accountinfo);
-        } else {
-            echo "No information available";
-        }
-    }
-
     /**
      * Connect to the WhatsApp network.
      */
@@ -351,9 +336,9 @@ class WhatsProt
      */
     public function Login()
     {
-        $credentials = $this->checkCredentials();
-        if ($credentials->status == 'ok') {
-            $this->_password = $credentials->pw;
+        $this->_accountinfo = (array) $this->checkCredentials();
+        if ($this->_accountinfo['status'] == 'ok') {
+            $this->_password = $this->_accountinfo['pw'];
         }
         $resource = "$this->_device-$this->_whatsAppVer-$this->_port";
         $data = $this->_writer->StartStream($this->_whatsAppServer, $resource);
