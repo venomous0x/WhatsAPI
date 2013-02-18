@@ -23,7 +23,7 @@ $destinationPhone = '34666443322';       # Destination telephone number includin
 $debug = TRUE;
 
 # Create a instance of WhastPort.
-$w = new WhatsProt($userPhone, $userIdenity, $userName, $debug);
+$w = new WhatsProt($userPhone, $userIdentity, $userName, $debug);
 
 # Connect to WhatsApp servers.
 $w->Connect();

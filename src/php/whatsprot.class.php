@@ -20,7 +20,8 @@ class WhatsProt
     // The port of the whatsapp server.
     const _port = 5222;
     // The timeout for the connection with the Whatsapp servers.
-    const _timeout = array('sec' => 2, 'usec' => 0);
+    const _timeoutSec = 2;
+    const _timeoutUsec = 0;
     // The request code host.
     const _whatsAppReqHost = 'v.whatsapp.net/v2/code';
     // The register code host.
@@ -103,7 +104,7 @@ class WhatsProt
         $this->_phoneNumber = $Number;
         $this->_identity = $identity;
         $this->_name = $Nickname;
-        $this->_loginStatus = WhatsPort::_disconnectedStatus;
+        $this->_loginStatus = WhatsProt::_disconnectedStatus;
     }
 
     /**
@@ -276,7 +277,7 @@ class WhatsProt
                 if (strcmp($node->_tag, "challenge") == 0) {
                     $this->processChallenge($node);
                 } elseif (strcmp($node->_tag, "success") == 0) {
-                    $this->_loginStatus = WhatsPort::_connectedStatus;
+                    $this->_loginStatus = WhatsProt::_connectedStatus;
                 }
                 if (strcmp($node->_tag, "message") == 0) {
                     array_push($this->_messageQueue, $node);
@@ -325,7 +326,7 @@ class WhatsProt
         $Socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         socket_connect($Socket, WhatsProt::_whatsAppHost, WhatsProt::_port);
         $this->_socket = $Socket;
-        socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, WhatsProt::_timeout);
+        socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => WhatsProt::_timeoutSec, 'usec' => WhatsProt::_timeoutUsec));
         $this->event('onConnect', $this->_socket);
     }
 
@@ -363,7 +364,7 @@ class WhatsProt
         $cnt = 0;
         do {
             $this->processInboundData($this->readData());
-        } while (($cnt++ < 100) && (strcmp($this->_loginStatus, WhatsPort::_disconnectedStatus) == 0));
+        } while (($cnt++ < 100) && (strcmp($this->_loginStatus, WhatsProt::_disconnectedStatus) == 0));
         $this->event('onLogin');
         $this->sendNickname();
         $this->SendPresence();
