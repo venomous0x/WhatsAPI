@@ -669,10 +669,46 @@ class WhatsProt
         $mediaHash = array();
         $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
         $mediaHash['type'] = "location";
-        $mediaHash['longitude'] = $long;
         $mediaHash['latitude'] = $lat;
+        $mediaHash['longitude'] = $long;
 
         $mediaNode = new ProtocolNode("media", $mediaHash, NULL, NULL);
+        $this->SendMessageNode($to, $mediaNode);
+    }
+
+    /**
+     * Send a location to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $url
+     *   The google maps place url.
+     * @param $long
+     *   The logitude to send.
+     * @param $lat
+     *   The latitude to send.
+     * @param $name
+     *   The google maps place name.
+     * @param $image
+     *   The google maps place image.
+     */
+    public function Place($to, $url, $long, $lat, $name, $image)
+    {
+        $mediaHash = array();
+        $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
+        $mediaHash['type'] = "location";
+        $mediaHash['url'] = $url;
+        $mediaHash['latitude'] = $lat;
+        $mediaHash['longitude'] = $long;
+
+        if ($image = file_get_contents($file))
+        {
+            $icon = createVideoIcon($image);
+        } else {
+            $icon = giftThumbnail();
+        }
+
+        $mediaNode = new ProtocolNode("media", $mediaHash, NULL, $icon);
         $this->SendMessageNode($to, $mediaNode);
     }
 
