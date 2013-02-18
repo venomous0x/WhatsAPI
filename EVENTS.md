@@ -15,6 +15,9 @@ Available events and arguments
    - name: User name.
 - onSendStatusUpdate:
    - msg: The text message status.
+- onRequestLastSeen:
+   - msgid: The message id.
+   - to: The reciepient to get the last seen.
 - onDissectPhone
    - cc: The user country code.
    - phone: The user phone number.

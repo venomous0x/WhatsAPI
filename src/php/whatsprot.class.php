@@ -745,6 +745,7 @@ class WhatsProt
 
         $messsageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
         $this->sendNode($messsageNode);
+        $this->eventManager()->fire('onRequestLastSeen', array($messageHash["id"], $to));
     }
 
     /**
