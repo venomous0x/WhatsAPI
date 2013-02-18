@@ -294,6 +294,15 @@ class WhatsProt
                         $this->_newmsgBind->process($node);
                     }
                     if ($node->_tag == "message") {
+                        if ($node->getChild('composing') != NULL) {
+                            $this->eventManager()->fire('onUserComposing', array(
+                                $this->_phoneNumber,
+                                $node->_attributeHash['from'],
+                                $node->_attributeHash['id'],
+                                $node->_attributeHash['type'],
+                                $node->_attributeHash['t']
+                            ));
+                        }
                         if ($node->getChild('x') != NULL) {
                             $this->eventManager()->fire('onMessageReceivedServer', array(
                                 $this->_phoneNumber,

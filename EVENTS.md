@@ -79,6 +79,12 @@ Available events and arguments
   - phone: The user phone number including the country code.
   - time: The unix time when send message notification.
   - from: The sender phone number.
+- onUserComposing:
+  - phone: The user phone number including the country code.
+  - from: The sender phone number.
+  - msgid: The message id.
+  - type: The message type.
+  - time: The unix time when send message notification.
 - onMessageReceivedServer:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
