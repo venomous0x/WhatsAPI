@@ -37,6 +37,13 @@ Available events and arguments
 - onBadCredentials:
    - status: Account status.
    - reason: The reason.
+- onRequestCode:
+   - method: Used method.
+   - length: Registration code lenght.
+- onFailedRequestCode:
+   - method: Used method.
+   - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
+   - value: The missing_param/bad_param or waiting time before requesting a new code.
 - onUploadFile:
    - name: The name.
    - url: The remote url on WhatsApp servers.

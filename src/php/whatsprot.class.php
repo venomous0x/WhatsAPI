@@ -828,8 +828,10 @@ class WhatsProt
         $rest = $this->getResponse($host, $query);
 
         if ($rest->status != 'sent') {
+            $this->eventManager()->fire('onFailedRequestCode', array($method, $rest->reason, $rest->param));
             throw new Exception('There was a problem trying to request the code.');
         } else {
+            $this->eventManager()->fire('onRequestCode', array($method, $rest->length));
             return $rest;
         }
     }
