@@ -691,6 +691,9 @@ class WhatsProt
      *   The google maps place name.
      * @param $image
      *   The google maps place image.
+     *
+     * @see: https://maps.google.com/maps/place?cid=1421139585205719654
+     * @todo: Add support for only pass as argument the place id.
      */
     public function Place($to, $url, $long, $lat, $name, $image)
     {
