@@ -399,6 +399,21 @@ class WhatsProt
                                     $node->_children[2]->getAttribute('acodec'),
                                     $node->_children[2]->_data
                                 ));
+                            } elseif ($node->_children[2]->getAttribute('type') == 'audio') {
+                                $this->eventManager()->fire('onAudio', array(
+                                    $this->_phoneNumber,
+                                    $node->_attributeHash['from'],
+                                    $node->_attributeHash['id'],
+                                    $node->_attributeHash['type'],
+                                    $node->_attributeHash['t'],
+                                    $node->_children[0]->getAttribute('name'),
+                                    $node->_children[2]->getAttribute('size'),
+                                    $node->_children[2]->getAttribute('url'),
+                                    $node->_children[2]->getAttribute('file'),
+                                    $node->_children[2]->getAttribute('mimetype'),
+                                    $node->_children[2]->getAttribute('filehash'),
+                                    $node->_children[2]->getAttribute('duration'),
+                                ));
                             }
                         }
                         if ($node->getChild('x') != NULL) {
@@ -727,12 +742,12 @@ class WhatsProt
      * @param $to
      *   The reciepient to send.
      * @param $file
-     *   The url/uri to the 3GP audio.
+     *   The url/uri to the 3GP/CAF audio.
      */
     public function MessageAudio($to, $file)
     {
         $file_parts = pathinfo($file);
-        if ($file_parts['extensions'] != '3gp') {
+        if ($file_parts['extensions'] != '3gp' || $file_parts['extensions'] != 'caf') {
             throw new Exception('Unsupported audio format.');
         } elseif ($image = file_get_contents($file)) {
             $fileName = basename($file);

@@ -129,6 +129,19 @@ Available events and arguments
   - vcodec: The video codec.
   - acodec: The audio codec.
   - thumbnail: The base64_encode video thumbnail.
+- onAudio:
+  - phone: The user phone number including the country code.
+  - from: The sender phone number.
+  - msgid: The message id.
+  - type: The message type.
+  - time: The unix time when send message notification.
+  - name: The sender name.
+  - size: The image size.
+  - url: The url to bigger audio version.
+  - file: The audio name.
+  - mimetype: The audio mime type.
+  - filehash: The audio file hash.
+  - duration: The audio duration.
 - onMessageReceivedServer:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
