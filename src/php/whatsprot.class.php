@@ -394,6 +394,7 @@ class WhatsProt
                                     $node->_children[2]->getAttribute('file'),
                                     $node->_children[2]->getAttribute('size'),
                                     $node->_children[2]->getAttribute('mimetype'),
+                                    $node->_children[2]->getAttribute('filehash'),
                                     $node->_children[2]->getAttribute('duration'),
                                     $node->_children[2]->getAttribute('vcodec'),
                                     $node->_children[2]->getAttribute('acodec'),

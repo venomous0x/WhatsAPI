@@ -125,6 +125,7 @@ Available events and arguments
   - file: The video name.
   - size: The video size.
   - mimetype: The video mime type.
+  - filehash: The video file hash.
   - duration: The video duration.
   - vcodec: The video codec.
   - acodec: The audio codec.
