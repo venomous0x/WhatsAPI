@@ -364,6 +364,26 @@ class WhatsProt
                                 $node->_children[2]->_data
                             ));
                         }
+                        if ($node->getChild('notify') != NULL && $node->_children[0]->getAttribute('name') != '' && $node->getChild('media') != NULL) {
+                            if ($node->_children[2]->getAttribute('type') == 'image') {
+                                $this->eventManager()->fire('onImage', array(
+                                    $this->_phoneNumber,
+                                    $node->_attributeHash['from'],
+                                    $node->_attributeHash['id'],
+                                    $node->_attributeHash['type'],
+                                    $node->_attributeHash['t'],
+                                    $node->_children[0]->getAttribute('name'),
+                                    $node->_children[2]->getAttribute('size'),
+                                    $node->_children[2]->getAttribute('url'),
+                                    $node->_children[2]->getAttribute('file'),
+                                    $node->_children[2]->getAttribute('mimetype'),
+                                    $node->_children[2]->getAttribute('filehash'),
+                                    $node->_children[2]->getAttribute('width'),
+                                    $node->_children[2]->getAttribute('height'),
+                                    $node->_children[2]->_data
+                                ));
+                            }
+                        }
                         if ($node->getChild('x') != NULL) {
                             $this->eventManager()->fire('onMessageReceivedServer', array(
                                 $this->_phoneNumber,

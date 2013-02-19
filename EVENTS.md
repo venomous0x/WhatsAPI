@@ -99,6 +99,21 @@ Available events and arguments
   - time: The unix time when send message notification.
   - name: The sender name.
   - message: The message.
+- onImage:
+  - phone: The user phone number including the country code.
+  - from: The sender phone number.
+  - msgid: The message id.
+  - type: The message type.
+  - time: The unix time when send message notification.
+  - name: The sender name.
+  - size: The image size.
+  - url: The url to bigger version image.
+  - file: The image name.
+  - mimetype: The mime type image.
+  - filehash: The file hash image.
+  - width: The image width.
+  - height: The image height.
+  - thumbnail: The base64_encode thumbnail image.
 - onMessageReceivedServer:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
