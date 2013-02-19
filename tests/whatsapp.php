@@ -19,9 +19,6 @@ $nickname = "WhatsAPI Test";
 $sender = 	""; // Mobile number with country code (but without + or 00)
 $imei = 	""; // MAC Address for iOS IMEI for other platform (Android/etc)
 
-$countrycode = substr($sender, 0, 2);
-$phonenumber=substr($sender, 2);
-
 if ($argc < 2) {
     echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>] [-set <status>]\n";
     echo "\tphone: full number including country code, without '+' or '00'\n";
@@ -39,14 +36,7 @@ for ($i=3; $i<$argc; $i++) {
 }
 
 echo "[] Logging in as '$nickname' ($sender)\n";
-$wa = new WhatsProt($sender, $imei, $nickname, true);
-
-$url = "https://r.whatsapp.net/v1/exist.php?cc=".$countrycode."&in=".$phonenumber."&udid=".$wa->encryptPassword();
-$content = file_get_contents($url);
-if (stristr($content,'status="ok"') === false) {
-    echo "Wrong Password\n";
-    exit(0);
-}
+$wa = new WhatsProt($sender, $imei, $nickname, TRUE);
 
 $wa->Connect();
 $wa->Login();
