@@ -153,6 +153,28 @@ Available events and arguments
   - name: The sender name.
   - contact: The vCard contact name.
   - vcard: The vCard.
+- onLocation:
+  - phone: The user phone number including the country code.
+  - from: The sender phone number.
+  - msgid: The message id.
+  - type: The message type.
+  - time: The unix time when send message notification.
+  - name: The sender name.
+  - longitude: The location longitude.
+  - latitude: The location latitude.
+  - thumbnail: The base64_encode location image thumbnail.
+- onPlace:
+  - phone: The user phone number including the country code.
+  - from: The sender phone number.
+  - msgid: The message id.
+  - type: The message type.
+  - time: The unix time when send message notification.
+  - name: The sender name.
+  - place_name: The place name.
+  - longitude: The location longitude.
+  - latitude: The location latitude.
+  - url: The place url.
+  - thumbnail: The base64_encode place image thumbnail.
 - onMessageReceivedServer:
   - phone: The user phone number including the country code.
   - from: The sender phone number.

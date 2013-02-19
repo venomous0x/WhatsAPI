@@ -408,6 +408,26 @@ class WhatsProt
                                 $node->_children[2]->_children[0]->getAttribute('name'),
                                 $node->_children[2]->_children[0]->_data
                             ));
+                        } elseif ($node->_children[2]->getAttribute('type') == 'location' && !isset($node->_children[2]->_attributeHash['url'])) {
+                            $this->eventManager()->fire('onLocation', array(
+                                $this->_phoneNumber,
+                                $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
+                                $node->_children[0]->getAttribute('name'),
+                                $node->_children[2]->getAttribute('longitude'),
+                                $node->_children[2]->getAttribute('latitude'),
+                                $node->_children[2]->_data
+                            ));
+                        } elseif ($node->_children[2]->getAttribute('type') == 'location' && isset($node->_children[2]->_attributeHash['url'])) {
+                            $this->eventManager()->fire('onPlace', array(
+                                $this->_phoneNumber,
+                                $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
+                                $node->_children[0]->getAttribute('name'),
+                                $node->_children[2]->getAttribute('name'),
+                                $node->_children[2]->getAttribute('longitude'),
+                                $node->_children[2]->getAttribute('latitude'),
+                                $node->_children[2]->getAttribute('url'),
+                                $node->_children[2]->_data
+                            ));
                         }
                     }
                     if ($node->getChild('x') != NULL) {
