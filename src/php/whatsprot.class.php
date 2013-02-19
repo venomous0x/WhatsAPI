@@ -382,6 +382,23 @@ class WhatsProt
                                     $node->_children[2]->getAttribute('height'),
                                     $node->_children[2]->_data
                                 ));
+                            } elseif ($node->_children[2]->getAttribute('type') == 'video') {
+                                $this->eventManager()->fire('onVideo', array(
+                                    $this->_phoneNumber,
+                                    $node->_attributeHash['from'],
+                                    $node->_attributeHash['id'],
+                                    $node->_attributeHash['type'],
+                                    $node->_attributeHash['t'],
+                                    $node->_children[0]->getAttribute('name'),
+                                    $node->_children[2]->getAttribute('url'),
+                                    $node->_children[2]->getAttribute('file'),
+                                    $node->_children[2]->getAttribute('size'),
+                                    $node->_children[2]->getAttribute('mimetype'),
+                                    $node->_children[2]->getAttribute('duration'),
+                                    $node->_children[2]->getAttribute('vcodec'),
+                                    $node->_children[2]->getAttribute('acodec'),
+                                    $node->_children[2]->_data
+                                ));
                             }
                         }
                         if ($node->getChild('x') != NULL) {
@@ -670,12 +687,12 @@ class WhatsProt
      * @param $to
      *   The reciepient to send.
      * @param $file
-     *   The url/uri to the MP4 video.
+     *   The url/uri to the MP4/MOV video.
      */
     public function MessageVideo($to, $file)
     {
         $file_parts = pathinfo($file);
-        if ($file_parts['extensions'] != 'mp4') {
+        if ($file_parts['extensions'] != 'mp4' || $file_parts['extensions'] != 'mov') {
             throw new Exception('Unsupported video format.');
         } elseif ($image = file_get_contents($file)) {
             $fileName = basename($file);

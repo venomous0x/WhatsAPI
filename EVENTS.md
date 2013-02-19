@@ -107,13 +107,28 @@ Available events and arguments
   - time: The unix time when send message notification.
   - name: The sender name.
   - size: The image size.
-  - url: The url to bigger version image.
+  - url: The url to bigger image version.
   - file: The image name.
-  - mimetype: The mime type image.
-  - filehash: The file hash image.
+  - mimetype: The image mime type.
+  - filehash: The image file hash.
   - width: The image width.
   - height: The image height.
-  - thumbnail: The base64_encode thumbnail image.
+  - thumbnail: The base64_encode image thumbnail.
+- onVideo:
+  - phone: The user phone number including the country code.
+  - from: The sender phone number.
+  - msgid: The message id.
+  - type: The message type.
+  - time: The unix time when send message notification.
+  - name: The sender name.
+  - url: The url to bigger video version.
+  - file: The video name.
+  - size: The video size.
+  - mimetype: The video mime type.
+  - duration: The video duration.
+  - vcodec: The video codec.
+  - acodec: The audio codec.
+  - thumbnail: The base64_encode video thumbnail.
 - onMessageReceivedServer:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
