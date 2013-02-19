@@ -66,6 +66,8 @@ class WhatsProt
     protected $_outQueue = array();
     // Id to the last message sent.
     protected $_lastId = FALSE;
+    // Id to the last grouip id created.
+    protected $_lastGroupId = FALSE;
     // Message counter for auto-id.
     protected $_msgCounter = 1;
     // A socket to connect to the whatsapp network.
@@ -456,6 +458,13 @@ class WhatsProt
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "query") == 0) {
                     array_push($this->_messageQueue, $node);
                 }
+                if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "group") == 0) {
+                    $this->_lastGroupId = $node->_children[0]->_attributeHash['id'];
+                    $this->eventManager()->fire('onCreateGroupChat', array(
+                        $this->_phoneNumber,
+                        $node->_children[0]->_attributeHash['id']
+                    ));
+                }
                 $node = $this->_reader->nextTree();
             }
         } catch (IncompleteMessageException $e) {
@@ -574,6 +583,19 @@ class WhatsProt
         } while (!$received);
     }
 
+
+    /**
+     * Wait for group notification.
+     */
+    public function WaitforGroupId()
+    {
+        $this->_lastGroupId = FALSE;
+        do {
+            $this->PollMessages();
+            $msgs = $this->GetMessages();
+        } while (!$this->_lastGroupId);
+    }
+
     /**
      * Send presence status.
      *
@@ -618,7 +640,7 @@ class WhatsProt
      * Send the composing message status. When typing a message.
      *
      * @param $to
-     *   The reciepient to send.	  	
+     *   The reciepient to send.
      */
     public function sendComposingMessage($to)
     {
@@ -645,7 +667,7 @@ class WhatsProt
      * Send the composing message status. When make a pause typing a message.
      *
      * @param $to
-     *   The reciepient to send.	  	
+     *   The reciepient to send.
      */
     public function sendPausedMessage($to)
     {
@@ -666,6 +688,95 @@ class WhatsProt
 
         $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
         $this->sendNode($messageNode);
+    }
+
+    /**
+     * Create a group chat.
+     *
+     * @param string $subject
+     *   The reciepient to send.
+     * @param array $participants
+     *   An array with the participans.
+     *
+     * @return string
+     *   The group ID.
+     */
+    public function createGroupChat($subject, $participants)
+    {
+        $groupHash = array();
+        $groupHash["xmlns"] = "w:g";
+        $groupHash["action"] = "create";
+        $groupHash["subject"] = $subject;
+        $group = new ProtocolNode("group", $groupHash, NULL, "");
+
+        $setHash = array();
+        $setHash["id"] = $this->msgId();
+        $setHash["type"] = "set";
+        $setHash["to"] = WhatsProt::_whatsAppGroupServer;
+        $groupNode = new ProtocolNode("iq", $setHash, array($group), "");
+
+        $this->sendNode($groupNode);
+        $this->WaitforGroupId();
+        $groupId = $this->_lastGroupId;
+        $this->addGroupParticipants($groupId, $participants);
+        return $groupId;
+    }
+
+    /**
+     * Add participants to a group.
+     *
+     * @param string $groupId
+     *   The group ID.
+     * @param array $participants
+     *   An array with the participans.
+     */
+    public function addGroupParticipants($groupId, $participants)
+    {
+        $this->SendActionGroupParticipants($groupId, $participants, 'add');
+    }
+
+    /**
+     * Remove participants from a group.
+     *
+     * @param string $groupId
+     *   The group ID.
+     * @param array $participants
+     *   An array with the participans.
+     */
+    public function removeGroupParticipants($groupId, $participants)
+    {
+        $this->SendActionGroupParticipants($groupId, $participants, 'remove');
+    }
+
+    /**
+     * Sent anctio to participants of a group.
+     *
+     * @param string $groupId
+     *   The group ID.
+     * @param array $participants
+     *   An array with the participans.
+     * @param string $tag
+     *   The tag action.
+     */
+    protected function sendActionGroupParticipants($groupId, $participants, $tag)
+    {
+        $Participants = array();
+        foreach($participants as $participant) {
+            $Participants[] = new ProtocolNode("participant", array("jid" => $participant . '@' . WhatsProt::_whatsAppServer), NULL, "");
+        }
+
+        $childHash = array();
+        $childHash["xmlns"] = "w:g";
+        $child = new ProtocolNode($tag, $childHash, $Participants, "");
+
+        $setHash = array();
+        $setHash["id"] = $this->msgId();
+        $setHash["type"] = "set";
+        $setHash["to"] = $groupId . '@' . WhatsProt::_whatsAppGroupServer;
+
+        $node = new ProtocolNode("iq", $setHash, array($child), "");
+
+        $this->sendNode($node);
     }
 
     /**

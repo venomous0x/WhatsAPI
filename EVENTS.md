@@ -91,6 +91,9 @@ Available events and arguments
   - msgid: The message id.
   - type: The message type.
   - time: The unix time when send message notification.
+- onCreateGroupChat:
+  - phone: The user phone number including the country code.
+  - gId: The group id.
 - onGetMessage:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
