@@ -350,7 +350,7 @@ class WhatsProt
                         ));
                     }
                     if ($node->getChild('notify') != NULL && $node->_children[0]->getAttribute('name') != '' && $node->getChild('body') != NULL) {
-                        $this->eventManager()->fire('onMessage', array(
+                        $this->eventManager()->fire('onGetMessage', array(
                             $this->_phoneNumber,
                             $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
                             $node->_children[0]->getAttribute('name'),
@@ -359,7 +359,7 @@ class WhatsProt
                     }
                     if ($node->getChild('notify') != NULL && $node->_children[0]->getAttribute('name') != '' && $node->getChild('media') != NULL) {
                         if ($node->_children[2]->getAttribute('type') == 'image') {
-                            $this->eventManager()->fire('onImage', array(
+                            $this->eventManager()->fire('onGetImage', array(
                                 $this->_phoneNumber,
                                 $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
                                 $node->_children[0]->getAttribute('name'),
@@ -373,7 +373,7 @@ class WhatsProt
                                 $node->_children[2]->_data
                             ));
                         } elseif ($node->_children[2]->getAttribute('type') == 'video') {
-                            $this->eventManager()->fire('onVideo', array(
+                            $this->eventManager()->fire('onGetVideo', array(
                                 $this->_phoneNumber,
                                 $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
                                 $node->_children[0]->getAttribute('name'),
@@ -388,7 +388,7 @@ class WhatsProt
                                 $node->_children[2]->_data
                             ));
                         } elseif ($node->_children[2]->getAttribute('type') == 'audio') {
-                            $this->eventManager()->fire('onAudio', array(
+                            $this->eventManager()->fire('onGetAudio', array(
                                 $this->_phoneNumber,
                                 $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
                                 $node->_children[0]->getAttribute('name'),
@@ -401,7 +401,7 @@ class WhatsProt
                                 $node->_children[2]->getAttribute('acodec'),
                             ));
                         } elseif ($node->_children[2]->getAttribute('type') == 'vcard') {
-                            $this->eventManager()->fire('onvCard', array(
+                            $this->eventManager()->fire('onGetvCard', array(
                                 $this->_phoneNumber,
                                 $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
                                 $node->_children[0]->getAttribute('name'),
@@ -409,7 +409,7 @@ class WhatsProt
                                 $node->_children[2]->_children[0]->_data
                             ));
                         } elseif ($node->_children[2]->getAttribute('type') == 'location' && !isset($node->_children[2]->_attributeHash['url'])) {
-                            $this->eventManager()->fire('onLocation', array(
+                            $this->eventManager()->fire('onGetLocation', array(
                                 $this->_phoneNumber,
                                 $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
                                 $node->_children[0]->getAttribute('name'),
@@ -418,7 +418,7 @@ class WhatsProt
                                 $node->_children[2]->_data
                             ));
                         } elseif ($node->_children[2]->getAttribute('type') == 'location' && isset($node->_children[2]->_attributeHash['url'])) {
-                            $this->eventManager()->fire('onPlace', array(
+                            $this->eventManager()->fire('onGetPlace', array(
                                 $this->_phoneNumber,
                                 $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
                                 $node->_children[0]->getAttribute('name'),

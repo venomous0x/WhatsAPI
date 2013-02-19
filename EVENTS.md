@@ -91,7 +91,7 @@ Available events and arguments
   - msgid: The message id.
   - type: The message type.
   - time: The unix time when send message notification.
-- onMessage:
+- onGetMessage:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
   - msgid: The message id.
@@ -99,7 +99,7 @@ Available events and arguments
   - time: The unix time when send message notification.
   - name: The sender name.
   - message: The message.
-- onImage:
+- onGetImage:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
   - msgid: The message id.
@@ -114,7 +114,7 @@ Available events and arguments
   - width: The image width.
   - height: The image height.
   - thumbnail: The base64_encode image thumbnail.
-- onVideo:
+- onGetVideo:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
   - msgid: The message id.
@@ -130,7 +130,7 @@ Available events and arguments
   - vcodec: The video codec.
   - acodec: The audio codec.
   - thumbnail: The base64_encode video thumbnail.
-- onAudio:
+- onGetAudio:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
   - msgid: The message id.
@@ -144,7 +144,7 @@ Available events and arguments
   - filehash: The audio file hash.
   - duration: The audio duration.
   - acodec: The audio codec.
-- onvCard:
+- onGetvCard:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
   - msgid: The message id.
@@ -153,7 +153,7 @@ Available events and arguments
   - name: The sender name.
   - contact: The vCard contact name.
   - vcard: The vCard.
-- onLocation:
+- onGetLocation:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
   - msgid: The message id.
@@ -163,7 +163,7 @@ Available events and arguments
   - longitude: The location longitude.
   - latitude: The location latitude.
   - thumbnail: The base64_encode location image thumbnail.
-- onPlace:
+- onGetPlace:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
   - msgid: The message id.
