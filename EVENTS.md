@@ -94,6 +94,15 @@ Available events and arguments
 - onCreateGroupChat:
   - phone: The user phone number including the country code.
   - gId: The group id.
+- onAddParticipantGroup:
+  - phone: The user phone number including the country code.
+  - groupId: The groupId.
+  - participant: The participant phone number including the country code.
+_ onRemoveParticipantGroup:
+  - phone: The user phone number including the country code.
+  - groupId: The groupId.
+  - participant: The participant phone number including the country code.
+  - author: The author phone number including the country code.
 - onGetMessage:
   - phone: The user phone number including the country code.
   - from: The sender phone number.

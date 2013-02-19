@@ -451,6 +451,20 @@ class WhatsProt
                         $node->_attributeHash['from'], $node->_attributeHash['type']
                     ));
                 }
+                if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") !== FALSE && isset($node->_attributeHash['type'])) {
+                    $groupId = reset(explode('@', $node->_attributeHash['from']));
+                    if (isset($node->_attributeHash['add'])) {
+                        $this->eventManager()->fire('onAddParticipantGroup', array(
+                            $this->_phoneNumber,
+                            $groupId, reset(explode('@', $node->_attributeHash['add']))
+                        ));
+                    } elseif (isset($node->_attributeHash['remove'])) {
+                        $this->eventManager()->fire('onRemoveParticipantGroup', array(
+                            $this->_phoneNumber,
+                            $groupId, reset(explode('@', $node->_attributeHash['remove'])), reset(explode('@', $node->_attributeHash['author']))
+                        ));
+                    }
+                }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "get") == 0 && strcmp($node->_children[0]->_tag, "ping") == 0) {
                     $this->eventManager()->fire('onPing', array($this->_phoneNumber, $node->_attributeHash['id']));
                     $this->Pong($node->_attributeHash['id']);
