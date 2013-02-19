@@ -144,6 +144,15 @@ Available events and arguments
   - filehash: The audio file hash.
   - duration: The audio duration.
   - acodec: The audio codec.
+- onvCard:
+  - phone: The user phone number including the country code.
+  - from: The sender phone number.
+  - msgid: The message id.
+  - type: The message type.
+  - time: The unix time when send message notification.
+  - name: The sender name.
+  - contact: The vCard contact name.
+  - vcard: The vCard.
 - onMessageReceivedServer:
   - phone: The user phone number including the country code.
   - from: The sender phone number.
@@ -156,6 +165,10 @@ Available events and arguments
   - msgid: The message id.
   - type: The message type.
   - time: The unix time when send message notification.
+- onGetPresence:
+  - phone: The user phone number including the country code.
+  - from: The sender phone number.
+  - type: The presence type.
 
 How to binds a callback to a event
 ==================================

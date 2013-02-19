@@ -334,109 +334,100 @@ class WhatsProt
                     if ($this->_newmsgBind && $node->getChild('body')) {
                         $this->_newmsgBind->process($node);
                     }
-                    if ($node->_tag == "message") {
-                        if ($node->getChild('composing') != NULL) {
-                            $this->eventManager()->fire('onUserComposing', array(
+                    if ($node->getChild('composing') != NULL) {
+                        $this->eventManager()->fire('onUserComposing', array(
+                            $this->_phoneNumber,
+                            $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t']
+                        ));
+                    }
+                    if ($node->getChild('paused') != NULL) {
+                        $this->eventManager()->fire('onUserPaused', array(
+                            $this->_phoneNumber,
+                            $node->_attributeHash['from'],
+                            $node->_attributeHash['id'],
+                            $node->_attributeHash['type'],
+                            $node->_attributeHash['t']
+                        ));
+                    }
+                    if ($node->getChild('notify') != NULL && $node->_children[0]->getAttribute('name') != '' && $node->getChild('body') != NULL) {
+                        $this->eventManager()->fire('onMessage', array(
+                            $this->_phoneNumber,
+                            $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
+                            $node->_children[0]->getAttribute('name'),
+                            $node->_children[2]->_data
+                        ));
+                    }
+                    if ($node->getChild('notify') != NULL && $node->_children[0]->getAttribute('name') != '' && $node->getChild('media') != NULL) {
+                        if ($node->_children[2]->getAttribute('type') == 'image') {
+                            $this->eventManager()->fire('onImage', array(
                                 $this->_phoneNumber,
-                                $node->_attributeHash['from'],
-                                $node->_attributeHash['id'],
-                                $node->_attributeHash['type'],
-                                $node->_attributeHash['t']
-                            ));
-                        }
-                        if ($node->getChild('paused') != NULL) {
-                            $this->eventManager()->fire('onUserPaused', array(
-                                $this->_phoneNumber,
-                                $node->_attributeHash['from'],
-                                $node->_attributeHash['id'],
-                                $node->_attributeHash['type'],
-                                $node->_attributeHash['t']
-                            ));
-                        }
-                        if ($node->getChild('notify') != NULL && $node->_children[0]->getAttribute('name') != '' && $node->getChild('body') != NULL) {
-                            $this->eventManager()->fire('onMessage', array(
-                                $this->_phoneNumber,
-                                $node->_attributeHash['from'],
-                                $node->_attributeHash['id'],
-                                $node->_attributeHash['type'],
-                                $node->_attributeHash['t'],
+                                $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
                                 $node->_children[0]->getAttribute('name'),
+                                $node->_children[2]->getAttribute('size'),
+                                $node->_children[2]->getAttribute('url'),
+                                $node->_children[2]->getAttribute('file'),
+                                $node->_children[2]->getAttribute('mimetype'),
+                                $node->_children[2]->getAttribute('filehash'),
+                                $node->_children[2]->getAttribute('width'),
+                                $node->_children[2]->getAttribute('height'),
                                 $node->_children[2]->_data
                             ));
-                        }
-                        if ($node->getChild('notify') != NULL && $node->_children[0]->getAttribute('name') != '' && $node->getChild('media') != NULL) {
-                            if ($node->_children[2]->getAttribute('type') == 'image') {
-                                $this->eventManager()->fire('onImage', array(
-                                    $this->_phoneNumber,
-                                    $node->_attributeHash['from'],
-                                    $node->_attributeHash['id'],
-                                    $node->_attributeHash['type'],
-                                    $node->_attributeHash['t'],
-                                    $node->_children[0]->getAttribute('name'),
-                                    $node->_children[2]->getAttribute('size'),
-                                    $node->_children[2]->getAttribute('url'),
-                                    $node->_children[2]->getAttribute('file'),
-                                    $node->_children[2]->getAttribute('mimetype'),
-                                    $node->_children[2]->getAttribute('filehash'),
-                                    $node->_children[2]->getAttribute('width'),
-                                    $node->_children[2]->getAttribute('height'),
-                                    $node->_children[2]->_data
-                                ));
-                            } elseif ($node->_children[2]->getAttribute('type') == 'video') {
-                                $this->eventManager()->fire('onVideo', array(
-                                    $this->_phoneNumber,
-                                    $node->_attributeHash['from'],
-                                    $node->_attributeHash['id'],
-                                    $node->_attributeHash['type'],
-                                    $node->_attributeHash['t'],
-                                    $node->_children[0]->getAttribute('name'),
-                                    $node->_children[2]->getAttribute('url'),
-                                    $node->_children[2]->getAttribute('file'),
-                                    $node->_children[2]->getAttribute('size'),
-                                    $node->_children[2]->getAttribute('mimetype'),
-                                    $node->_children[2]->getAttribute('filehash'),
-                                    $node->_children[2]->getAttribute('duration'),
-                                    $node->_children[2]->getAttribute('vcodec'),
-                                    $node->_children[2]->getAttribute('acodec'),
-                                    $node->_children[2]->_data
-                                ));
-                            } elseif ($node->_children[2]->getAttribute('type') == 'audio') {
-                                $this->eventManager()->fire('onAudio', array(
-                                    $this->_phoneNumber,
-                                    $node->_attributeHash['from'],
-                                    $node->_attributeHash['id'],
-                                    $node->_attributeHash['type'],
-                                    $node->_attributeHash['t'],
-                                    $node->_children[0]->getAttribute('name'),
-                                    $node->_children[2]->getAttribute('size'),
-                                    $node->_children[2]->getAttribute('url'),
-                                    $node->_children[2]->getAttribute('file'),
-                                    $node->_children[2]->getAttribute('mimetype'),
-                                    $node->_children[2]->getAttribute('filehash'),
-                                    $node->_children[2]->getAttribute('duration'),
-                                    $node->_children[2]->getAttribute('acodec'),
-                                ));
-                            }
-                        }
-                        if ($node->getChild('x') != NULL) {
-                            $this->eventManager()->fire('onMessageReceivedServer', array(
+                        } elseif ($node->_children[2]->getAttribute('type') == 'video') {
+                            $this->eventManager()->fire('onVideo', array(
                                 $this->_phoneNumber,
-                                $node->_attributeHash['from'],
-                                $node->_attributeHash['id'],
-                                $node->_attributeHash['type'],
-                                $node->_attributeHash['t']
+                                $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
+                                $node->_children[0]->getAttribute('name'),
+                                $node->_children[2]->getAttribute('url'),
+                                $node->_children[2]->getAttribute('file'),
+                                $node->_children[2]->getAttribute('size'),
+                                $node->_children[2]->getAttribute('mimetype'),
+                                $node->_children[2]->getAttribute('filehash'),
+                                $node->_children[2]->getAttribute('duration'),
+                                $node->_children[2]->getAttribute('vcodec'),
+                                $node->_children[2]->getAttribute('acodec'),
+                                $node->_children[2]->_data
                             ));
-                        }
-                        if ($node->getChild('received') != NULL) {
-                            $this->eventManager()->fire('onMessageReceivedClient', array(
+                        } elseif ($node->_children[2]->getAttribute('type') == 'audio') {
+                            $this->eventManager()->fire('onAudio', array(
                                 $this->_phoneNumber,
-                                $node->_attributeHash['from'],
-                                $node->_attributeHash['id'],
-                                $node->_attributeHash['type'],
-                                $node->_attributeHash['t']
+                                $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
+                                $node->_children[0]->getAttribute('name'),
+                                $node->_children[2]->getAttribute('size'),
+                                $node->_children[2]->getAttribute('url'),
+                                $node->_children[2]->getAttribute('file'),
+                                $node->_children[2]->getAttribute('mimetype'),
+                                $node->_children[2]->getAttribute('filehash'),
+                                $node->_children[2]->getAttribute('duration'),
+                                $node->_children[2]->getAttribute('acodec'),
+                            ));
+                        } elseif ($node->_children[2]->getAttribute('type') == 'vcard') {
+                            $this->eventManager()->fire('onvCard', array(
+                                $this->_phoneNumber,
+                                $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t'],
+                                $node->_children[0]->getAttribute('name'),
+                                $node->_children[2]->_children[0]->getAttribute('name'),
+                                $node->_children[2]->_children[0]->_data
                             ));
                         }
                     }
+                    if ($node->getChild('x') != NULL) {
+                        $this->eventManager()->fire('onMessageReceivedServer', array(
+                            $this->_phoneNumber,
+                            $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t']
+                        ));
+                    }
+                    if ($node->getChild('received') != NULL) {
+                        $this->eventManager()->fire('onMessageReceivedClient', array(
+                            $this->_phoneNumber,
+                            $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t']
+                        ));
+                    }
+                }
+                if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") !== FALSE && isset($node->_attributeHash['type'])) {
+                    $this->eventManager()->fire('onGetPresence', array(
+                        $this->_phoneNumber,
+                        $node->_attributeHash['from'], $node->_attributeHash['type']
+                    ));
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "get") == 0 && strcmp($node->_children[0]->_tag, "ping") == 0) {
                     $this->eventManager()->fire('onPing', array($this->_phoneNumber, $node->_attributeHash['id']));
