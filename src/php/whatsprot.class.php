@@ -444,6 +444,14 @@ class WhatsProt
                             $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t']
                         ));
                     }
+                    if (strcmp($node->_attributeHash['type'], "subject") == 0) {print_r($node);
+                        $this->eventManager()->fire('onGetGroupSubject', array(
+                            $this->_phoneNumber,
+                            reset(explode('@', $node->_attributeHash['from'])), $node->_attributeHash['t'], reset(explode('@', $node->_attributeHash['author'])),
+                            $node->_children[0]->getAttribute('name'),
+                            $node->_children[2]->_data,
+                        ));
+                    }
                 }
                 if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") !== FALSE && isset($node->_attributeHash['type'])) {
                     $this->eventManager()->fire('onGetPresence', array(

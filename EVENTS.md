@@ -94,6 +94,14 @@ Available events and arguments
 - onCreateGroupChat:
   - phone: The user phone number including the country code.
   - gId: The group id.
+- onGetGroupSubject:
+  - phone: The user phone number including the country code.
+  - gId: The group id.
+  - time: The unix time when send subject.
+  - author: The author phone number including the country code.
+  - participant: The participant phone number including the country code.
+  - name: The sender name.
+  - subject: The subject.
 - onAddParticipantGroup:
   - phone: The user phone number including the country code.
   - groupId: The groupId.
