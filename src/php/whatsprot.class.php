@@ -353,6 +353,17 @@ class WhatsProt
                                 $node->_attributeHash['t']
                             ));
                         }
+                        if ($node->getChild('notify') != NULL && $node->_children[0]->getAttribute('name') != '' && $node->getChild('body') != NULL) {
+                            $this->eventManager()->fire('onMessage', array(
+                                $this->_phoneNumber,
+                                $node->_attributeHash['from'],
+                                $node->_attributeHash['id'],
+                                $node->_attributeHash['type'],
+                                $node->_attributeHash['t'],
+                                $node->_children[0]->getAttribute('name'),
+                                $node->_children[2]->_data
+                            ));
+                        }
                         if ($node->getChild('x') != NULL) {
                             $this->eventManager()->fire('onMessageReceivedServer', array(
                                 $this->_phoneNumber,
