@@ -143,6 +143,7 @@ Available events and arguments
   - mimetype: The audio mime type.
   - filehash: The audio file hash.
   - duration: The audio duration.
+  - acodec: The audio codec.
 - onMessageReceivedServer:
   - phone: The user phone number including the country code.
   - from: The sender phone number.

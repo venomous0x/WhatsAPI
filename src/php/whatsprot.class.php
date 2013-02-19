@@ -414,6 +414,7 @@ class WhatsProt
                                     $node->_children[2]->getAttribute('mimetype'),
                                     $node->_children[2]->getAttribute('filehash'),
                                     $node->_children[2]->getAttribute('duration'),
+                                    $node->_children[2]->getAttribute('acodec'),
                                 ));
                             }
                         }
