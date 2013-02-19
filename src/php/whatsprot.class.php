@@ -617,17 +617,22 @@ class WhatsProt
     /**
      * Send the composing message status. When typing a message.
      *
-     * @param $msg	  	
-     *   The ProtocolTreeNode that contains the message.	  	
+     * @param $to
+     *   The reciepient to send.	  	
      */
-    public function sendComposingMessage($msg)
+    public function sendComposingMessage($to)
     {
         $comphash = array();
         $comphash['xmlns'] = 'http://jabber.org/protocol/chatstates';
         $compose = new ProtocolNode("composing", $comphash, NULL, "");
 
+        $whatsAppServer = WhatsProt::_whatsAppServer;
+        if (strpos($to, "-") !== FALSE) {
+            $whatsAppServer = WhatsProt::_whatsAppGroupServer;
+        }
+
         $messageHash = array();
-        $messageHash["to"] = $msg->getAttribute("from");
+        $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $this->msgId();
         $messageHash["t"] = time();
@@ -639,17 +644,22 @@ class WhatsProt
     /**
      * Send the composing message status. When make a pause typing a message.
      *
-     * @param $msg	  	
-     *   The ProtocolTreeNode that contains the message.	  	
+     * @param $to
+     *   The reciepient to send.	  	
      */
-    public function sendPausedMessage($msg)
+    public function sendPausedMessage($to)
     {
         $comphash = array();
         $comphash['xmlns'] = 'http://jabber.org/protocol/chatstates';
         $compose = new ProtocolNode("paused", $comphash, NULL, "");
 
+        $whatsAppServer = WhatsProt::_whatsAppServer;
+        if (strpos($to, "-") !== FALSE) {
+            $whatsAppServer = WhatsProt::_whatsAppGroupServer;
+        }
+
         $messageHash = array();
-        $messageHash["to"] = $msg->getAttribute("from");
+        $messageHash["to"] = $to . "@" . $whatsAppServer;
         $messageHash["type"] = "chat";
         $messageHash["id"] = $this->msgId();
         $messageHash["t"] = time();
