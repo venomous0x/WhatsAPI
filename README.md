@@ -1,3 +1,7 @@
+### Foreword
+F*** spammers. If you're one of them, or you operate shady marketing campaigns, please get lost.
+
+
 For recent changes, refer to the [Change Log](https://github.com/venomous0x/WhatsAPI/blob/master/CHANGELOG.md)
 
 # WhatsAPI
