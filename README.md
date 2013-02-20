@@ -1,6 +1,3 @@
-###September 29 Note:
-> Development to be resumed, let's pretend that nothing was happened.
-
 For recent changes, refer to the [Change Log](https://github.com/venomous0x/WhatsAPI/blob/master/CHANGELOG.md)
 
 # WhatsAPI
@@ -82,10 +79,6 @@ With the sufficent permissions of course
 - **Android**: MD5 hash of reversed IMEI (Credit: [WhatsAPI Original Authors](https://github.com/venomous0x/WhatsAPI#venomous))
 - **iOS**: MD5 hash of the MAC address repeated twice (Credit: [Ezio Amodio](http://www.ezioamodio.it/?p=29))
 - **Windows Phone**: MD5 hash of reversed DeviceUniqueId (Credit: [Robe Fernández](http://blog-robefernandez.blogspot.com.es/2012/11/know-your-whatsapp-password-on-windows.html))
- 
-
-# Applications
-- [WhatsAppify](http://www.whatsappify.com/) (as of november 2012 closed beta. Only delivering WhatsApp messages to Telepienso customers when their parcel is assigned a tracking number.) 
 
 # NOTES
 
