@@ -862,8 +862,9 @@ class WhatsProt
      */
     public function MessageVideo($to, $file)
     {
-        $file_parts = pathinfo($file);
-        if ($file_parts['extensions'] != 'mp4' || $file_parts['extensions'] != 'mov') {
+        $extension        = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $allowedExtesions = array('mp4', 'mov');
+        if (!in_array($extension, $allowedExtesions)) {
             throw new Exception('Unsupported video format.');
         } elseif ($image = file_get_contents($file)) {
             $fileName = basename($file);
@@ -902,8 +903,9 @@ class WhatsProt
      */
     public function MessageAudio($to, $file)
     {
-        $file_parts = pathinfo($file);
-        if ($file_parts['extensions'] != '3gp' || $file_parts['extensions'] != 'caf') {
+        $extension        = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $allowedExtesions = array('3gp', 'caf');
+        if (!in_array($extension, $allowedExtesions)) {
             throw new Exception('Unsupported audio format.');
         } elseif ($image = file_get_contents($file)) {
             $fileName = basename($file);
