@@ -863,7 +863,7 @@ class WhatsProt
     public function MessageVideo($to, $file)
     {
         $file_parts = pathinfo($file);
-        if ($file_parts['extensions'] != 'mp4' || $file_parts['extensions'] != 'mov') {
+        if ($file_parts['extension'] != 'mp4' || $file_parts['extensions'] != 'mov') {
             throw new Exception('Unsupported video format.');
         } elseif ($image = file_get_contents($file)) {
             $fileName = basename($file);
