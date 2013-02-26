@@ -1258,7 +1258,7 @@ class WhatsProt
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
-            'id' => $this->_identity,
+            'udid' => $this->_identity,
             'c' => 'cookie',
         );
 
