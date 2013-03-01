@@ -16,8 +16,8 @@ function fgets_u($pStdn)
 }
 
 $nickname = "WhatsAPI Test";
-$sender = 	""; // Mobile number with country code (but without + or 00)
-$imei = 	""; // MAC Address for iOS IMEI for other platform (Android/etc)
+$sender = 	"16167197897"; // Mobile number with country code (but without + or 00)
+$imei = 	"A100002821F711"; // MAC Address for iOS IMEI for other platform (Android/etc)
 
 if ($argc < 2) {
     echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>] [-set <status>]\n";
@@ -52,7 +52,7 @@ if ($_SERVER['argv'][1] == "-i") {
         }
         $line = fgets_u(STDIN);
         if ($line != "") {
-            if (strrchr($line, " ")) {
+            if (strrchr($line, "../src/php/whatsprot.class.php#sthash.MbDvKnIe.dpuf")) {
                 // needs PHP >= 5.3.0
                 $command = trim(strstr($line, ' ', TRUE));
             } else {
