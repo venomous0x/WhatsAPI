@@ -339,14 +339,13 @@ class WhatsProt
                     if ($node->getChild('composing') != NULL) {
                         $this->eventManager()->fire('onUserComposing', array(
                             $this->_phoneNumber,
-                            $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t']
+                            $node->_attributeHash['from'], $node->_attributeHash['type'], $node->_attributeHash['t']
                         ));
                     }
                     if ($node->getChild('paused') != NULL) {
                         $this->eventManager()->fire('onUserPaused', array(
                             $this->_phoneNumber,
                             $node->_attributeHash['from'],
-                            $node->_attributeHash['id'],
                             $node->_attributeHash['type'],
                             $node->_attributeHash['t']
                         ));
