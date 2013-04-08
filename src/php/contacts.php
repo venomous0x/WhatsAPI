@@ -21,22 +21,22 @@
 //          array (size=3)
 //            'phonenumber' => string '31641xxxxxx' (length=11)
 //            'status' => string 'Hey there! I am using WhatsApp.' (length=31)
-//            'lastseen' => int 1365456759
+//            'lastupdate' => int 1365456759
 //        1 => 
 //          array (size=3)
 //            'phonenumber' => string '31629xxxxxx' (length=11)
 //            'status' => string 'Beschikbaar' (length=11)
-//            'lastseen' => int 1340793460
+//            'lastupdate' => int 1340793460
 //        2 => 
 //          array (size=3)
 //            'phonenumber' => string '31620xxxxxx' (length=11)
 //            'status' => string 'Online' (length=6)
-//            'lastseen' => int 1345740390
+//            'lastupdate' => int 1345740390
 //        3 => 
 //          array (size=3)
 //            'phonenumber' => string '31614xxxxxx' (length=11)
 //            'status' => string 'Here comes the kraken!' (length=22)
-//            'lastseen' => int 1362736455
+//            'lastupdate' => int 1362736455
 //
 //
 class WhatsAppContactSync
@@ -209,7 +209,7 @@ class WhatsAppContactSync
                 $_contact = array(
                     "phonenumber" => $contact->n,
                     "status" => $contact->s,
-                    "lastseen" => $contact->t
+                    "lastupdate" => $contact->t
                 );
                 $_contacts[] = $_contact;
             }
