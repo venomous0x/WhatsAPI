@@ -14,49 +14,30 @@
 //  "+31650568134" (uses specified country code [NL])
 //
 //
-//
+//this class will only return existing whatsapp accounts
 //return value on success example:
-//          [p] = provided phonenumber
-//          [n] = phonenumber used in whatsapp
-//          [s] = status
-//          [t] = last seen timestamp
-//          [w] = exists (0/1)
-//          object(stdClass)[2]
-//                public 'c' => 
-//                  array (size=5)
-//                    0 => 
-//                      object(stdClass)[3]
-//                        public 'p' => string '+31641xxxxxx' (length=12)
-//                        public 'n' => string '31641xxxxxx' (length=11)
-//                        public 's' => string 'Hey there! I am using WhatsApp.' (length=31)
-//                        public 't' => int 1365453801
-//                        public 'w' => int 1
-//                    1 => 
-//                      object(stdClass)[4]
-//                        public 'p' => string '+31629xxxxxx' (length=12)
-//                        public 'n' => string '31629xxxxxx' (length=11)
-//                        public 's' => string 'Beschikbaar' (length=11)
-//                        public 't' => int 1340793460
-//                        public 'w' => int 1
-//                    2 => 
-//                      object(stdClass)[5]
-//                        public 'p' => string '+31620xxxxxx' (length=12)
-//                        public 'n' => string '31620xxxxxx' (length=11)
-//                        public 's' => string 'Online' (length=6)
-//                        public 't' => int 1345740390
-//                        public 'w' => int 1
-//                    3 => 
-//                      object(stdClass)[6]
-//                        public 'p' => string '+31614xxxxxx' (length=12)
-//                        public 'n' => string '31614xxxxxx' (length=11)
-//                        public 's' => string 'Here comes the kraken!' (length=22)
-//                        public 't' => int 1362736455
-//                        public 'w' => int 1
-//                    4 => 
-//                      object(stdClass)[7]
-//                        public 'p' => string '+31650568134' (length=12)
-//                        public 'n' => string '31650568134' (length=11)
-//                        public 'w' => int 0
+//     array (size=4)
+//        0 => 
+//          array (size=3)
+//            'phonenumber' => string '31641xxxxxx' (length=11)
+//            'status' => string 'Hey there! I am using WhatsApp.' (length=31)
+//            'lastseen' => int 1365456759
+//        1 => 
+//          array (size=3)
+//            'phonenumber' => string '31629xxxxxx' (length=11)
+//            'status' => string 'Beschikbaar' (length=11)
+//            'lastseen' => int 1340793460
+//        2 => 
+//          array (size=3)
+//            'phonenumber' => string '31620xxxxxx' (length=11)
+//            'status' => string 'Online' (length=6)
+//            'lastseen' => int 1345740390
+//        3 => 
+//          array (size=3)
+//            'phonenumber' => string '31614xxxxxx' (length=11)
+//            'status' => string 'Here comes the kraken!' (length=22)
+//            'lastseen' => int 1362736455
+//
 //
 class WhatsAppContactSync
 {
@@ -190,7 +171,7 @@ class WhatsAppContactSync
             $result = $this->_processCurlResponse($result);
             if(isset($result["obj"]))
             {
-                return($result["obj"]);
+                return($this->_processJSONResponse($result["obj"]));
             }
             elseif(isset($result["message"]))
             {
@@ -214,6 +195,26 @@ class WhatsAppContactSync
         {
             return false;
         }
+    }
+    
+    protected function _processJSONResponse($json)
+    {
+        //process decoded JSON object
+        $contacts = $json->c;
+        $_contacts = array();
+        foreach($contacts as $contact)
+        {
+            if($contact->w == 1)
+            {
+                $_contact = array(
+                    "phonenumber" => $contact->n,
+                    "status" => $contact->s,
+                    "lastseen" => $contact->t
+                );
+                $_contacts[] = $_contact;
+            }
+        }
+        return $_contacts;
     }
 }
 ?>
