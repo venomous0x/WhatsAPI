@@ -2,9 +2,12 @@
 //ported from yowsup
 //
 //usage:
+//$wasync = new WhatsAppContactSync($username, $password, contacts);
+//$wacontacts = $wasync->executeSync();
+//
 //$username = phonenumber (*see NOTE*)
 //$password = base64 encoded password
-//$contacts = array of phonenumbers
+//$contact = single phonenumber or array of phonenumbers
 //
 //NOTE:
 //contact phonenumber must be either without cc or with cc and leading +
@@ -142,11 +145,16 @@ class WhatsAppContactSync
         return $return;
     }
     
-    public function __construct($username, $password, $contacts = array())
+    public function __construct($username, $password, $contact)
     {
         $this->_username = $username;
         $this->_password = base64_decode($password);
-        $this->_contacts = $contacts;
+        if(!is_array($contact))
+        {
+            //single contact
+            $contact = array($contact);
+        }
+        $this->_contacts = $contact;
     }
     
     public function executeSync()
