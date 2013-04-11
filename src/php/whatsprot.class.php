@@ -329,7 +329,12 @@ class WhatsProt
                 }
                 if (strcmp($node->_tag, "message") == 0) {
                     array_push($this->_messageQueue, $node);
-                    $this->sendMessageReceived($node);
+                    
+                    //do not send received confirmation if sender is yourself
+                    if (!((reset(explode('@',$node->_attributeHash['from']))==$this->_phoneNumber) && ($node->getChild('received') != NULL))){         
+                        $this->sendMessageReceived($node);
+                    }
+                    
                     if ($node->hasChild('x') && $this->_lastId == $node->getAttribute('id')) {
                         $this->sendNext();
                     }
