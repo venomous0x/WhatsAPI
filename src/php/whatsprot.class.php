@@ -100,7 +100,7 @@ class WhatsProt
      * @param $debug
      *   Debug on or off, false by default.
      */
-    public function __construct($Number, $identity, $Nickname = "", $debug = FALSE)
+    public function __construct($Number, $identity, $Nickname, $debug = FALSE)
     {
         $this->_debug = $debug;
         $dict = getDictionary();
@@ -695,10 +695,7 @@ class WhatsProt
     {
         $presence = array();
         $presence['type'] = $type;
-        if($this->_name)
-        {//optional
-            $presence['name'] = $this->_name;
-        }
+        $presence['name'] = $this->_name;
         $node = new ProtocolNode("presence", $presence, NULL, "");
         $this->sendNode($node);
         $this->eventManager()->fire('onSendPresence', array($this->_phoneNumber, $presence['type'], @$presence['name']));
