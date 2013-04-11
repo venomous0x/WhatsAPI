@@ -478,8 +478,13 @@ class WhatsProt
                     $this->eventManager()->fire('onPing', array($this->_phoneNumber, $node->_attributeHash['id']));
                     $this->Pong($node->_attributeHash['id']);
                 }
-                if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "query") == 0) {
-                    array_push($this->_messageQueue, $node);
+                if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0) {
+                    if (strcmp($node->_children[0]->_tag, "query") == 0) {
+                        array_push($this->_messageQueue, $node);
+                    }
+                    if (strcmp($node->_children[0]->_tag, "picture") == 0) {
+                        $this->processProfilePicture($node);
+                    }
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "group") == 0) {
                     $this->_lastGroupId = $node->_children[0]->_attributeHash['id'];
@@ -593,6 +598,56 @@ class WhatsProt
 
         return $ret;
     }
+    
+    /**
+     * Get profile picture of user
+     *
+     * @param $number
+     *  Number or JID
+     *  
+     * @param bool $large
+     *  Request large picture
+     */
+    public function GetProfilePicture($number, $large = false)
+    {
+        $hash = array();
+        $hash["xmlns"] = "w:profile:picture";
+        $hash["type"] = "image";
+        if(!$large)
+        {
+            $hash["type"] = "preview";
+        }
+        $picture = new ProtocolNode("picture", $hash, null, null);
+        
+        $hash = array();
+        $hash["id"] = $this->msgId();
+        $hash["type"] = "get";
+        $hash["to"] = $this->GetJID($number);
+        $node = new ProtocolNode("iq", $hash, array($picture), null);
+        $this->sendNode($node);
+    }
+    
+    /**
+     * Processes received picture node
+     *
+     * @param $node
+     *  ProtocolNode containing the picture
+     */
+    protected function processProfilePicture($node)
+    {
+        $pictureNode = $node->getChild("picture");
+        
+        if($pictureNode != null)
+        {
+            $data = $pictureNode->_data;
+            $fp = @fopen("pictures/" . $node->getAttribute("from") . ".jpg", "w");
+            if($fp)
+            {
+                fwrite($fp, $data);
+                fclose($fp);
+            }
+        }
+    }
 
     /**
      * Wait for message delivery notification.
@@ -640,10 +695,13 @@ class WhatsProt
     {
         $presence = array();
         $presence['type'] = $type;
-        $presence['name'] = $this->_name;
+        if($this->_name)
+        {//optional
+            $presence['name'] = $this->_name;
+        }
         $node = new ProtocolNode("presence", $presence, NULL, "");
         $this->sendNode($node);
-        $this->eventManager()->fire('onSendPresence', array($this->_phoneNumber, $presence['type'], $presence['name']));
+        $this->eventManager()->fire('onSendPresence', array($this->_phoneNumber, $presence['type'], @$presence['name']));
     }
     
     /**
