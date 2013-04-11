@@ -100,7 +100,7 @@ class WhatsProt
      * @param $debug
      *   Debug on or off, false by default.
      */
-    public function __construct($Number, $identity, $Nickname, $debug = FALSE)
+    public function __construct($Number, $identity, $Nickname = "", $debug = FALSE)
     {
         $this->_debug = $debug;
         $dict = getDictionary();
