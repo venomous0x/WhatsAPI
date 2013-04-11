@@ -539,6 +539,17 @@ class WhatsProt
         if ($this->_accountinfo['status'] == 'ok') {
             $this->_password = $this->_accountinfo['pw'];
         }
+        $this->doLogin();
+    }
+    
+    public function LoginWithPassword($password)
+    {
+        $this->_password = $password;
+        $this->doLogin();
+    }
+    
+    protected function doLogin()
+    {
         $resource = WhatsProt::_device . '-' . WhatsProt::_whatsAppVer . '-' . WhatsProt::_port;
         $data = $this->_writer->StartStream(WhatsProt::_whatsAppServer, $resource);
         $feat = $this->addFeatures();
