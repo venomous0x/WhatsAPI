@@ -236,12 +236,8 @@ class WhatsProt
         $request['xmlns'] = "urn:xmpp:receipts";
         $reqnode = new ProtocolNode("request", $request, NULL, "");
 
-        $whatsAppServer = WhatsProt::_whatsAppServer;
-        if (strpos($to, "-") !== FALSE) {
-            $whatsAppServer = WhatsProt::_whatsAppGroupServer;
-        }
         $messageHash = array();
-        $messageHash["to"] = $to . "@" . $whatsAppServer;
+        $messageHash["to"] = $this->GetJID($to);
         $messageHash["type"] = "chat";
         $messageHash["id"] = $this->msgId();
         $messageHash["t"] = time();
@@ -649,6 +645,43 @@ class WhatsProt
         $this->sendNode($node);
         $this->eventManager()->fire('onSendPresence', array($this->_phoneNumber, $presence['type'], $presence['name']));
     }
+    
+    /**
+     * Send presence subscription, automatically receive presence updates as long as the socket is open.
+     *
+     * @param $to
+     *   Phone number.
+     */
+    public function SendPresenceSubscription($to)
+    {
+        $node = new ProtocolNode("presence", array("type" => "subscribe", "to" => $this->GetJID($to)), NULL, "");
+        $this->sendNode($node);
+    }
+    
+    /*
+     * Process number/jid and turn it into a JID if necessary
+     *
+     * @param $number
+     *  Number to process
+     */
+    protected function GetJID($number)
+    {
+        if(!stristr($number, '@'))
+        {
+            //check if group message
+            if(stristr($number, '-'))
+            {
+                //to group
+                $number .= "@" . self::_whatsAppGroupServer;
+            }
+            else
+            {
+                //to normal user
+                $number .= "@" . self::_whatsAppServer;
+            }
+        }
+        return $number;
+    }
 
     /**
      * Update de user status.
@@ -673,6 +706,24 @@ class WhatsProt
         $this->sendNode($messsageNode);
         $this->eventManager()->fire('onSendStatusUpdate', array($this->_phoneNumber, $txt));
     }
+    
+    /**
+     * Send the active status. User will show up as "Online" (as long as socket is connected).
+     */
+    public function sendActive()
+    {
+        $messageNode = new ProtocolNode("presence", array("type" => "active"), null, "");
+        $this->sendNode($messageNode);
+    }
+    
+    /**
+     * Send the offline status. User will show up as "Offline".
+     */
+    public function sendOffline()
+    {
+        $messageNode = new ProtocolNode("presence", array("type" => "unavailable"), null, "");
+        $this->sendNode($messageNode);
+    }
 
     /**
      * Send the composing message status. When typing a message.
@@ -686,13 +737,8 @@ class WhatsProt
         $comphash['xmlns'] = 'http://jabber.org/protocol/chatstates';
         $compose = new ProtocolNode("composing", $comphash, NULL, "");
 
-        $whatsAppServer = WhatsProt::_whatsAppServer;
-        if (strpos($to, "-") !== FALSE) {
-            $whatsAppServer = WhatsProt::_whatsAppGroupServer;
-        }
-
         $messageHash = array();
-        $messageHash["to"] = $to . "@" . $whatsAppServer;
+        $messageHash["to"] = $this->GetJID($to);
         $messageHash["type"] = "chat";
         $messageHash["id"] = $this->msgId();
         $messageHash["t"] = time();
@@ -713,13 +759,8 @@ class WhatsProt
         $comphash['xmlns'] = 'http://jabber.org/protocol/chatstates';
         $compose = new ProtocolNode("paused", $comphash, NULL, "");
 
-        $whatsAppServer = WhatsProt::_whatsAppServer;
-        if (strpos($to, "-") !== FALSE) {
-            $whatsAppServer = WhatsProt::_whatsAppGroupServer;
-        }
-
         $messageHash = array();
-        $messageHash["to"] = $to . "@" . $whatsAppServer;
+        $messageHash["to"] = $this->GetJID($to);
         $messageHash["type"] = "chat";
         $messageHash["id"] = $this->msgId();
         $messageHash["t"] = time();
@@ -800,7 +841,7 @@ class WhatsProt
     {
         $Participants = array();
         foreach($participants as $participant) {
-            $Participants[] = new ProtocolNode("participant", array("jid" => $participant . '@' . WhatsProt::_whatsAppServer), NULL, "");
+            $Participants[] = new ProtocolNode("participant", array("jid" => $this->GetJID($participant)), NULL, "");
         }
 
         $childHash = array();
@@ -810,7 +851,7 @@ class WhatsProt
         $setHash = array();
         $setHash["id"] = $this->msgId();
         $setHash["type"] = "set";
-        $setHash["to"] = $groupId . '@' . WhatsProt::_whatsAppGroupServer;
+        $setHash["to"] = $this->GetJID($groupId);
 
         $node = new ProtocolNode("iq", $setHash, array($child), "");
 
@@ -1076,18 +1117,15 @@ class WhatsProt
      */
     public function RequestLastSeen($to)
     {
-
-        $whatsAppServer = WhatsProt::_whatsAppServer;
-
         $queryHash = array();
         $queryHash['xmlns'] = "jabber:iq:last";
         $queryNode = new ProtocolNode("query", $queryHash, NULL, NULL);
 
         $messageHash = array();
-        $messageHash["to"] = $to . "@" . $whatsAppServer;
+        $messageHash["to"] = $this->GetJID($to);
         $messageHash["type"] = "get";
         $messageHash["id"] = $this->msgId();
-        $messageHash["from"] = $this->_phoneNumber . "@" . WhatsProt::_whatsAppServer;
+        $messageHash["from"] = $this->GetJID($this->_phoneNumber);
 
         $messsageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
         $this->sendNode($messsageNode);
