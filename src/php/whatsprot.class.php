@@ -1302,7 +1302,7 @@ class WhatsProt
         foreach ($query as $key => $value) {
           $url .= $key . '=' . $value . '&';
         }
-        rtrim($url, '&');
+        $url = rtrim($url, '&');
 
         // Open connection.
         $ch = curl_init();
