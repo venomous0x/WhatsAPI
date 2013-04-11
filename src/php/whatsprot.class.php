@@ -30,8 +30,8 @@ class WhatsProt
     // The check credentials host.
     const _whatsAppCheHost = 'v.whatsapp.net/v2/exist';
     // User agent and token used in reques/registration code.
-    const _whatsAppUserAgent = 'WhatsApp/2.3.53 S40Version/14.26 Device/Nokia302';
-    const _whatsAppToken = 'PdA2DJyKoUrwLw1Bg6EIhzh502dF9noR9uFCllGk1354754753509';
+    const _whatsAppUserAgent = 'WhatsApp/2.4.7 S40Version/14.26 Device/Nokia302';
+    const _whatsAppToken = 'PdA2DJyKoUrwLw1Bg6EIhzh502dF9noR9uFCllGk1359594496554';
 
     // The upload host.
     const _whatsAppUploadHost = 'https://mms.whatsapp.net/client/iphone/upload.php';
@@ -1269,15 +1269,16 @@ class WhatsProt
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
-            'udid' => $this->_identity,
-            'c' => 'cookie',
+            'id' => $this->_identity,
+            
         );
 
         $response = $this->getResponse($host, $query);
-
+    	//print_r($response);
         if ($response->status != 'ok') {
             $this->eventManager()->fire('onBadCredentials', array($this->_phoneNumber, $response->status, $response->reason));
-            throw new Exception('There was a problem trying to request the code.');
+            
+			throw new Exception('There was a problem trying to request the code.');
         } else {
             $this->eventManager()->fire('onGoodCredentials', array(
                 $this->_phoneNumber,
@@ -1289,7 +1290,8 @@ class WhatsProt
                 $response->price,
                 $response->cost,
                 $response->currency,
-                $response->price_expiration
+                $response->price_expiration,
+				$response->status
             ));
         }
         return $response;
