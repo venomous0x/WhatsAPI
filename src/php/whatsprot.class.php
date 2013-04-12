@@ -375,6 +375,8 @@ class WhatsProt
                                 $node->_children[2]->getAttribute('height'),
                                 $node->_children[2]->_data
                             ));
+                            //save image
+                            $this->processMediaImage($node);
                         } elseif ($node->_children[2]->getAttribute('type') == 'video') {
                             $this->eventManager()->fire('onGetVideo', array(
                                 $this->_phoneNumber,
@@ -650,6 +652,40 @@ class WhatsProt
                 $filename = "pictures/" . $node->getAttribute("from") . ".jpg";
             }
             $fp = @fopen($filename, "w");
+            if($fp)
+            {
+                fwrite($fp, $data);
+                fclose($fp);
+            }
+        }
+    }
+    
+    /**
+     * Process and save media image
+     *
+     * @param $node
+     * ProtocolNode containing media
+     */
+    protected function processMediaImage($node)
+    {
+        $media = $node->getChild("media");
+        if($media != null)
+        {
+            $filename = $media->getAttribute("file");
+            $url = $media->getAttribute("url");
+            
+            //save thumbnail
+            $data = $media->_data;
+            $fp = @fopen("media/thumb_" . $filename, "w");
+            if($fp)
+            {
+                fwrite($fp, $data);
+                fclose($fp);
+            }
+            
+            //download and save original
+            $data = file_get_contents($url);
+            $fp = @fopen("media/" . $filename, "w");
             if($fp)
             {
                 fwrite($fp, $data);
