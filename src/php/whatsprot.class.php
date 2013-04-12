@@ -1,8 +1,9 @@
 <?php
-require 'protocol.class.php';
-require 'WhatsAppEvent.php';
-require 'func.php';
-require 'rc4.php';
+require_once 'protocol.class.php';
+require_once 'WhatsAppEvent.php';
+require_once 'func.php';
+require_once 'rc4.php';
+require_once 'mediauploader.php';
 
 class WhatsProt
 {
@@ -59,7 +60,9 @@ class WhatsProt
     protected $_loginStatus;
     // The AccountInfo object.
     protected $_accountinfo;
-
+    
+    // Queue for media message nodes
+    protected $_mediaQueue = array();
     // Queue for received messages.
     protected $_messageQueue = array();
     // Queue for outgoing messages.
@@ -257,7 +260,7 @@ class WhatsProt
     protected function readData()
     {
         $buff = '';
-        $ret = socket_read($this->_socket, 1024);
+        $ret = @socket_read($this->_socket, 1024);
         if ($ret) {
             $buff = $this->_incomplete_message . $ret;
             $this->_incomplete_message = '';
@@ -487,6 +490,12 @@ class WhatsProt
                     if (strcmp($node->_children[0]->_tag, "picture") == 0) {
                         $this->processProfilePicture($node);
                     }
+                    if (strcmp($node->_children[0]->_tag, "media") == 0) {
+                        $this->processUploadResponse($node);
+                    }
+                    if (strcmp($node->_children[0]->_tag, "duplicate") == 0) {
+                        $this->processUploadResponse($node);
+                    }
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "group") == 0) {
                     $this->_lastGroupId = $node->_children[0]->_attributeHash['id'];
@@ -658,6 +667,67 @@ class WhatsProt
                 fclose($fp);
             }
         }
+    }
+    
+    /**
+     * Process media upload response
+     *
+     * @param $node
+     *  Message node
+     */
+    protected function processUploadResponse($node)
+    {
+        $id = $node->getAttribute("id");
+        $messageNode = @$this->_mediaQueue[$id];
+        if($messageNode == null)
+        {
+            //message not found, can't send!
+            return;
+        }
+        
+        $duplicate = $node->getChild("duplicate");
+        if($duplicate != null)
+        {
+            //file already on whatsapp servers
+            $url = $duplicate->getAttribute("url");
+            $filesize = $duplicate->getAttribute("size");
+            $mimetype = $duplicate->getAttribute("mimetype");
+            $filehash = $duplicate->getAttribute("filehash");
+            $filetype = $duplicate->getAttribute("type");
+            $width = $duplicate->getAttribute("width");
+            $height = $duplicate->getAttribute("height");
+            $filename = array_pop(explode("/", $url));
+        }
+        else
+        {
+            //upload new file
+            $json = WhatsMediaUploader::pushFile($node, $messageNode, $this->_phoneNumber);
+            
+            $url = $json->url;
+            $filesize = $json->size;
+            $mimetype = $json->mimetype;
+            $filehash = $json->filehash;
+            $filetype = $json->type;
+            $width = $json->width;
+            $height = $json->height;
+            $filename = $json->name;
+        }
+        
+        $mediaAttribs = array();
+        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+        $mediaAttribs["type"] = "image";
+        $mediaAttribs["url"] = $url;
+        $mediaAttribs["file"] = $filename;
+        $mediaAttribs["size"] = $filesize;
+
+        $filepath = $this->_mediaQueue[$id];
+        $to = $filepath["to"];
+        $filepath = $filepath["filePath"];
+        
+        $icon = createIcon($filepath);
+
+        $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
+        $this->SendMessageNode($to, $mediaNode);
     }
     
     /**
@@ -1011,33 +1081,90 @@ class WhatsProt
      * @param $file
      *   The url/uri to the image.
      */
-    public function MessageImage($to, $file)
+    //public function MessageImage($to, $file)
+    //{
+    //    if ($image = file_get_contents($file)) {
+    //        $fileName = basename($file);
+    //        if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
+    //            $uri = "/tmp/" . md5(time()) . $fileName;
+    //            $tmpFile = file_put_contents($uri, $image);
+    //            $url = $this->uploadFile($uri);
+    //            unlink($uri);
+    //        } else {
+    //            $url = $file;
+    //        }
+    //
+    //        $mediaAttribs = array();
+    //        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
+    //        $mediaAttribs["type"] = "image";
+    //        $mediaAttribs["url"] = $url;
+    //        $mediaAttribs["file"] = $fileName;
+    //        $mediaAttribs["size"] = strlen($image);
+    //
+    //        $icon = createIcon($image);
+    //
+    //        $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
+    //        $this->SendMessageNode($to, $mediaNode);
+    //    } else {
+    //        throw new Exception('A problem has occurred trying to get the image.');
+    //    }
+    //}
+    
+    /**
+     * Send image file to group/user
+     *
+     * @param $to
+     *  recepient
+     * @param $filepath
+     *  path to local image file
+     */
+    public function MessageImage($to, $filepath)
     {
-        if ($image = file_get_contents($file)) {
-            $fileName = basename($file);
-            if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
-                $uri = "/tmp/" . md5(time()) . $fileName;
-                $tmpFile = file_put_contents($uri, $image);
-                $url = $this->uploadFile($uri);
-                unlink($uri);
-            } else {
-                $url = $file;
-            }
+        //get file details
+        if(file_exists($filepath))
+        {
+            $filesize = filesize($filepath);
+            $b64hash = base64_encode(hash("sha256", file_get_contents($filepath), true));
 
-            $mediaAttribs = array();
-            $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
-            $mediaAttribs["type"] = "image";
-            $mediaAttribs["url"] = $url;
-            $mediaAttribs["file"] = $fileName;
-            $mediaAttribs["size"] = strlen($image);
-
-            $icon = createIcon($image);
-
-            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
-            $this->SendMessageNode($to, $mediaNode);
-        } else {
-            throw new Exception('A problem has occurred trying to get the image.');
+            //request upload
+            $this->requestFileUpload($b64hash, "image", $filesize, $filepath, $to);
         }
+    }
+    
+    /**
+     * Send request to upload file
+     *
+     * @param $b64hash
+     *  Base64 hash of file
+     * @param $type
+     *  File type
+     * @param $size
+     *  File size
+     * @param $filepath
+     *  Path to image file
+     * @param $to
+     *  Recepient
+     */
+    protected function requestFileUpload($b64hash, $type, $size, $filepath, $to)
+    {
+        $hash = array();
+        $hash["xmlns"] = "w:m";
+        $hash["hash"] = $b64hash;
+        $hash["type"] = $type;
+        $hash["size"] = $size;
+        $medianode = new ProtocolNode("media", $hash, null, null);
+        
+        $hash = array();
+        $id = $this->msgId();
+        $hash["id"] = $id;
+        $hash["to"] = self::_whatsAppServer;
+        $hash["type"] = "set";
+        $node = new ProtocolNode("iq", $hash, array($medianode), null);
+        
+        //add to queue
+        $this->_mediaQueue[$id] = array("messageNode" => $node, "filePath" => $filepath, "to" => $this->GetJID($to));
+        
+        $this->sendNode($node);
     }
 
     /**

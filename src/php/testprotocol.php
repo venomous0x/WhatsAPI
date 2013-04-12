@@ -17,6 +17,9 @@ $w->GetProfilePicture($target, true);
 //update your profile picture
 $w->SetProfilePicture("demo/venom.jpg");
 
+//send picture
+$w->MessageImage($target, "demo/x3.jpg");
+
 # Implemented out queue messages and auto msgid
 $w->Message($target, "Sent from WhatsApi at " . $time());
 

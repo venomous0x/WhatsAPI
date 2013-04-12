@@ -52,7 +52,7 @@ class WhatsMediaUploader
         $url = $uploadResponseNode->getChild("media")->getAttribute("url");
         $messageNode = $messageContainer["messageNode"];
         $filepath = $messageContainer["filePath"];
-        $to = $messageNode->getAttribute("to");
+        $to = $messageContainer["to"];
         return self::getPostString($filepath, $url, $to, $selfJID);
     }
     
@@ -60,7 +60,6 @@ class WhatsMediaUploader
     {
         $host = str_replace("https://", "", $url);
         $host = explode("/", $host);
-        print_r($host);
         $host = $host[0];
         
         $filetype = mime_content_type($filepath);
