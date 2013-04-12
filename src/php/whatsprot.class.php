@@ -758,6 +758,37 @@ class WhatsProt
         $this->sendNode($node);
     }
     
+    /**
+     * Set your profile picture
+     *
+     * @param $filepath
+     *  Path to image file
+     */
+    public function SetProfilePicture($filepath)
+    {
+        $fp = @fopen($filepath, "r");
+        if($fp)
+        {
+            $data = fread($fp, filesize($filepath));
+            if($data)
+            {
+                //this is where the fun starts
+                $hash = array();
+                $hash["xmlns"] = "w:profile:picture";
+                $hash["type"] = "image";
+                $picture = new ProtocolNode("picture", $hash, null, $data);
+                
+                $hash = array();
+                $hash["id"] = $this->msgId();
+                $hash["to"] = $this->GetJID($this->_phoneNumber);
+                $hash["type"] = "set";
+                $node = new ProtocolNode("iq", $hash, array($picture), null);
+                
+                $this->sendNode($node);
+            }
+        }
+    }
+    
     /*
      * Process number/jid and turn it into a JID if necessary
      *

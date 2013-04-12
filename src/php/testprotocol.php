@@ -14,6 +14,9 @@ $w->Login();
 //retrieve large profile picture/ output is in /src/php/pictures/
 $w->GetProfilePicture($target, true);
 
+//update your profile picture
+$w->SetProfilePicture("demo/venom.jpg");
+
 # Implemented out queue messages and auto msgid
 $w->Message($target, "Sent from WhatsApi at " . $time());
 
