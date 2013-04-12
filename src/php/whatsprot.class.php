@@ -639,8 +639,17 @@ class WhatsProt
         
         if($pictureNode != null)
         {
+            $type = $pictureNode->getAttribute("type");
             $data = $pictureNode->_data;
-            $fp = @fopen("pictures/" . $node->getAttribute("from") . ".jpg", "w");
+            if($type == "preview")
+            {
+                $filename = "pictures/preview_" . $node->getAttribute("from") . ".jpg";
+            }
+            else
+            {
+                $filename = "pictures/" . $node->getAttribute("from") . ".jpg";
+            }
+            $fp = @fopen($filename, "w");
             if($fp)
             {
                 fwrite($fp, $data);
