@@ -249,6 +249,8 @@ class WhatsProt
         if (!$this->_lastId) {
             $this->_lastId = $messageHash["id"];
             $this->sendNode($messsageNode);
+            //listen for response
+            $this->PollMessages();
         } else {
             $this->_outQueue[] = $messsageNode;
         }
@@ -378,8 +380,6 @@ class WhatsProt
                                 $node->_children[2]->getAttribute('height'),
                                 $node->_children[2]->_data
                             ));
-                            //save image
-                            $this->processMediaImage($node);
                         } elseif ($node->_children[2]->getAttribute('type') == 'video') {
                             $this->eventManager()->fire('onGetVideo', array(
                                 $this->_phoneNumber,
@@ -488,7 +488,11 @@ class WhatsProt
                         array_push($this->_messageQueue, $node);
                     }
                     if (strcmp($node->_children[0]->_tag, "picture") == 0) {
-                        $this->processProfilePicture($node);
+                        $this->eventManager()->fire("onProfilePicture", array(
+                            $node->getAttribute("from"),
+                            $node->getChild("picture")->getAttribute("type"),
+                            $node->getChild("picture")->_data
+                        ));
                     }
                     if (strcmp($node->_children[0]->_tag, "media") == 0) {
                         $this->processUploadResponse($node);
@@ -636,38 +640,7 @@ class WhatsProt
         $node = new ProtocolNode("iq", $hash, array($picture), null);
         $this->sendNode($node);
     }
-    
-    /**
-     * Processes received picture node
-     *
-     * @param $node
-     *  ProtocolNode containing the picture
-     */
-    protected function processProfilePicture($node)
-    {
-        $pictureNode = $node->getChild("picture");
-        
-        if($pictureNode != null)
-        {
-            $type = $pictureNode->getAttribute("type");
-            $data = $pictureNode->_data;
-            if($type == "preview")
-            {
-                $filename = "pictures/preview_" . $node->getAttribute("from") . ".jpg";
-            }
-            else
-            {
-                $filename = "pictures/" . $node->getAttribute("from") . ".jpg";
-            }
-            $fp = @fopen($filename, "w");
-            if($fp)
-            {
-                fwrite($fp, $data);
-                fclose($fp);
-            }
-        }
-    }
-    
+
     /**
      * Process media upload response
      *
@@ -729,40 +702,6 @@ class WhatsProt
         $this->SendMessageNode($to, $mediaNode);
     }
     
-    /**
-     * Process and save media image
-     *
-     * @param $node
-     * ProtocolNode containing media
-     */
-    protected function processMediaImage($node)
-    {
-        $media = $node->getChild("media");
-        if($media != null)
-        {
-            $filename = $media->getAttribute("file");
-            $url = $media->getAttribute("url");
-            
-            //save thumbnail
-            $data = $media->_data;
-            $fp = @fopen("media/thumb_" . $filename, "w");
-            if($fp)
-            {
-                fwrite($fp, $data);
-                fclose($fp);
-            }
-            
-            //download and save original
-            $data = file_get_contents($url);
-            $fp = @fopen("media/" . $filename, "w");
-            if($fp)
-            {
-                fwrite($fp, $data);
-                fclose($fp);
-            }
-        }
-    }
-
     /**
      * Wait for message delivery notification.
      */
@@ -905,6 +844,8 @@ class WhatsProt
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
         $this->sendNode($messsageNode);
         $this->eventManager()->fire('onSendStatusUpdate', array($this->_phoneNumber, $txt));
+        //listen for response
+        $this->PollMessages();
     }
     
     /**
