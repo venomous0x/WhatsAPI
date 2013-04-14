@@ -265,7 +265,7 @@ class WhatsProt
             $buff = $this->_incomplete_message . $ret;
             $this->_incomplete_message = '';
         } else {
-            fclose($this->_socket);
+            //fclose($this->_socket);
             $error = "Read error, closing socket...";
             $this->eventManager()->fire('onClose', array($this->_phoneNumber, $error));
         }
@@ -344,14 +344,13 @@ class WhatsProt
                     if ($node->getChild('composing') != NULL) {
                         $this->eventManager()->fire('onUserComposing', array(
                             $this->_phoneNumber,
-                            $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t']
+                            $node->_attributeHash['from'], $node->_attributeHash['type'], $node->_attributeHash['t']
                         ));
                     }
                     if ($node->getChild('paused') != NULL) {
                         $this->eventManager()->fire('onUserPaused', array(
                             $this->_phoneNumber,
                             $node->_attributeHash['from'],
-                            $node->_attributeHash['id'],
                             $node->_attributeHash['type'],
                             $node->_attributeHash['t']
                         ));
@@ -532,7 +531,7 @@ class WhatsProt
      */
     public function Connect()
     {
-        $Socket = pfsockopen(WhatsProt::_whatsAppHost, WhatsProt::_port);
+        $Socket = fsockopen(WhatsProt::_whatsAppHost, WhatsProt::_port);
         stream_set_timeout($Socket, WhatsProt::_timeoutSec, WhatsProt::_timeoutUsec);
         $this->_socket = $Socket;
         $this->eventManager()->fire('onConnect', array($this->_phoneNumber, $this->_socket));
