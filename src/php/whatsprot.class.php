@@ -205,7 +205,7 @@ class WhatsProt
      */
     protected function sendData($data)
     {
-        socket_send($this->_socket, $data, strlen($data), 0);
+        fwrite($this->_socket, $data, strlen($data));
     }
 
     /**
@@ -260,12 +260,13 @@ class WhatsProt
     protected function readData()
     {
         $buff = '';
-        $ret = @socket_read($this->_socket, 1024);
+        $ret = @fread($this->_socket, 1024);
         if ($ret) {
             $buff = $this->_incomplete_message . $ret;
             $this->_incomplete_message = '';
         } else {
-            $error = socket_strerror(socket_last_error($this->_socket));
+            fclose($this->_socket);
+            $error = "Read error, closing socket...";
             $this->eventManager()->fire('onClose', array($this->_phoneNumber, $error));
         }
 
@@ -531,10 +532,9 @@ class WhatsProt
      */
     public function Connect()
     {
-        $Socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        socket_connect($Socket, WhatsProt::_whatsAppHost, WhatsProt::_port);
+        $Socket = pfsockopen(WhatsProt::_whatsAppHost, WhatsProt::_port);
+        stream_set_timeout($Socket, WhatsProt::_timeoutSec, WhatsProt::_timeoutUsec);
         $this->_socket = $Socket;
-        socket_set_option($this->_socket, SOL_SOCKET, SO_RCVTIMEO, array('sec' => WhatsProt::_timeoutSec, 'usec' => WhatsProt::_timeoutUsec));
         $this->eventManager()->fire('onConnect', array($this->_phoneNumber, $this->_socket));
     }
 
