@@ -11,6 +11,27 @@ session_write_close();
 
 $time = $_SESSION["running"];
 
+function onProfilePicture($from, $type, $data)
+{
+    if($type == "preview")
+    {
+        $filename = "../pictures/preview_" . $from . ".jpg";
+    }
+    else
+    {
+        $filename = "../pictures/" . $from . ".jpg";
+    }
+    $fp = @fopen($filename, "w");
+    if($fp)
+    {
+        fwrite($fp, $data);
+        fclose($fp);
+    }
+    session_start();
+    $_SESSION["profilepic"] = $filename;
+    session_write_close();
+}
+
 function running($time)
 {
     //Compare initial timestamp in session
@@ -29,18 +50,33 @@ function running($time)
     return true;//continue running
 }
 
-require_once 'whatsprot.class.php';
-$username = "**********";
-$password = "*****************************";
+require_once '../whatsprot.class.php';
+$target = @$_POST["target"];
+$username = "************";
+$password = "******************************";
 $w = new WhatsProt($username, 0, "WhatsApi AJAX Demo", true);
 $w->Connect();
 $w->LoginWithPassword($password);
-session_write_close();
+
+$initial = @$_POST["initial"];
+if($initial == "true" && $target != null)
+{
+    //request contact picture only on first call
+    $w->GetProfilePicture($target);
+    //finally starting to use the event manager!
+    $w->eventManager()->bind("onProfilePicture", "onProfilePicture");
+}
+//subscribe contact status
+//$w->SendPresenceSubscription($target);
+//TODO: presense handling (online/offline/typing/last seen)
+
 while(running($time))
 {
     $w->PollMessages();
-    !running($time);
+    
+    running($time);//check again if timestamp has been updated
 
+    //check for outbound messages to send:
     session_start();
     $outbound = $_SESSION["outbound"];
     $_SESSION["outbound"] = array();
@@ -54,6 +90,8 @@ while(running($time))
             $w->PollMessages();
         }
     }
+    
+    //check for received messages:
     $messages = $w->GetMessages();
     if(count($messages) > 0)
     {

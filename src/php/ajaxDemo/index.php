@@ -9,6 +9,7 @@ $target = "***********";//conversation target number/JID
 ?>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript">
+    var target = "<?php echo $target;?>";
     $(document).ready(function()
     {
         $("#message").keypress(function(e) {
@@ -17,20 +18,32 @@ $target = "***********";//conversation target number/JID
                 sendMessage();
             }
         });
-        Listen();
+        Listen(true);
         getMessages();
     });
     
-    function Listen()
+    function Listen(initial)
     {
         $.ajax({
             url: "socket.php",
             cache: false,
             dataType: "html",
-            timeout: 1000,//don't wait for it to finish
+            timeout: 70000,
             method: "POST",
+            data: {
+                initial: initial,
+                target: target
+            }
+            }).done(function(data) {
+                //write debug info
+                //if(data)
+                //{
+                //    var foo = $("#debug").text();
+                //    $("#debug").text(foo + data);
+                //}
+                setTimeout(function() {Listen(false)}, 1000);
             });
-        setTimeout(function() {Listen()}, 60000);//page max execution time
+        
     }
     
     function getMessages()
@@ -45,6 +58,10 @@ $target = "***********";//conversation target number/JID
                 }}).done(function(data) {
                     if(data)
                     {
+                        if(data.profilepic != "")
+                        {
+                            $("#profilepic").attr("src", data.profilepic);
+                        }
                         for(var i in data.messages)
                         {
                             addMessage(data.messages[i], "toMe");
@@ -73,7 +90,7 @@ $target = "***********";//conversation target number/JID
                 method: "POST",
                 data: {
                         method: "sendMessage",
-                        target: "<?php echo $target;?>",
+                        target: target,
                         message: message
                     }});
         }
@@ -109,12 +126,25 @@ $target = "***********";//conversation target number/JID
 </style>
 <table border=1>
     <tr>
-        <td id="conversation"></td>
+        <td width=96 height=96>
+            <img width=96 height=96 id="profilepic" />
+        </td>
+        <td id="header">
+            <span id="contactname"></span>
+            <br />
+            <span id="contactstatus"></span>
+        </td>
     </tr>
     <tr>
-        <td>
+        <td colspan=2 id="conversation"></td>
+    </tr>
+    <tr>
+        <td colspan=2 >
             <input type="text" id="message" />
             <button id="sendbutton" onclick="sendMessage()">Send</button>
         </td>
+    </tr>
+    <tr>
+        <td colspan=2 id="debug" style="white-space: pre"></td>
     </tr>
 </table>
