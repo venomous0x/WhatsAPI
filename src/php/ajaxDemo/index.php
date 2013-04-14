@@ -73,7 +73,7 @@ $target = "***********";//conversation target number/JID
     
     function addMessage(message, cssclass)
     {
-        $("#conversation").append($("<div></div>").addClass("message").addClass(cssclass).text(message));
+        $("#conversation").append($("<div></div>").addClass("message").addClass(cssclass).html(message));
     }
     
     function sendMessage()

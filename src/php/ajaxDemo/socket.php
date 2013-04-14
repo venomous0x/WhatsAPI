@@ -50,6 +50,38 @@ function running($time)
     return true;//continue running
 }
 
+function onGetImage($mynumber, $from, $id, $type, $t, $name, $size, $url, $file, $mimetype, $filehash, $width, $height, $preview)
+{
+    //save thumbnail
+    $previewuri = "../media/thumb_" . $file;
+    $fp = @fopen($previewuri, "w");
+    if($fp)
+    {
+        fwrite($fp, $preview);
+        fclose($fp);
+    }
+    
+    //download and save original
+    $data = file_get_contents($url);
+    $fulluri = "../media/" . $file;
+    $fp = @fopen($fulluri, "w");
+    if($fp)
+    {
+        fwrite($fp, $data);
+        fclose($fp);
+    }
+    
+    //format message
+    $msg = "<a href='$fulluri' target='_blank'><img src='$previewuri' /></a>";
+    
+    //insert message
+    session_start();
+    $in = $_SESSION["inbound"];
+    $in[] = $msg;
+    $_SESSION["inbound"] = $in;
+    session_write_close();
+}
+
 require_once '../whatsprot.class.php';
 $target = @$_POST["target"];
 $username = "************";
@@ -66,6 +98,7 @@ if($initial == "true" && $target != null)
     //finally starting to use the event manager!
     $w->eventManager()->bind("onProfilePicture", "onProfilePicture");
 }
+$w->eventManager()->bind("onGetImage", "onGetImage");
 //subscribe contact status
 //$w->SendPresenceSubscription($target);
 //TODO: presense handling (online/offline/typing/last seen)
@@ -100,7 +133,7 @@ while(running($time))
         $_SESSION["inbound"] = array();//lock
         foreach($messages as $message)
         {
-            $data = $message->getChild("body")->_data;
+            $data = @$message->getChild("body")->_data;
             if($data != null && $data != '')
             {
                 $inbound[] = $data;
