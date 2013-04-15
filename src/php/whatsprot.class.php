@@ -270,8 +270,10 @@ class WhatsProt
             $this->_incomplete_message = '';
         } else {
             //fclose($this->_socket);
-            $error = "Read error, closing socket...";
-            $this->eventManager()->fire('onClose', array($this->_phoneNumber, $error));
+            //$error = "Read error, closing socket...";
+            //$this->eventManager()->fire('onClose', array($this->_phoneNumber, $error));
+            //Don't close socket since it could be a timeout
+            //TODO: Check connection status on error
         }
 
         return $buff;
