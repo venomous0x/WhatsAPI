@@ -550,7 +550,7 @@ class WhatsProt
      */
     public function Disconnect()
     {
-        socket_close($this->_socket);
+        fclose($this->_socket);
         $this->eventManager()->fire('onDisconnect', array($this->_phoneNumber, $this->_socket));
     }
 
