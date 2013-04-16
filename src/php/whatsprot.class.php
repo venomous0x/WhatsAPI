@@ -88,6 +88,9 @@ class WhatsProt
     protected $_inputKey;
     protected $_outputKey;
 
+    //Media File Information
+    protected $_mediafileinfo = array();
+
     // Determines wether debug mode is on or off.
     protected $_debug;
 
@@ -678,7 +681,7 @@ class WhatsProt
         else
         {
             //upload new file
-            $json = WhatsMediaUploader::pushFile($node, $messageNode, $this->_phoneNumber);
+            $json = WhatsMediaUploader::pushFile($node, $messageNode, $this->_mediafileinfo, $this->_phoneNumber);
 
             $url = $json->url;
             $filesize = $json->size;
@@ -697,9 +700,8 @@ class WhatsProt
         $mediaAttribs["file"] = $filename;
         $mediaAttribs["size"] = $filesize;
 
-        $filepath = $this->_mediaQueue[$id];
-        $to = $filepath["to"];
-        $filepath = $filepath["filePath"];
+        $filepath = $this->_mediaQueue[$id]['filePath'];
+        $to = $this->_mediaQueue[$id]['to'];
 
         $icon = createIcon($filepath);
 
@@ -1031,60 +1033,194 @@ class WhatsProt
     }
 
     /**
-     * Send a image to the user/group.
-     *
-     * @param $to
-     *   The reciepient to send.
-     * @param $file
-     *   The url/uri to the image.
-     */
-    //public function MessageImage($to, $file)
-    //{
-    //    if ($image = file_get_contents($file)) {
-    //        $fileName = basename($file);
-    //        if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
-    //            $uri = "/tmp/" . md5(time()) . $fileName;
-    //            $tmpFile = file_put_contents($uri, $image);
-    //            $url = $this->uploadFile($uri);
-    //            unlink($uri);
-    //        } else {
-    //            $url = $file;
-    //        }
-    //
-    //        $mediaAttribs = array();
-    //        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
-    //        $mediaAttribs["type"] = "image";
-    //        $mediaAttribs["url"] = $url;
-    //        $mediaAttribs["file"] = $fileName;
-    //        $mediaAttribs["size"] = strlen($image);
-    //
-    //        $icon = createIcon($image);
-    //
-    //        $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
-    //        $this->SendMessageNode($to, $mediaNode);
-    //    } else {
-    //        throw new Exception('A problem has occurred trying to get the image.');
-    //    }
-    //}
-
-    /**
-     * Send image file to group/user
+     * Send an image file to group/user
      *
      * @param $to
      *  recepient
      * @param $filepath
      *  path to local image file
      */
-    public function MessageImage($to, $filepath)
+    public function MessageImage($to, $filepath, $storeURLmedia = false)
     {
-        //get file details
-        if(file_exists($filepath))
-        {
-            $filesize = filesize($filepath);
-            $b64hash = base64_encode(hash("sha256", file_get_contents($filepath), true));
+        if ($this->getMediaFile($filepath) == true) {
+            $allowedExtensions = array('jpg', 'gif', 'png');
+            if (in_array($this->_mediafileinfo['fileextension'], $allowedExtensions)) {
+                $b64hash = base64_encode(hash_file("sha256", $this->_mediafileinfo['filepath'], true));
+                //request upload
+                $this->requestFileUpload($b64hash, "image", $this->_mediafileinfo['filesize'], $this->_mediafileinfo['filepath'], $to);
+                $this->processTempMediaFile($storeURLmedia);
+                return true;
+            } else {
+                //Not allowed file type.
+                $this->processTempMediaFile($storeURLmedia);
+                return false;
+            }
+        } else {
+            //Didn't get media file details.
+            return false;
+        }
+    }
 
-            //request upload
-            $this->requestFileUpload($b64hash, "image", $filesize, $filepath, $to);
+    /**
+     * Send a video to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $file
+     *   The url/uri to the MP4/MOV video.
+     */
+    public function MessageVideo($to, $filepath, $storeURLmedia = false)
+    {
+        if ($this->getMediaFile($filepath) == true) {
+            $allowedExtensions = array('mp4', 'mov');
+            if (in_array($this->_mediafileinfo['fileextension'], $allowedExtensions)) {
+                $b64hash = base64_encode(hash_file("sha256", $this->_mediafileinfo['filepath'], true));
+                //request upload
+                $this->requestFileUpload($b64hash, "video", $this->_mediafileinfo['filesize'], $this->_mediafileinfo['filepath'], $to);
+                $this->processTempMediaFile($storeURLmedia);
+                return true;
+            } else {
+                //Not allowed file type.
+                $this->processTempMediaFile($storeURLmedia);
+                return false;
+            }
+        } else {
+            //Didn't get media file details.
+            return false;
+        }
+    }
+
+    /**
+     * Send a audio to the user/group.
+     *
+     * @param $to
+     *   The reciepient to send.
+     * @param $file
+     *   The url/uri to the 3GP/CAF audio.
+     */
+    public function MessageAudio($to, $filepath, $storeURLmedia = false)
+    {
+        if ($this->getMediaFile($filepath) == true) {
+            $allowedExtensions = array('3gp', 'caf');
+            if (in_array($this->_mediafileinfo['fileextension'], $allowedExtensions)) {
+                $b64hash = base64_encode(hash_file("sha256", $this->_mediafileinfo['filepath'], true));
+                //request upload
+                $this->requestFileUpload($b64hash, "audio", $this->_mediafileinfo['filesize'], $this->_mediafileinfo['filepath'], $to);
+                $this->processTempMediaFile($storeURLmedia);
+                return true;
+            } else {
+                //Not allowed file type.
+                $this->processTempMediaFile($storeURLmedia);
+                return false;
+            }
+        } else {
+            //Didn't get media file details.
+            return false;
+        }
+    }
+
+    /**
+     * Retrieves media file and info from either a URL or localpath
+     * @param $filepath
+     * The URL or path to the mediafile you wish to send
+     * @param $maxsizebytes
+     * The maximum size in bytes the media file can be. Default 1MB
+     *
+     * @return boolean Returns false if file information can not be obtained.
+     */
+    protected function getMediaFile($filepath, $maxsizebytes = 1048576)
+    {
+        if (filter_var($filepath, FILTER_VALIDATE_URL) !== FALSE) {
+            $this->_mediafileinfo = array();
+            $this->_mediafileinfo['url'] = $filepath;
+
+            //File is a URL. Create a curl connection but DON'T download the body content
+            //because we want to see if file is too big.
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, "$filepath");
+            curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11");
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_NOBODY, TRUE);
+
+            if (curl_exec($curl) === false) {
+                return false;
+            }
+
+            //While we're here, get mime type and filesize and extension
+            $info = curl_getinfo($curl);
+            $this->_mediafileinfo['filesize'] = $info['download_content_length'];
+            $this->_mediafileinfo['filemimetype'] = $info['content_type'];
+            $this->_mediafileinfo['fileextension'] = pathinfo(parse_url($this->_mediafileinfo['url'], PHP_URL_PATH), PATHINFO_EXTENSION);
+
+            //Only download file if it's not too big
+            //TODO check what max file size whatsapp server accepts.
+            if ($this->_mediafileinfo['filesize'] < $maxsizebytes) {
+                //Create temp file in media folder. Media folder must be writable!
+                $this->_mediafileinfo['filepath'] = tempnam(getcwd() . '/media', 'WHA');
+                $fp = fopen($this->_mediafileinfo['filepath'], w);
+                if ($fp) {
+                    curl_setopt($curl, CURLOPT_NOBODY, FALSE);
+                    curl_setopt($curl, CURLOPT_BUFFERSIZE, 1024);
+                    curl_setopt($curl, CURLOPT_FILE, $fp);
+                    curl_exec($curl);
+                    fclose($fp);
+                } else {
+                    unlink($this->_mediafileinfo['filepath']);
+                    curl_close($curl);
+                    return false;
+                }
+                //Success
+                curl_close($curl);
+                return true;
+            } else {
+                //File too big. Don't Download.
+                curl_close($curl);
+                return false;
+            }
+            //Close connection to test file headers.
+            curl_close($curl);
+        } else if (file_exists($filepath)) {
+            //Local file
+            $this->_mediafileinfo['filesize'] = filesize($filepath);
+            if ($this->_mediafileinfo['filesize'] < $maxsizebytes) {
+                $this->_mediafileinfo['filepath'] = $filepath;
+                $this->_mediafileinfo['fileextension'] = pathinfo($filepath, PATHINFO_EXTENSION);
+                //TODO
+                //Get Mime type using finfo.
+//                $finfo = new finfo_open(FILEINFO_MIME_TYPE);
+//                $this->_mediafileinfo['filemimetype'] = finfo_file($finfo, $filepath);
+//                finfo_close($finfo);
+                //mime_content_type deprecated
+                $this->_mediafileinfo['filemimetype'] = mime_content_type($filepath);
+                return true;
+            } else {
+                //File too big
+                return false;
+            }
+        }
+        //Couldn't tell what file was, local or URL.
+        return false;
+    }
+
+    /**
+     * If the media file was originally from a URL, this function either deletes it
+     * or renames it depending on the user option.
+     * @param boolean $storeURLmedia Should the script save and rename any media files saved from
+     * a URL or remove the temporary file?
+     */
+    protected function processTempMediaFile($storeURLmedia)
+    {
+        if (isset($this->_mediafileinfo['url'])) {
+            if ($storeURLmedia) {
+                if (is_file($this->_mediafileinfo['filepath'])) {
+                    rename($this->_mediafileinfo['filepath'], $this->_mediafileinfo['filepath'] . $this->_mediafileinfo['fileextension']);
+                }
+            } else {
+                if (is_file($this->_mediafileinfo['filepath'])) {
+                    unlink($this->_mediafileinfo['filepath']);
+                }
+            }
         }
     }
 
@@ -1123,86 +1259,6 @@ class WhatsProt
 
         $this->sendNode($node);
         $this->WaitforServer($hash["id"]);
-    }
-
-    /**
-     * Send a video to the user/group.
-     *
-     * @param $to
-     *   The reciepient to send.
-     * @param $file
-     *   The url/uri to the MP4/MOV video.
-     */
-    public function MessageVideo($to, $file)
-    {
-        $extension         = strtolower(pathinfo($url, PATHINFO_EXTENSION));
-        $allowedExtensions = array('mp4', 'mov');
-        if (!in_array($extension, $allowedExtensions)) {
-            throw new Exception('Unsupported video format.');
-        } elseif ($image = file_get_contents($file)) {
-            $fileName = basename($file);
-            if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
-                $uri = "/tmp/" . md5(time()) . $fileName;
-                $tmpFile = file_put_contents($uri, $image);
-                $url = $this->uploadFile($uri);
-                unlink($uri);
-            } else {
-                $url = $file;
-            }
-
-            $mediaAttribs = array();
-            $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
-            $mediaAttribs["type"] = "video";
-            $mediaAttribs["url"] = $url;
-            $mediaAttribs["file"] = $fileName;
-            $mediaAttribs["size"] = strlen($image);
-
-            $icon = createVideoIcon($image);
-
-            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
-            $this->SendMessageNode($to, $mediaNode);
-        } else {
-            throw new Exception('A problem has occurred trying to get the video.');
-        }
-    }
-
-    /**
-     * Send a audio to the user/group.
-     *
-     * @param $to
-     *   The reciepient to send.
-     * @param $file
-     *   The url/uri to the 3GP/CAF audio.
-     */
-    public function MessageAudio($to, $file)
-    {
-        $extension         = strtolower(pathinfo($url, PATHINFO_EXTENSION));
-        $allowedExtensions = array('3gp', 'caf');
-        if (!in_array($extension, $allowedExtensions)) {
-            throw new Exception('Unsupported audio format.');
-        } elseif ($image = file_get_contents($file)) {
-            $fileName = basename($file);
-            if (!preg_match("/https:\/\/[a-z0-9]+\.whatsapp.net\//i", $file)) {
-                $uri = "/tmp/" . md5(time()) . $fileName;
-                $tmpFile = file_put_contents($uri, $image);
-                $url = $this->uploadFile($uri);
-                unlink($uri);
-            } else {
-                $url = $file;
-            }
-
-            $mediaAttribs = array();
-            $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
-            $mediaAttribs["type"] = "audio";
-            $mediaAttribs["url"] = $url;
-            $mediaAttribs["file"] = $fileName;
-            $mediaAttribs["size"] = strlen($image);
-
-            $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, "");
-            $this->SendMessageNode($to, $mediaNode);
-        } else {
-            throw new Exception('A problem has occurred trying to get the audio.');
-        }
     }
 
     /**
