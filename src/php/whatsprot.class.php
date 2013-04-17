@@ -564,6 +564,10 @@ class WhatsProt
      */
     public function Login()
     {
+        //2013-04-17:
+        //check credentials is borked for now
+        throw new Exception("Credentials check in Login() is broken at the  moment. Use LoginWithPassword(\$password) instead.")
+        
         $this->_accountinfo = (array) $this->checkCredentials();
         if ($this->_accountinfo['status'] == 'ok') {
             $this->_password = $this->_accountinfo['pw'];
