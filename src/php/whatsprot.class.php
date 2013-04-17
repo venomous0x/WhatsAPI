@@ -1486,7 +1486,7 @@ class WhatsProt
             'mcc' => '000',
             'mnc' => '000',
             'method' => $method,
-            'id' => $this->_identity,
+            'id' =>  md5(strrev($this->_identity)),
             'token' => $token,
             'c' => 'cookie',
         );
