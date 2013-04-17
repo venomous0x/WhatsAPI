@@ -110,6 +110,9 @@ class WhatsProt
      */
     public function __construct($Number, $identity, $Nickname, $debug = FALSE)
     {
+        $dict = getDictionary();
+        $this->_writer = new BinTreeNodeWriter($dict);
+        $this->_reader = new BinTreeNodeReader($dict);
         $this->_debug = $debug;
         $this->_phoneNumber = $Number;
         $this->_identity = $identity;
@@ -542,9 +545,6 @@ class WhatsProt
     public function Connect()
     {
         $Socket = fsockopen(WhatsProt::_whatsAppHost, WhatsProt::_port);
-        $dict = getDictionary();
-        $this->_writer = new BinTreeNodeWriter($dict);
-        $this->_reader = new BinTreeNodeReader($dict);
         stream_set_timeout($Socket, WhatsProt::_timeoutSec, WhatsProt::_timeoutUsec);
         $this->_socket = $Socket;
         $this->eventManager()->fire('onConnect', array($this->_phoneNumber, $this->_socket));
@@ -579,6 +579,8 @@ class WhatsProt
 
     protected function doLogin()
     {
+        $this->_writer->resetKey();
+        $this->_reader->resetKey();
         $resource = WhatsProt::_device . '-' . WhatsProt::_whatsAppVer . '-' . WhatsProt::_port;
         $data = $this->_writer->StartStream(WhatsProt::_whatsAppServer, $resource);
         $feat = $this->addFeatures();

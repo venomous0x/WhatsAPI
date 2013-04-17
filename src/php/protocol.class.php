@@ -114,6 +114,11 @@ class BinTreeNodeReader
     {
         $this->_dictionary = $dictionary;
     }
+    
+    public function resetKey()
+    {
+        unset($this->_key);
+    }
 
     public function setKey($key)
     {
@@ -345,6 +350,11 @@ class BinTreeNodeWriter
                 $this->_tokenMap[$dictionary[$i]] = $i;
             }
         }
+    }
+    
+    public function resetKey()
+    {
+        unset($this->_key);
     }
 
     public function setKey($key)
