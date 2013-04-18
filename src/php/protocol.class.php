@@ -117,7 +117,7 @@ class BinTreeNodeReader
     
     public function resetKey()
     {
-        unset($this->_key);
+        $this->_key = null;
     }
 
     public function setKey($key)
@@ -354,7 +354,7 @@ class BinTreeNodeWriter
     
     public function resetKey()
     {
-        unset($this->_key);
+        $this->_key = null;
     }
 
     public function setKey($key)
