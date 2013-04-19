@@ -944,7 +944,7 @@ class WhatsProt
      * @return string
      *   The group ID.
      */
-    public function createGroupChat($subject, $participants)
+    public function createGroupChat($subject, $participants = array())
     {
         $groupHash = array();
         $groupHash["xmlns"] = "w:g";
@@ -961,7 +961,11 @@ class WhatsProt
         $this->sendNode($groupNode);
         $this->WaitforGroupId();
         $groupId = $this->_lastGroupId;
-        $this->addGroupParticipants($groupId, $participants);
+
+        if (count($participants) > 0) {
+            $this->addGroupParticipants($groupId, $participants);
+        }
+
         return $groupId;
     }
 
