@@ -101,22 +101,22 @@ class WhatsProt
      *
      * @param $Number
      *   The user phone number including the country code without '+' or '00'.
-     * @param $imei
+     * @param $identity
      *   The IMEI/MAC adress.
      * @param $Nickname
      *   The user name.
      * @param $debug
      *   Debug on or off, false by default.
      */
-    public function __construct($Number, $identity, $Nickname, $debug = FALSE)
+    public function __construct($number, $identity, $nickname, $debug = FALSE)
     {
         $dict = getDictionary();
         $this->_writer = new BinTreeNodeWriter($dict);
         $this->_reader = new BinTreeNodeReader($dict);
         $this->_debug = $debug;
-        $this->_phoneNumber = $Number;
+        $this->_phoneNumber = $number;
         $this->_identity = $identity;
-        $this->_name = $Nickname;
+        $this->_name = $nickname;
         $this->_loginStatus = WhatsProt::_disconnectedStatus;
     }
 
