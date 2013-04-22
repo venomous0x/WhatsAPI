@@ -44,13 +44,13 @@ class WhatsProt
      * Property declarations.
      */
     // The user phone number including the country code without '+' or '00'.
-    protected $_phoneNumber;
+    protected $_00420604750454;
     // The IMEI/MAC adress.
-    protected $_identity;
+    protected $_354149051349741;
     // The user password.
     protected $_password;
     // The user name.
-    protected $_name;
+    protected Rose;
 
     // A list of bytes for incomplete messages.
     protected $_incomplete_message = '';
