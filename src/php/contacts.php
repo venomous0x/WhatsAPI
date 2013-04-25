@@ -39,6 +39,7 @@ class WhatsAppContactSync
     protected $_username;
     protected $_password;
     protected $_contacts = array();
+    protected $debug = false;
     
     protected function _getCnonce()
     {
@@ -100,6 +101,7 @@ class WhatsAppContactSync
     {
         //process curl response
         $return = array();
+        $return["data"] = $result;
         
         $lines = explode("\n", $result);
         foreach($lines as $line)
@@ -137,7 +139,7 @@ class WhatsAppContactSync
         return $return;
     }
     
-    public function __construct($username, $password, $contact)
+    public function __construct($username, $password, $contact, $debug = false)
     {
         $this->_username = $username;
         $this->_password = base64_decode($password);
@@ -147,6 +149,7 @@ class WhatsAppContactSync
             $contact = array($contact);
         }
         $this->_contacts = $contact;
+        $this->debug = $debug;
     }
     
     public function executeSync()
@@ -176,28 +179,49 @@ class WhatsAppContactSync
             $result = $this->_processCurlResponse($result);
             if(isset($result["obj"]))
             {
+                //succes!
                 return($this->_processJSONResponse($result["obj"]));
             }
             elseif(isset($result["message"]))
             {
+                if($this->debug)
+                {
+                    throw new Exception("Received unexpected message: " . $result["message"]);
+                }
                 return $result["message"];
             }
             elseif(isset($result["error"]))
             {
+                if($this->debug)
+                {
+                    throw new Exception("Received error: " . $result["error"]);
+                }
                 return $result["error"];
             }
             else
             {
+                if($this->debug)
+                {
+                    throw new Exception("Received unknown response: " . print_r($result["data"], true));
+                }
                 return false;
             }
         }
         elseif(isset($result["error"]))
         {
             //error
+            if($this->debug)
+            {
+                throw new Exception("Received error: " . $result["error"]);
+            }
             return $result["error"];
         }
         else
         {
+            if($this->debug)
+            {
+                throw new Exception("Received unknown response: " . print_r($result["data"], true));
+            }
             return false;
         }
     }
