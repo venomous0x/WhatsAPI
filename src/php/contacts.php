@@ -5,17 +5,9 @@
 //$wasync = new WhatsAppContactSync($username, $password, contacts);
 //$wacontacts = $wasync->executeSync();
 //
-//$username = phonenumber (*see NOTE*)
+//$username = phonenumber
 //$password = base64 encoded password
 //$contact = single phonenumber or array of phonenumbers
-//
-//NOTE:
-//contact phonenumber must be either without cc or with cc and leading +
-//e.g.
-//  "650568134" (will use same country code as you)
-//  or
-//  "+31650568134" (uses specified country code [NL])
-//
 //
 //this class will only return existing whatsapp accounts
 //return value on success example:
@@ -172,6 +164,11 @@ class WhatsAppContactSync
             $postfields = "ut=all&t=c";
             foreach($this->_contacts as $contact)
             {
+                if(!stristr($contact, "+"))
+                {
+                    //automatically add leading plus sign
+                    $contact = "+" . $contact;
+                }
                 $postfields .= "&u[]=" . urlencode($contact);
             }
             $headers = $this->_getHeaders($result["nonce"], strlen($postfields));
