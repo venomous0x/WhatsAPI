@@ -66,15 +66,11 @@ class WhatsAppContactSync
         //generate auth string
         $cnonce = $this->_getCnonce();
         $nc = "00000001";
-        $realm = "s.whatsapp.net";
-        $qop = "auth";
         $digestUri = "WAWA/s.whatsapp.net";
-        $charSet = "utf-8";
-        $authMethod = "X-WAWA";
         $credentials = $this->_username . ":s.whatsapp.net:";
         $credentials .= $this->_password;
         $response = md5(md5(md5($credentials, true) . ":$nonce:" . $cnonce) . ":$nonce:" . $nc . ":" . $cnonce . ":auth:" . md5("AUTHENTICATE:" . $digestUri));
-        return "$authMethod:username=\"" . $this->_username . "\",realm=\"$realm\",nonce=\"$nonce\",cnonce=\"$cnonce\",nc=\"$nc\",qop=\"auth\",digest-uri=\"$digestUri\",response=\"$response\",charset=\"utf-8\"";
+        return "X-WAWA:username=\"" . $this->_username . "\",realm=\"s.whatsapp.net\",nonce=\"$nonce\",cnonce=\"$cnonce\",nc=\"$nc\",qop=\"auth\",digest-uri=\"$digestUri\",response=\"$response\",charset=\"utf-8\"";
     }
     
     protected function _curlRequest($url, $headers, $postfields = false)
