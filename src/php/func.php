@@ -39,9 +39,37 @@ function createIcon($file)
         $img->thumbnailImage(100, 100, TRUE);
 
         return base64_encode($img);
-    } else {
-        return giftThumbnail();
+    } elseif(extension_loaded('gd')) {
+        return createIconGD($file);
     }
+    else
+    {
+	return giftThumbnail();
+    }
+}
+
+function createIconGD($file)
+{
+    list($width, $height) = getimagesize($file);
+    if($width > $height)
+    {
+	//landscape
+	$nheight = ($height / $width) * 100;
+	$nwidth = 100;
+    }
+    else
+    {
+	$nwidth = ($width / $height) * 100;
+	$nheight = 100;
+    }
+    $image_p = imagecreatetruecolor($nwidth, $nheight);
+    $image = imagecreatefromjpeg($file);
+    imagecopyresampled($image_p, $image, 0, 0, 0, 0, $nwidth, $nheight, $width, $height);
+    ob_start();
+    imagejpeg($image_p);
+    $i = ob_get_contents();
+    ob_end_clean();
+    return base64_encode($i);
 }
 
 function createVideoIcon($file)
