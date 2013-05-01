@@ -1612,6 +1612,11 @@ class WhatsProt
 
         if ($response->status != 'ok') {
             $this->eventManager()->fire('onBadCredentials', array($this->_phoneNumber, $response->status, $response->reason));
+            if($this->_debug)
+            {
+                print_r($query);
+                print_r($response);
+            }
             throw new Exception('There was a problem trying to request the code.');
         } else {
             $this->eventManager()->fire('onGoodCredentials', array(
