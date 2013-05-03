@@ -1501,12 +1501,31 @@ class WhatsProt
             'token' => $token,
             'c' => 'cookie',
         );
+        
+        if($this->_debug)
+        {
+            print_r($query);
+        }
 
         $response = $this->getResponse($host, $query);
-
+        
+        if($this->_debug)
+        {
+            print_r($response);
+        }
+        
         if ($response->status != 'sent') {
-            $this->eventManager()->fire('onFailedRequestCode', array($this->_phoneNumber, $method, $response->reason, $response->reason == 'too_recent' ? $response->reason : $response->param));
-            throw new Exception('There was a problem trying to request the code.');
+            if(isset($response->reason) && $response->reason == "too_recent")
+            {
+                $this->eventManager()->fire('onFailedRequestCodeTooRecent', array($this->_phoneNumber, $method, $response->reason, $response->retry_after));
+                $minutes = round($response->retry_after / 60);
+                throw new Exception("Code already sent. Retry after $minutes minutes.");
+            }
+            else
+            {
+                $this->eventManager()->fire('onFailedRequestCode', array($this->_phoneNumber, $method, $response->reason, $response->param));
+                throw new Exception('There was a problem trying to request the code.');
+            }
         } else {
             $this->eventManager()->fire('onRequestCode', array($this->_phoneNumber, $method, $response->length));
         }
