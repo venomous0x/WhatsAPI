@@ -1177,7 +1177,7 @@ class WhatsProt
             if ($this->_mediafileinfo['filesize'] < $maxsizebytes) {
                 //Create temp file in media folder. Media folder must be writable!
                 $this->_mediafileinfo['filepath'] = tempnam(getcwd() . '/media', 'WHA');
-                $fp = fopen($this->_mediafileinfo['filepath'], w);
+                $fp = fopen($this->_mediafileinfo['filepath'], 'w');
                 if ($fp) {
                     curl_setopt($curl, CURLOPT_NOBODY, FALSE);
                     curl_setopt($curl, CURLOPT_BUFFERSIZE, 1024);
