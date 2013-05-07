@@ -710,7 +710,7 @@ class WhatsProt
 
         $mediaAttribs = array();
         $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
-        $mediaAttribs["type"] = "image";
+        $mediaAttribs["type"] = $filetype;
         $mediaAttribs["url"] = $url;
         $mediaAttribs["file"] = $filename;
         $mediaAttribs["size"] = $filesize;
@@ -1090,7 +1090,7 @@ class WhatsProt
      */
     public function MessageVideo($to, $filepath, $storeURLmedia = false)
     {
-        if ($this->getMediaFile($filepath) == true) {
+        if ($this->getMediaFile($filepath, 20971520) == true) {
             $allowedExtensions = array('mp4', 'mov');
             if (in_array($this->_mediafileinfo['fileextension'], $allowedExtensions)) {
                 $b64hash = base64_encode(hash_file("sha256", $this->_mediafileinfo['filepath'], true));
