@@ -1071,8 +1071,8 @@ class WhatsProt
      */
     public function MessageImage($to, $filepath, $storeURLmedia = false)
     {
-        if ($this->getMediaFile($filepath) == true) {
-            $allowedExtensions = array('jpg', 'gif', 'png');
+        if ($this->getMediaFile($filepath, 1024 * 1024 * 5) == true) {
+            $allowedExtensions = array('jpg', 'jpeg', 'gif', 'png');
             if (in_array($this->_mediafileinfo['fileextension'], $allowedExtensions)) {
                 $b64hash = base64_encode(hash_file("sha256", $this->_mediafileinfo['filepath'], true));
                 //request upload
@@ -1100,8 +1100,8 @@ class WhatsProt
      */
     public function MessageVideo($to, $filepath, $storeURLmedia = false)
     {
-        if ($this->getMediaFile($filepath, 20971520) == true) {
-            $allowedExtensions = array('mp4', 'mov');
+        if ($this->getMediaFile($filepath, 1024 * 1024 * 20) == true) {
+            $allowedExtensions = array('mp4', 'mov', 'avi');
             if (in_array($this->_mediafileinfo['fileextension'], $allowedExtensions)) {
                 $b64hash = base64_encode(hash_file("sha256", $this->_mediafileinfo['filepath'], true));
                 //request upload
@@ -1129,8 +1129,8 @@ class WhatsProt
      */
     public function MessageAudio($to, $filepath, $storeURLmedia = false)
     {
-        if ($this->getMediaFile($filepath) == true) {
-            $allowedExtensions = array('3gp', 'caf');
+        if ($this->getMediaFile($filepath, 1024 * 1024 * 10) == true) {
+            $allowedExtensions = array('3gp', 'caf', 'wav', 'mp3', 'wma', 'ogg', 'aif', 'aac', 'm4a');
             if (in_array($this->_mediafileinfo['fileextension'], $allowedExtensions)) {
                 $b64hash = base64_encode(hash_file("sha256", $this->_mediafileinfo['filepath'], true));
                 //request upload
