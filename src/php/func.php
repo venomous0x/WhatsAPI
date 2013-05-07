@@ -35,7 +35,7 @@ function createIcon($file)
     // @todo: Add support for others methods.
     if (class_exists("Imagick")) {
         $img = new Imagick();
-        $img->readImageBlob($file);
+        $img->readImageBlob(file_get_contents($file));
         $img->thumbnailImage(100, 100, TRUE);
 
         return base64_encode($img);
