@@ -119,7 +119,7 @@ class WhatsProt
         $this->_name = $nickname;
         $this->_loginStatus = WhatsProt::_disconnectedStatus;
     }
-    
+
     protected function getIdentity($imei)
     {
         return md5(strrev($imei));
@@ -723,7 +723,7 @@ class WhatsProt
                 $icon = createIcon($filepath);
                 break;
             case "video":
-                $icon = giftThumbnail();
+                $icon = videoThumbnail();
                 break;
             default:
                 $icon = '';
@@ -1511,19 +1511,19 @@ class WhatsProt
             'token' => $token,
             'c' => 'cookie',
         );
-        
+
         if($this->_debug)
         {
             print_r($query);
         }
 
         $response = $this->getResponse($host, $query);
-        
+
         if($this->_debug)
         {
             print_r($response);
         }
-        
+
         if ($response->status != 'sent') {
             if(isset($response->reason) && $response->reason == "too_recent")
             {
