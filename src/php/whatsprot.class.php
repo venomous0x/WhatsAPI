@@ -73,6 +73,8 @@ class WhatsProt
     protected $_lastGroupId = FALSE;
     // Confirm that the *server* has received your command.
     protected $_serverReceivedId;
+    // An array with all the groups a user belongs in.
+    protected $_groupList = array();
     // Message counter for auto-id.
     protected $_msgCounter = 1;
     // A socket to connect to the whatsapp network.
@@ -515,12 +517,34 @@ class WhatsProt
                         $this->processUploadResponse($node);
                     }
                 }
-                if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0 && strcmp($node->_children[0]->_tag, "group") == 0) {
-                    $this->_lastGroupId = $node->_children[0]->_attributeHash['id'];
-                    $this->eventManager()->fire('onCreateGroupChat', array(
-                        $this->_phoneNumber,
-                        $node->_children[0]->_attributeHash['id']
-                    ));
+                if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0) {
+                    if (strcmp($node->_children[0]->_tag, "group") == 0) {
+                        if (isset($node->_children[0]->_attributeHash['owner'])) {
+                            foreach ($node->_children as $key => $group) {
+                                $this->_groupList[] = array(
+                                    'group_id' => $group->_attributeHash['id'],
+                                    'owner' => $group->_attributeHash['owner'],
+                                    'creation' => $group->_attributeHash['creation'],
+                                    'subject' => $group->_attributeHash['subject'],
+                                    's_t' => $group->_attributeHash['s_t'],
+                                    's_o' => $group->_attributeHash['s_o'],
+                                );
+                            }
+                            $this->eventManager()->fire('onGetGroupList', array(
+                                $this->_phoneNumber,
+                                $this->_groupList
+                            ));
+                            $this->_serverReceivedId = $node->_attributeHash['id'];
+                        } else {
+                            $this->_lastGroupId = $node->_children[0]->_attributeHash['id'];
+                            $this->eventManager()->fire('onCreateGroupChat', array(
+                                $this->_phoneNumber,
+                                $node->_children[0]->_attributeHash['id']
+                            ));
+                        }
+                    } else {
+                        $this->_serverReceivedId = $node->_attributeHash['id'];
+                    }
                 }
                 $node = $this->_reader->nextTree();
             }
@@ -988,6 +1012,34 @@ class WhatsProt
         }
 
         return $groupId;
+    }
+
+    /**
+     * Get a List of all groups user belongs too.
+     *
+     * @param string $type
+     * The type of group you belong to, either
+     * 'participating' or 'owning' .
+     *
+     * @return array
+     * An array with all the groups user is involved with.
+     */
+    public function getGroupList($type = 'participating')
+    {
+        $groupHash = array();
+        $groupHash["xmlns"] = "w:g";
+        $groupHash["type"] = $type;
+        $list = new ProtocolNode("list", $groupHash, NULL, "");
+
+        $setHash = array();
+        $setHash["id"] = $this->msgId();
+        $setHash["type"] = "get";
+        $setHash["to"] = WhatsProt::_whatsAppGroupServer;
+        $groupNode = new ProtocolNode("iq", $setHash, array($list), "");
+        $this->sendNode($groupNode);
+        $this->WaitforServer($setHash["id"]);
+        $group_list = $this->_groupList;
+        return $group_list;
     }
 
     /**
