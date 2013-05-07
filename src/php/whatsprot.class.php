@@ -718,7 +718,17 @@ class WhatsProt
         $filepath = $this->_mediaQueue[$id]['filePath'];
         $to = $this->_mediaQueue[$id]['to'];
 
-        $icon = createIcon($filepath);
+        switch($filetype) {
+            case "image":
+                $icon = createIcon($filepath);
+                break;
+            case "video":
+                $icon = giftThumbnail();
+                break;
+            default:
+                $icon = '';
+                break;
+        }
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
         $this->SendMessageNode($to, $mediaNode);
