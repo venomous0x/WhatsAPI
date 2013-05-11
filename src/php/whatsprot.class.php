@@ -1369,11 +1369,13 @@ class WhatsProt
 
     /**
      * Send a location to the user/group.
-     *
+     * Receiver will see larger google map
+     * thumbnail of Lat/Long but NO
+     * name/url for location.
      * @param $to
-     *   The reciepient to send.
+     *   The receipient to send.
      * @param $long
-     *   The logitude to send.
+     *   The longitude to send.
      * @param $lat
      *   The latitude to send.
      */
@@ -1391,24 +1393,24 @@ class WhatsProt
 
     /**
      * Send a location to the user/group.
+     * Allows for custom name and URL to
+     * location to be set by user.
      *
      * @param $to
-     *   The reciepient to send.
+     *   The receipient to send.
      * @param $url
      *   The google maps place url.
      * @param $long
-     *   The logitude to send.
+     *   The longitude to send.
      * @param $lat
      *   The latitude to send.
      * @param $name
      *   The google maps place name.
-     * @param $image
-     *   The google maps place image.
      *
      * @see: https://maps.google.com/maps/place?cid=1421139585205719654
      * @todo: Add support for only pass as argument the place id.
      */
-    public function Place($to, $url, $long, $lat, $name, $image)
+    public function Place($to,$long, $lat, $name, $url = null)
     {
         $mediaHash = array();
         $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
@@ -1416,15 +1418,9 @@ class WhatsProt
         $mediaHash['url'] = $url;
         $mediaHash['latitude'] = $lat;
         $mediaHash['longitude'] = $long;
+        $mediaHash['name'] = $name;
 
-        if ($image = file_get_contents($file))
-        {
-            $icon = createVideoIcon($image);
-        } else {
-            $icon = giftThumbnail();
-        }
-
-        $mediaNode = new ProtocolNode("media", $mediaHash, NULL, $icon);
+        $mediaNode = new ProtocolNode("media", $mediaHash, NULL, NULL);
         $this->SendMessageNode($to, $mediaNode);
     }
 
