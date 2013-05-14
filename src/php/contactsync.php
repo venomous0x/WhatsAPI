@@ -28,8 +28,8 @@ if($contacts == null || empty($contacts))
 
 try
 {
-$sync = new WhatsAppContactSync($username, $password, $contacts, $debug);
-$res = $sync->executeSync();
+    $sync = new WhatsAppContactSync($username, $password, $contacts, $debug);
+    $res = $sync->executeSync();
 }
 catch(Exception $e)
 {
