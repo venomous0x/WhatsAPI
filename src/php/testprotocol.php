@@ -10,12 +10,19 @@ $w = new WhatsProt("************", "********", "John Doe", true);
 $w->Connect();
 # Now Login function sends Nickname and (Available) Presence
 $w->Login();
+
+//retrieve large profile picture/ output is in /src/php/pictures/
+$w->GetProfilePicture($target, true);
+
+//update your profile picture
+$w->SetProfilePicture("demo/venom.jpg");
+
+//send picture
+$w->MessageImage($target, "demo/x3.jpg");
+
 # Implemented out queue messages and auto msgid
-$w->Message($target, "1");
-$w->Message($target, "2");
-$w->Message($target, "3");
-$w->Message($target, "4");
-$w->Message($target, "5");
+$w->Message($target, "Sent from WhatsApi at " . $time());
+
 # You can create a ProcessNode class (or whatever name you want) that has a process($node) function
 # and pass it through setNewMessageBind, that way everytime the class receives a text message it will run
 # the process function to it.
