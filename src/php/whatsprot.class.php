@@ -136,7 +136,8 @@ class WhatsProt
     protected function addFeatures()
     {
         $child = new ProtocolNode("receipt_acks", NULL, NULL, "");
-        $parent = new ProtocolNode("stream:features", NULL, array($child), "");
+        $child2 = new ProtocolNode("w:profile:picture", array("type" => "all"), null, '');
+        $parent = new ProtocolNode("stream:features", NULL, array($child, $child2), "");
 
         return $parent;
     }
