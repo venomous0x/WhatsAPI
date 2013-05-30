@@ -136,7 +136,8 @@ class WhatsProt
     protected function addFeatures()
     {
         $child = new ProtocolNode("receipt_acks", NULL, NULL, "");
-        $parent = new ProtocolNode("stream:features", NULL, array($child), "");
+        $child2 = new ProtocolNode("w:profile:picture", array("type" => "all"), null, '');
+        $parent = new ProtocolNode("stream:features", NULL, array($child, $child2), "");
 
         return $parent;
     }
@@ -1098,7 +1099,49 @@ class WhatsProt
 
         $this->sendNode($node);
     }
+    
+    public function BroadcastMessage($targets, $message)
+    {
+        if(!is_array($targets))
+        {
+            $targets = array($targets);
+        }
+        $bodynode = new ProtocolNode("body", null, null, $message);
+        
+        
+        
+        $serverNode = new ProtocolNode("server", NULL, NULL, "");
+        $xHash = array();
+        $xHash["xmlns"] = "jabber:x:event";
+        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
 
+        $tonodes = array();
+        foreach($targets as $target)
+        {
+            $jid = $this->GetJID($target);
+            $hash = array("jid" => $jid);
+            $tonode = new ProtocolNode("to", $hash, null, null);
+            $tonodes[] = $tonode;
+        }
+        
+        $broadcastnode = new ProtocolNode("broadcast", null, $tonodes, null);
+
+        $messageHash = array();
+        $messageHash["to"] = "broadcast";
+        $messageHash["type"] = "chat";
+        $messageHash["id"] = $this->msgId();
+
+        $messsageNode = new ProtocolNode("message", $messageHash, array($broadcastnode, $xNode, $bodynode), null);
+        if (!$this->_lastId) {
+            $this->_lastId = $messageHash["id"];
+            $this->sendNode($messsageNode);
+            //listen for response
+            $this->WaitforServer($messageHash["id"]);
+        } else {
+            $this->_outQueue[] = $messsageNode;
+        }
+    }
+    
     /**
      * Send a text message to the user/group.
      *
