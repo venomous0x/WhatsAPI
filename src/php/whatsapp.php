@@ -35,7 +35,6 @@
 //This is a aimple password to view this script. It is NOT the whatsapp password.
 $config['webpassword'] = 'MakeUpPassword';
 
-
 //Config Template
 //$config['YourFirstName'] = array(
 //    'id' => '<iOS WIFI MAC eg 11:22:33:44:55   Android: IMEI number>',
@@ -77,8 +76,6 @@ $config['YOURNAME'] = array(
  */
 require "whatsprot.class.php";
 
-
-
 /**
  * For the future, other ways of getting contacts from various sources
  * can be used by implementing the Contacts Interface.
@@ -104,11 +101,10 @@ require "whatsprot.class.php";
  */
 interface Contacts
 {
-
     public function getContacts(array $config, $user);
 }
 
-/*
+/**
  * Google Contacts implementation.
  */
 class GoogleContacts implements Contacts
@@ -261,20 +257,16 @@ class GoogleContacts implements Contacts
     {
         return strcasecmp($a['name'], $b['name']);
     }
+
 }
-
-
-
-
 
 /**
  * Start session so we don't always have to
  * log in.
  */
-$session_name = 'wa_session'; // Set a custom session name
 $cookieParams = session_get_cookie_params(); // Gets current cookies params.
 session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], false, true);
-session_name($session_name); // Sets the session name to the one set above.
+session_name('wa_session'); // Sets the session name to the one set above.
 session_start(); // Start the php session
 
 /**
@@ -343,18 +335,37 @@ class Whatsapp
         }
     }
 
+    /**
+     * Sets flag when there is a connection with WhatsAPP servers.
+     *
+     * @return void
+     */
     public function connected()
     {
         $this->connected = true;
     }
 
+    /**
+     * Clean and Filter the inputted Form values
+     *
+     * This function attempts to clean and filter input values from
+     * the form in the $_POST array. As nothing is currently put into
+     * a database etc, this is probably not required, but it should help
+     * if someone wishes to extend this project later.
+     *
+     * @return array array with values that have been filtered.
+     * @throws Exception If no $_POST values submitted.
+     */
     private function cleanPostInputs()
     {
         $args = array(
             'action' => FILTER_SANITIZE_STRING,
             'password' => FILTER_SANITIZE_STRING,
             'from' => FILTER_SANITIZE_STRING,
-            'to' => FILTER_SANITIZE_STRING,
+            'to' => array(
+                'filter' => FILTER_SANITIZE_NUMBER_INT,
+                'flags' => FILTER_REQUIRE_ARRAY,
+            ),
             'message' => FILTER_UNSAFE_RAW,
             'image' => FILTER_VALIDATE_URL,
             'audio' => FILTER_VALIDATE_URL,
@@ -372,6 +383,14 @@ class Whatsapp
         return $myinputs;
     }
 
+    /**
+     * Process the latest request.
+     *
+     * Decide what course of action to take with the latest
+     * request/post to this script.
+     *
+     * @return void
+     */
     public function process()
     {
         switch ($this->inputs['action']) {
@@ -396,6 +415,10 @@ class Whatsapp
                 $this->sendMessage();
                 break;
 
+            case 'sendBroadcast':
+                $this->sendBroadcast();
+                break;
+
             default:
                 if ($_SESSION['logged_in'] == true) {
                     exit($this->showWebForm());
@@ -405,12 +428,27 @@ class Whatsapp
         }
     }
 
+    /**
+     * Get Contacts from various sources to display in form.
+     *
+     * This method will allow you to add contacts from external
+     * sources to add to the "to box" dropdown list on the form.
+     * Currently this can include:
+     *  - Whatsapp Groups for the current user
+     *  - Google Contacts (if username/password was supplied in config)
+     *
+     * @return void
+     *
+     */
     private function getContacts()
     {
         try {
             //Get whatsapp's Groups this user belongs to.
             $wagroups = array();
             $wagroups = $this->getGroupList();
+            if (is_array($wagroups)) {
+                $this->contacts = array_merge($this->contacts, $wagroups);
+            }
 
             //Get contacts from google if gmail account configured.
             $googleContacts = array();
@@ -444,6 +482,14 @@ class Whatsapp
         }
     }
 
+    /**
+     * Cleanly disconnect from Whatsapp.
+     *
+     * Ensure at end of script, if a connected had been made
+     * to the whatsapp servers, that it is nicely terminated.
+     *
+     * @return void
+     */
     public function __destruct()
     {
         if (isset($this->wa) && $this->connected) {
@@ -451,6 +497,14 @@ class Whatsapp
         }
     }
 
+    /**
+     * Connect to Whatsapp.
+     *
+     * Create a connection to the whatsapp servers
+     * using the supplied password.
+     *
+     * @return boolean
+     */
     private function connectToWhatsApp()
     {
         if (isset($this->wa)) {
@@ -461,21 +515,47 @@ class Whatsapp
         return false;
     }
 
+    /**
+     * Return all groups a user belongs too.
+     *
+     * Log into the whatsapp servers and return a list
+     * of all the groups a user participates in.
+     *
+     * @return array List of groups in correct format or
+     * empty array if no groups.
+     */
     private function getGroupList()
     {
         $wagroups = array();
         $this->connectToWhatsApp();
         $wagroups = $this->wa->getGroupList('participating');
 
+        $listGroups = array();
         if (!empty($wagroups)) {
             foreach ($wagroups as $group) {
-                $this->contacts[] = array('name' => "GROUP: " . $group['subject'], 'id' => $group['group_id']);
+                $listGroups[] = array('name' => "GROUP: " . $group['subject'], 'id' => $group['group_id']);
             }
-            return true;
         }
-        return false;
+        return $listGroups;
     }
 
+    /**
+     * Process inbound text messages.
+     *
+     * If an inbound message is detected, this method will
+     * store the details so that it can be shown to the user
+     * at a suitable time.
+     *
+     * @param string $phone The number that is receiving the message
+     * @param string $from The number that is sending the message
+     * @param string $id The unique ID for the message
+     * @param string $type Type of inbound message
+     * @param string $time Y-m-d H:m:s formatted string
+     * @param string $name The Name of sender (nick)
+     * @param string $data The actual message
+     *
+     * @return void
+     */
     public function processReceivedMessage($phone, $from, $id, $type, $time, $name, $data)
     {
         $matches = null;
@@ -486,6 +566,11 @@ class Whatsapp
         $this->messages[] = array('phone' => $phone, 'from' => $from, 'id' => $id, 'type' => $type, 'time' => $time, 'name' => $name, 'data' => $data);
     }
 
+    /**
+     * Update a users Status
+     *
+     * @return void
+     */
     private function updateStatus()
     {
         if (isset($this->inputs['status']) && trim($this->inputs['status']) !== '') {
@@ -504,34 +589,98 @@ class Whatsapp
         }
     }
 
+    /**
+     * Sends a message to a contact.
+     *
+     * Depending on the inputs sends a
+     * message/video/image/location message to
+     * a contact.
+     *
+     * @return void
+     */
     private function sendMessage()
     {
-        if (isset($this->inputs['to']) && trim($this->inputs['to']) !== '') {
-
+        if (is_array($this->inputs['to'])) {
             $this->connectToWhatsApp();
-            if (isset($this->inputs['message']) && trim($this->inputs['message'] !== '')) {
-                $this->wa->Message($this->inputs['to'], $this->inputs['message']);
+            foreach ($this->inputs['to'] as $to) {
+                if (trim($to) !== '') {
+                    if (isset($this->inputs['message']) && trim($this->inputs['message'] !== '')) {
+                        $this->wa->Message($to, $this->inputs['message']);
+                    }
+                    if (isset($this->inputs['image']) && $this->inputs['image'] !== false) {
+                        $this->wa->MessageImage($to, $this->inputs['image']);
+                    }
+                    if (isset($this->inputs['audio']) && $this->inputs['audio'] !== false) {
+                        $this->wa->MessageAudio($to, $this->inputs['audio']);
+                    }
+                    if (isset($this->inputs['video']) && $this->inputs['video'] !== false) {
+                        $this->wa->MessageVideo($to, $this->inputs['video']);
+                    }
+                    if (isset($this->inputs['locationname']) && trim($this->inputs['locationname'] !== '')) {
+                        $this->wa->Place($to, $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
+                    }
+                } else {
+                    exit(json_encode(array(
+                        "success" => false,
+                        "errormsg" => "A blank number was provided!",
+                        "messages" => $this->messages
+                    )));
+                }
             }
-            if (isset($this->inputs['image']) && $this->inputs['image'] !== false) {
-                $this->wa->MessageImage($this->inputs['to'], $this->inputs['image']);
-            }
-            if (isset($this->inputs['audio']) && $this->inputs['audio'] !== false) {
-                $this->wa->MessageAudio($this->inputs['to'], $this->inputs['audio']);
-            }
-            if (isset($this->inputs['video']) && $this->inputs['video'] !== false) {
-                $this->wa->MessageVideo($this->inputs['to'], $this->inputs['video']);
-            }
-            if (isset($this->inputs['locationname']) && trim($this->inputs['locationname'] !== '')) {
-                $this->wa->Place($this->inputs['to'], $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
-            }
+
             exit(json_encode(array(
                 "success" => true,
                 "data" => "Message Sent!",
                 "messages" => $this->messages
             )));
         }
+        exit(json_encode(array(
+            "success" => false,
+            "errormsg" => "Provided numbers to send message to were not in valid format."
+        )));
     }
 
+    /**
+     * Sends a broadcast Message to a group of contacts.
+     *
+     * Currenly only sends a normal message to
+     * a group of contacts.
+     *
+     * @return void
+     */
+    private function sendBroadcast()
+    {
+        if (isset($this->inputs['action']) && trim($this->inputs['action']) == 'sendBroadcast') {
+
+            $this->connectToWhatsApp();
+            if (isset($this->inputs['message']) && trim($this->inputs['message'] !== '')) {
+                $this->wa->BroadcastMessage($this->inputs['to'], $this->inputs['message']);
+            }
+            if (isset($this->inputs['image']) && $this->inputs['image'] !== false) {
+//                $this->wa->MessageImage($this->inputs['to'], $this->inputs['image']);
+            }
+            if (isset($this->inputs['audio']) && $this->inputs['audio'] !== false) {
+//                $this->wa->MessageAudio($this->inputs['to'], $this->inputs['audio']);
+            }
+            if (isset($this->inputs['video']) && $this->inputs['video'] !== false) {
+//                $this->wa->MessageVideo($this->inputs['to'], $this->inputs['video']);
+            }
+            if (isset($this->inputs['locationname']) && trim($this->inputs['locationname'] !== '')) {
+//                $this->wa->Place($this->inputs['to'], $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
+            }
+            exit(json_encode(array(
+                "success" => true,
+                "data" => "Broadcast Message Sent!",
+                "messages" => $this->messages
+            )));
+        }
+    }
+
+    /**
+     * Process the web login page.
+     *
+     * @return void
+     */
     private function webLogin()
     {
         if ($this->inputs['password'] == $this->config['webpassword']) {
@@ -543,11 +692,21 @@ class Whatsapp
         }
     }
 
+    /**
+     * Logout of the webapp
+     *
+     * @return void
+     */
     private function webLogout()
     {
         unset($_SESSION['logged_in']);
     }
 
+    /**
+     * Show Web app Login page
+     *
+     * @return void
+     */
     public function showWebLoginForm($error = null)
     {
         ob_start();
@@ -628,6 +787,11 @@ class Whatsapp
         return ob_get_clean();
     }
 
+    /**
+     * Show main Web App.
+     *
+     * @return void
+     */
     private function showWebForm()
     {
         ob_start();
@@ -763,6 +927,18 @@ class Whatsapp
                         height:28px;
                         line-height: 28px;
                     }
+
+                    .chzn-container-multi .chzn-choices li{
+                        float:none;
+                    }
+
+                    .chzn-container-multi .chzn-choices .search-choice{
+                        margin-right: 3px;
+                    }
+                    .chzn-container-multi .chzn-choices .search-field{
+                        height: 28px;
+                        line-height: 28px;
+                    }
                     div#to_chzn a.error{
                         color: #b94a48;
                         border-color: #b94a48;
@@ -836,6 +1012,7 @@ class Whatsapp
                             doAction(val);
                         });
 
+                        createChosen();
                         $('#to').bind("change", function() {
                             $('#whatsappform').validate().element($(this));
                         });
@@ -848,45 +1025,70 @@ class Whatsapp
                         {
                             switch (type) {
                                 case 'sendMessage':
-                                    $("#to").removeAttr('disabled');
+                                    $('#to').prop('multiple', false);
+                                    $("#to").prop('disabled', false);
+                                    createChosen();
                                     $("#to").closest('div.control-group').show();
                                     $('#emojiTab').show();
-                                    $("#faketextbox").removeAttr('disabled');
+                                    $("#faketextbox").prop('disabled', false);
                                     $("#faketextbox").closest('div.control-group').show();
-                                    $("#image").removeAttr('disabled');
+                                    $("#image").prop('disabled', false);
                                     $("#image").closest('div.control-group').show();
-                                    $("#audio").removeAttr('disabled');
+                                    $("#audio").prop('disabled', false);
                                     $("#audio").closest('div.control-group').show();
-                                    $("#video").removeAttr('disabled');
+                                    $("#video").prop('disabled', false);
                                     $("#video").closest('div.control-group').show();
-                                    $("#locationname").removeAttr('disabled');
-                                    $("#userlat").removeAttr('disabled');
-                                    $("#userlong").removeAttr('disabled');
+                                    $("#locationname").prop('disabled', false);
+                                    $("#userlat").prop('disabled', false);
+                                    $("#userlong").prop('disabled', false);
                                     $("#locationname").closest('div.control-group').show();
                                     $("#pickLocation").show();
-                                    $("#status").attr('disabled', 'disabled');
+                                    $("#status").prop('disabled', true);
                                     $("#status").closest('div.control-group').hide();
                                     break;
 
                                 case 'updateStatus':
-                                    $("#to").attr('disabled', 'disabled');
+                                    $("#to").prop('disabled', true);
                                     $("#to").closest('div.control-group').hide();
                                     $('#emojiTab').hide();
-                                    $("#faketextbox").attr('disabled', 'disabled');
+                                    $("#faketextbox").prop('disabled', true);
                                     $("#faketextbox").closest('div.control-group').hide();
-                                    $("#image").attr('disabled', 'disabled');
+                                    $("#image").prop('disabled', true);
                                     $("#image").closest('div.control-group').hide();
-                                    $("#audio").attr('disabled', 'disabled');
+                                    $("#audio").prop('disabled', true);
                                     $("#audio").closest('div.control-group').hide();
-                                    $("#video").attr('disabled', 'disabled');
+                                    $("#video").prop('disabled', true);
                                     $("#video").closest('div.control-group').hide();
-                                    $("#locationname").attr('disabled', 'disabled');
-                                    $("#userlat").attr('disabled', 'disabled');
-                                    $("#userlong").attr('disabled', 'disabled');
+                                    $("#locationname").prop('disabled', true);
+                                    $("#userlat").prop('disabled', true);
+                                    $("#userlong").prop('disabled', true);
                                     $("#locationname").closest('div.control-group').hide();
                                     $("#pickLocation").hide();
-                                    $("#status").removeAttr('disabled');
+                                    $("#status").prop('disabled', false);
                                     $("#status").closest('div.control-group').show();
+                                    break;
+
+                                case 'sendBroadcast':
+                                    $('#to').prop('multiple', true);
+                                    $("#to").prop('disabled', false);
+                                    createChosen();
+                                    $("#to").closest('div.control-group').show();
+                                    $('#emojiTab').show();
+                                    $("#faketextbox").prop('disabled', false);
+                                    $("#faketextbox").closest('div.control-group').show();
+                                    $("#image").prop('disabled', false);
+                                    $("#image").closest('div.control-group').show();
+                                    $("#audio").prop('disabled', false);
+                                    $("#audio").closest('div.control-group').show();
+                                    $("#video").prop('disabled', false);
+                                    $("#video").closest('div.control-group').show();
+                                    $("#locationname").prop('disabled', false);
+                                    $("#userlat").prop('disabled', false);
+                                    $("#userlong").prop('disabled', false);
+                                    $("#locationname").closest('div.control-group').show();
+                                    $("#pickLocation").show();
+                                    $("#status").prop('disabled', true);
+                                    $("#status").closest('div.control-group').hide();
                                     break;
 
                                 case 'getContacts':
@@ -912,12 +1114,17 @@ class Whatsapp
                             }
                         }
 
-                        $("#to").chosen({
-                            create_option: true,
-                            persistent_create_option: true,
-                            no_results_text: "Can't Find:",
-                            create_option_text: 'Click to Add '
-                        });
+                        function createChosen() {
+                            $('#to_chzn').remove();
+                            $('#to').removeClass('chzn-done');
+                            $("#to").chosen({
+                                create_option: true,
+                                persistent_create_option: true,
+                                no_results_text: "Can't Find:",
+                                create_option_text: 'Click to Add '
+                            });
+                        }
+                        ;
 
                         $("img").on('click', function() {
                             var txtToAdd = this.outerHTML;
@@ -1021,7 +1228,7 @@ class Whatsapp
                                 $(this).replaceWith('##' + emojiUnicode + '##');
                             });
                             //Replace all BR's with line breaks.
-                            var message = $('#faketextbox').html().replace(/<br\s?\/?>/g,"\n");
+                            var message = $('#faketextbox').html().replace(/<br\s?\/?>/g, "\n");
                             //Copy the corrected message text to our hidden input field to be serialised.
                             $('#message').val($('#faketextbox').html(message).text());
                             //Replace the corrected text with the original html so it shows properly on a browser.
@@ -1076,8 +1283,8 @@ class Whatsapp
                                 }
                             },
                             success: function(label) {
-                                $("#"+label[0].htmlFor).closest('.control-group').addClass('success');
-                                $("#"+label[0].htmlFor).closest('.control-group').removeClass('error');
+                                $("#" + label[0].htmlFor).closest('.control-group').addClass('success');
+                                $("#" + label[0].htmlFor).closest('.control-group').removeClass('error');
                                 if (label[0].htmlFor === 'to') {
                                     $('div#to_chzn a').addClass('success');
                                     $('div#to_chzn a').removeClass('error');
@@ -1177,6 +1384,7 @@ class Whatsapp
                                         <select id="action" name="action">
                                             <option value="sendMessage">Send a Message</option>
                                             <option value="updateStatus">Update Status</option>
+                                            <option value="sendBroadcast">Send Broadcast</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1189,7 +1397,7 @@ class Whatsapp
                                         <select id="from" name="from" placeholder="Choose who to send as...">
                                             <option value="">Choose Sender...</option> 
                                             <?php
-                                            foreach ($this->config as $key => $value) {
+                                            foreach (array_keys($this->config) as $key) {
                                                 if ($key !== 'webpassword') {
                                                     echo "<option value='$key'>$key</option>";
                                                 }
@@ -1204,7 +1412,7 @@ class Whatsapp
                                 <div class="controls">
                                     <div class="input-prepend">
                                         <span class="add-on"><i class="icon-user"></i></span>
-                                        <select id="to" name="to" data-placeholder="Choose a person/group..">
+                                        <select id="to" name="to[]" data-placeholder="Choose a person/group..">
                                         </select>
                                     </div>
                                 </div>
@@ -1443,6 +1651,6 @@ class Whatsapp
         <?php
         return ob_get_clean();
     }
+
 }
 ?>
-
