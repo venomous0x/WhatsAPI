@@ -16,8 +16,8 @@ function fgets_u($pStdn)
 }
 
 $nickname = "WhatsAPI Test";
-$sender = 	""; // Mobile number with country code (but without + or 00)
-$imei = 	""; // MAC Address for iOS IMEI for other platform (Android/etc)
+$sender = 	""; // 659820401
+$imei = 	""; // 354915058144222/01
 
 if ($argc < 2) {
     echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>] [-set <status>]\n";
