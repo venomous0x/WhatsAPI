@@ -31,8 +31,8 @@ class WhatsProt
     // The check credentials host.
     const _whatsAppCheHost = 'v.whatsapp.net/v2/exist';
     // User agent and token used in reques/registration code.
-    const _whatsAppUserAgent = 'WhatsApp/2.3.53 S40Version/14.26 Device/Nokia302';
-    const _whatsAppToken = 'PdA2DJyKoUrwLw1Bg6EIhzh502dF9noR9uFCllGk1354754753509';
+    const _whatsAppUserAgent = 'WhatsApp/2.9.4 WP7/7.10.8858 Device/HTC-HTC-H0002';
+    const _whatsAppToken = 'Od52pFozHNWF9XbTN5lrqDtnsiZGL2G3l9yw1GiQ21a31a2d9dbdc9a8ce324ef2df918064fd26e30a';
 
     // The upload host.
     const _whatsAppUploadHost = 'https://mms.whatsapp.net/client/iphone/upload.php';
