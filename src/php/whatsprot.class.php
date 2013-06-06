@@ -722,6 +722,12 @@ class WhatsProt
         {
             //upload new file
             $json = WhatsMediaUploader::pushFile($node, $messageNode, $this->_mediafileinfo, $this->_phoneNumber);
+            
+            if(!$json)
+            {
+                //failed upload
+                return false;
+            }
 
             $url = $json->url;
             $filesize = $json->size;
