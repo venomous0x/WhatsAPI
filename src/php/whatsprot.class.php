@@ -690,6 +690,32 @@ class WhatsProt
     }
 
     /**
+     * Processes received picture node
+     *
+     * @param $node
+     *  ProtocolNode containing the picture
+     */
+    protected function processProfilePicture($node)
+    {
+        $pictureNode = $node->getChild("picture");
+
+        if ($pictureNode != null) {
+            $type = $pictureNode->getAttribute("type");
+            $data = $pictureNode->_data;
+            if ($type == "preview") {
+                $filename = "pictures/preview_" . $node->getAttribute("from") . ".jpg";
+            } else {
+                $filename = "pictures/" . $node->getAttribute("from") . ".jpg";
+            }
+            $fp = @fopen($filename, "w");
+            if ($fp) {
+                fwrite($fp, $data);
+                fclose($fp);
+            }
+        }
+    }
+
+    /**
      * Process media upload response
      *
      * @param $node
@@ -763,6 +789,37 @@ class WhatsProt
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, NULL, $icon);
         $this->SendMessageNode($to, $mediaNode);
+    }
+
+    /**
+     * Process and save media image
+     *
+     * @param $node
+     * ProtocolNode containing media
+     */
+    protected function processMediaImage($node)
+    {
+        $media = $node->getChild("media");
+        if ($media != null) {
+            $filename = $media->getAttribute("file");
+            $url = $media->getAttribute("url");
+
+            //save thumbnail
+            $data = $media->_data;
+            $fp = @fopen("media/thumb_" . $filename, "w");
+            if ($fp) {
+                fwrite($fp, $data);
+                fclose($fp);
+            }
+
+            //download and save original
+            $data = file_get_contents($url);
+            $fp = @fopen("media/" . $filename, "w");
+            if ($fp) {
+                fwrite($fp, $data);
+                fclose($fp);
+            }
+        }
     }
 
     /**
@@ -1158,9 +1215,63 @@ class WhatsProt
      */
     public function Message($to, $txt)
     {
+        $txt = $this->parseForEmojis($txt);
         $bodyNode = new ProtocolNode("body", NULL, NULL, $txt);
         $this->SendMessageNode($to, $bodyNode);
     }
+
+    /**
+     * Parse the message text for emojis
+     *
+     * This will look for special strings in the message text
+     * that need to be replaced with a unicode character to show
+     * the corresponding emoji.
+     *
+     * Emojis should be entered in the message text either as the
+     * correct unicode character directly, or if this isn't possible,
+     * by putting a placeholder of ##unicodeNumber## in the message text.
+     * eg:
+     * ##1f604## this will show the smiling face
+     * ##1f1ec_1f1e7## this will show the UK flag.
+     *
+     * Notice that if 2 unicode characters are required they should be joined
+     * with an underscore.
+     *
+     *
+     * @param string $txt
+     * The message to be parsed for emoji code.
+     *
+     * @return string
+     */
+    private function parseForEmojis($txt)
+    {
+        $matches = null;
+        preg_match_all('/##(.*?)##/', $txt, $matches, PREG_SET_ORDER);
+        if (is_array($matches)) {
+            foreach ($matches as $emoji) {
+                $txt = str_ireplace($emoji[0], $this->unichr((string) $emoji[1]), $txt);
+            }
+        }
+        return $txt;
+    }
+
+    /**
+     * Creates the correct unicode character from the unicode code point
+     *
+     * @param int $int
+     * @return string
+     */
+    private function unichr($int)
+    {
+        $string = null;
+        $multichars = explode('_', $int);
+
+        foreach ($multichars as $char) {
+            $string .= mb_convert_encoding('&#' . intval($char, 16) . ';', 'UTF-8', 'HTML-ENTITIES');
+        }
+        return $string;
+    }
+
 
     /**
      * Send an image file to group/user
@@ -1418,11 +1529,13 @@ class WhatsProt
 
     /**
      * Send a location to the user/group.
-     *
+     * Receiver will see larger google map
+     * thumbnail of Lat/Long but NO
+     * name/url for location.
      * @param $to
-     *   The reciepient to send.
+     *   The receipient to send.
      * @param $long
-     *   The logitude to send.
+     *   The longitude to send.
      * @param $lat
      *   The latitude to send.
      */
@@ -1440,24 +1553,24 @@ class WhatsProt
 
     /**
      * Send a location to the user/group.
+     * Allows for custom name and URL to
+     * location to be set by user.
      *
      * @param $to
-     *   The reciepient to send.
+     *   The receipient to send.
      * @param $url
      *   The google maps place url.
      * @param $long
-     *   The logitude to send.
+     *   The longitude to send.
      * @param $lat
      *   The latitude to send.
      * @param $name
      *   The google maps place name.
-     * @param $image
-     *   The google maps place image.
      *
      * @see: https://maps.google.com/maps/place?cid=1421139585205719654
      * @todo: Add support for only pass as argument the place id.
      */
-    public function Place($to, $url, $long, $lat, $name, $image)
+    public function Place($to,$long, $lat, $name, $url = null)
     {
         $mediaHash = array();
         $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
@@ -1465,15 +1578,9 @@ class WhatsProt
         $mediaHash['url'] = $url;
         $mediaHash['latitude'] = $lat;
         $mediaHash['longitude'] = $long;
+        $mediaHash['name'] = $name;
 
-        if ($image = file_get_contents($file))
-        {
-            $icon = createVideoIcon($image);
-        } else {
-            $icon = giftThumbnail();
-        }
-
-        $mediaNode = new ProtocolNode("media", $mediaHash, NULL, $icon);
+        $mediaNode = new ProtocolNode("media", $mediaHash, NULL, NULL);
         $this->SendMessageNode($to, $mediaNode);
     }
 
@@ -1613,15 +1720,13 @@ class WhatsProt
             'c' => 'cookie',
         );
 
-        if($this->_debug)
-        {
+        if ($this->_debug) {
             print_r($query);
         }
 
         $response = $this->getResponse($host, $query);
 
-        if($this->_debug)
-        {
+        if ($this->_debug) {
             print_r($response);
         }
 
