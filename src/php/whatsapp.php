@@ -59,7 +59,6 @@ $config['webpassword'] = 'MakeUpPassword';
 //    'emailPassword' => 'gmailpassword'
 //);
 
-
 $config['YOURNAME'] = array(
     'id' => '11:11:11:11:11:11',
     'fromNumber' => '441234567890',
@@ -716,23 +715,25 @@ class Whatsapp
             <head>
                 <meta charset="utf-8">
                 <title>Personal Whatsapp Login</title>
-                <meta id="viewport" name="viewport" content="width=200">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <meta name="description" content="">
                 <meta name="author" content="">
 
                 <!-- Styles -->
-                <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap.min.css" rel="stylesheet">
+                <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap.min.css" rel="stylesheet">
                 <style type="text/css">
                     body {
                         padding-top: 40px;
                         padding-bottom: 40px;
                         background-color: #f5f5f5;
                     }
-
+                    h2 {
+                        font-size: 24px;
+                    }
                     .form-signin, .error {
-                        max-width: 340px;
-                        padding: 19px 29px 29px;
-                        margin: 0 auto 20px;
+                        max-width: 300px;
+                        padding: 20px 40px;
+                        margin: 10px auto;
                         background-color: #fff;
                         border: 1px solid #e5e5e5;
                         -webkit-border-radius: 5px;
@@ -742,11 +743,6 @@ class Whatsapp
                         -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
                         box-shadow: 0 1px 2px rgba(0,0,0,.05);
                     }
-                    .form-signin .form-signin-heading,
-                    .form-signin .checkbox {
-                        margin-bottom: 10px;
-                    }
-                    .form-signin input[type="text"],
                     .form-signin input[type="password"] {
                         font-size: 16px;
                         height: auto;
@@ -755,16 +751,13 @@ class Whatsapp
                     }
                     .error {
                         background-color: pink;
-                    }
-
-                    .container{
-                        width: 420px;
+                        padding: 10px;
                     }
                 </style>
+                <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
 
                 <!-- Javascript -->
-                <script type="text/javascript" src="//code.jquery.com/jquery-1.8.3.min.js"></script>
-                <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+                <script type="text/javascript" src="//scottjehl.github.io/iOS-Orientationchange-Fix/ios-orientationchange-fix.js"></script>
             </head>
 
             <body>
@@ -778,7 +771,9 @@ class Whatsapp
                         <input type="hidden" name="action" value="login">
                         <h2 class="form-signin-heading">Whatsapp! Login</h2>
                         <input type="password" name="password" class="input-block-level" placeholder="Password">
-                        <button class="btn btn-large btn-primary" type="submit">Sign in</button>
+                        <div class="pagination-centered">
+                            <button class="btn btn-large btn-primary" type="submit">Sign in</button>
+                        </div>
                     </form>
                 </div>
             </body>
@@ -803,31 +798,38 @@ class Whatsapp
             <head>
                 <meta charset="utf-8">
                 <title>Personal Whatsapp</title>
-                <meta id="viewport" name="viewport" content="width=600">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <meta name="description" content="">
                 <meta name="author" content="">
 
                 <!-- Styles -->
-                <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap.min.css" rel="stylesheet">
+                <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap.min.css" rel="stylesheet">
                 <link href="chosen/chosen.css" rel="stylesheet">
                 <link href="emoji/emojisprite.css" rel="stylesheet" type="text/css" />
-
                 <style type="text/css">
                     body {
-                        padding-top: 40px;
-                        padding-bottom: 40px;
                         background-color: #f5f5f5;
                     }
-
+                    .container{
+                        width: 320px;
+                    }
+                    h2 {
+                        font-size: 24px;
+                        text-align: center;
+                        margin:0;
+                    }
+                    #inboundMessage, #results {
+                        padding-left: 5px;
+                    }
                     .form-horizontal {
-                        max-width: 340px;
-                        padding: 19px 29px 29px;
-                        margin: 0 auto 20px;
+                        width: 300px;
+                        padding: 10px 10px 10px 5px;
+                        margin: 5px auto;
                         background-color: #fff;
                         border: 1px solid #e5e5e5;
+                        border-radius: 5px;
                         -webkit-border-radius: 5px;
                         -moz-border-radius: 5px;
-                        border-radius: 5px;
                         -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
                         -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
                         box-shadow: 0 1px 2px rgba(0,0,0,.05);
@@ -835,13 +837,6 @@ class Whatsapp
                     .form-horizontal .form-heading
                     {
                         margin-bottom: 10px;
-                    }
-                    .form-signin input
-                    {
-                        font-size: 16px;
-                        height: auto;
-                        margin-bottom: 15px;
-                        padding: 7px 9px;
                     }
                     .form-horizontal .control-label{
                         width: 45px;
@@ -853,23 +848,30 @@ class Whatsapp
                     .form-horizontal .control-group{
                         margin-bottom: 5px;
                     }
+                    .input-prepend input[id*='user']{
+                        width: 70px;
+                    }
+                    .input-prepend input{
+                        width:206px;
+                    }
+                    .nav-tabs {
+                        border-bottom:transparent;
+                    }
                     #faketextbox {
-                        width: 207px;
                         height: 90px;
                         display:block;
                         background-color: #FFF;
                         padding: 5px;
                         border: 1px solid #e5e5e5;
+                        border-radius: 5px;
                         -webkit-border-radius: 5px;
                         -moz-border-radius: 5px;
-                        border-radius: 5px;
                         -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
                         -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
                         box-shadow: 0 1px 2px rgba(0,0,0,.05);
                         font-size: 13px;
                         overflow-y: auto;
                         white-space: pre-wrap;
-                        float:right;
                     }
                     img.emoji {
                         content: "";
@@ -882,19 +884,17 @@ class Whatsapp
                         -webkit-border-radius: 5px;
                     }
                     .nav-tabs>li>a {
-                        padding: 0 5px;
+                        padding: 0 6px;
                         line-height: 15px;
-                        font-size: 8px;
+                        font-size: 10px;
                     }
                     .emojicontainer{
                         margin-left: 55px;
                         width: 247px;
                     }
-
                     #emojiTab.nav{
                         margin-bottom: 3px;
                     }
-
                     #emojiTab ul.dropdown-menu{
                         min-width:194px;
                         padding: 6px;
@@ -909,11 +909,8 @@ class Whatsapp
                     #pickLocation{
                         margin-left: 12px;
                     }
-                    input[id*='user']{
-                        width: 70px;
-                    }
                     #mapContainer input{
-                        width: 140px;
+                        width: 130px;
                         position: relative;
                         top: 30px;
                         left: 3px;
@@ -954,47 +951,38 @@ class Whatsapp
                     }
                     #formcontrols button{
                         width: 48%;
-                    }
-
-                    .spanspecial {
-                        float: left;
-                        margin-left:0;
-                    }
-
-                    .special{
-                        width:247px;
+                        height: 50px;
                     }
 
                     /* Large desktop */
                     @media (min-width: 1200px) {
+                        #formcontrols button{height: 30px;}
                     }
 
                     /* Portrait tablet to landscape and desktop */
-                    @media (min-width: 768px) and (max-width: 979px) { }
+                    @media (min-width: 768px) and (max-width: 979px) {
+                    }
 
                     /* Landscape phone to portrait tablet */
-                    @media (max-width: 767px) { }
+                    @media (max-width: 767px) {
+                    }
 
                     /* Landscape phones and down */
                     @media (max-width: 480px) {
-                        input[type='text'],input[type='select'],input[type='number'],textarea {font-size:16px;}
-                        .container{
-                            width: 320px;
-                        }
                     }
                 </style>
 
                 <!-- Javascript -->
                 <script type="text/javascript" src="//code.jquery.com/jquery-1.8.3.min.js"></script>
                 <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
-                <!-- Chosen fork from: https://github.com/koenpunt/chosen-->
+                <!-- Chosen "fork" originally from here due ability to add number not found in list: https://github.com/koenpunt/chosen  -->
                 <script type="text/javascript" src="chosen/chosen.jquery.js"></script>
                 <!-- Blockui fork from: http://www.malsup.com/jquery/block/-->
+                <script type="text/javascript" src="//scottjehl.github.io/iOS-Orientationchange-Fix/ios-orientationchange-fix.js"></script>
                 <script type="text/javascript" src="//bainternet-js-cdn.googlecode.com/svn/trunk/js/jQuery%20BlockUI%20Plugin/2.39/jquery.blockUI.js"></script>
                 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
                 <script type="text/javascript" src="//cdn.jsdelivr.net/gmap3/5.0b/gmap3.min.js"></script>
                 <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places" ></script>
-
 
                 <script type="text/javascript">
                     $(document).ready(function() {
@@ -1370,9 +1358,9 @@ class Whatsapp
             <body>
 
                 <div class="container">
+                    <h2 class="form-heading">Whatsapp! Messenger</h2>
                     <form class="form-horizontal" id="whatsappform">
                         <input type="hidden" name='message' id='message'>
-                        <h2 class="form-heading">Whatsapp! Messenger</h2>
                         <div id="results"></div>
                         <div id="inboundMessage"></div>
                         <fieldset>
@@ -1576,10 +1564,7 @@ class Whatsapp
                             <div class="control-group">
                                 <label class="control-label" for="faketextbox">Msg</label>
                                 <div class="controls">
-                                    <div class="input-prepend special">
-                                        <span class="add-on spanspecial"><i class="icon-pencil"></i></span>
-                                        <div contenteditable="true" id="faketextbox" name="faketextbox"></div>
-                                    </div>
+                                    <div contenteditable="true" id="faketextbox" name="faketextbox"></div>
                                 </div>
                             </div>
                             <div class="control-group" style="display:none">
