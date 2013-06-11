@@ -133,11 +133,15 @@ class WhatsProt
      * @return ProtocolNode
      *   Return itself.
      */
-    protected function addFeatures()
+    protected function addFeatures($profileSubscribe)
     {
-        $child = new ProtocolNode("receipt_acks", NULL, NULL, "");
-        $child2 = new ProtocolNode("w:profile:picture", array("type" => "all"), null, '');
-        $parent = new ProtocolNode("stream:features", NULL, array($child, $child2), "");
+        $nodes = array();
+        $nodes[] = new ProtocolNode("receipt_acks", NULL, NULL, "");
+        if($profileSubscribe)
+        {
+            $nodes[] = new ProtocolNode("w:profile:picture", array("type" => "all"), null, '');
+        }
+        $parent = new ProtocolNode("stream:features", NULL, $nodes, "");
 
         return $parent;
     }
@@ -348,7 +352,7 @@ class WhatsProt
                     array_push($this->_messageQueue, $node);
 
                     //do not send received confirmation if sender is yourself
-                    if (!((reset(explode('@',$node->_attributeHash['from']))==$this->_phoneNumber) && ($node->getChild('received') != NULL))){
+                    if (!((reset(explode('@',$node->_attributeHash['from']))==$this->_phoneNumber) || ($node->getChild('received') != NULL))){
                         $this->sendMessageReceived($node);
                     }
 
@@ -607,19 +611,19 @@ class WhatsProt
         $this->doLogin();
     }
 
-    public function LoginWithPassword($password)
+    public function LoginWithPassword($password, $profileSubscribe = false)
     {
         $this->_password = $password;
-        $this->doLogin();
+        $this->doLogin($profileSubscribe);
     }
 
-    protected function doLogin()
+    protected function doLogin($profileSubscribe)
     {
         $this->_writer->resetKey();
         $this->_reader->resetKey();
         $resource = WhatsProt::_device . '-' . WhatsProt::_whatsAppVer . '-' . WhatsProt::_port;
         $data = $this->_writer->StartStream(WhatsProt::_whatsAppServer, $resource);
-        $feat = $this->addFeatures();
+        $feat = $this->addFeatures($profileSubscribe);
         $auth = $this->addAuth();
         $this->sendData($data);
         $this->sendNode($feat);
@@ -987,6 +991,42 @@ class WhatsProt
     {
         $messageNode = new ProtocolNode("presence", array("type" => "active"), null, "");
         $this->sendNode($messageNode);
+    }
+    
+    public function SendLeaveGroups($gjids)
+    {
+        if(!is_array($gjids))
+        {
+            $gjids = array($gjids);
+        }
+        $nodes = array();
+        foreach($gjids as $gjid)
+        {
+            $nodes[] = new ProtocolNode("group", array("id" => $gjid), null, null);
+        }
+        $leave = new ProtocolNode("leave", array("xmlns" => "w:g"), $nodes, null);
+        $hash = array();
+        $hash["id"] = $this->msgId();
+        $hash["to"] = "g.us";
+        $hash["type"] = "set";
+        $node = new ProtocolNode("iq", $hash, array($leave), null);
+        $this->sendNode($node);
+    }
+    
+    public function SendEndGroupChat($gjid)
+    {
+        $gjid = $this->GetJID($gjid);
+        $hash = array();
+        $hash["xmlns"] = "w:g";
+        $hash["action"] = "delete";
+        $child = new ProtocolNode("group", $hash, null, null);
+        
+        $hash = array();
+        $hash["id"] = $this->msgId();
+        $hash["type"] = "set";
+        $hash["to"] = $gjid;
+        $node = new ProtocolNode("iq", $hash, array($child), null);
+        $this->sendNode($node);
     }
 
     /**
