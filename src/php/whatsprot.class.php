@@ -1946,8 +1946,10 @@ class WhatsProt
      * @return array
      *   An associative array with country code and phone number.
      *   - country: The detected country name.
-     *   - cc: The detected country code.
+     *   - cc: The detected country code (phone prefix).
      *   - phone: The phone number.
+     *   - ISO3166: 2-Letter country code
+     *   - ISO639-1: 2-Letter language code
      *   Return FALSE if country code is not found.
      */
     protected function dissectPhone()
@@ -1962,6 +1964,8 @@ class WhatsProt
                         'country' => $data[0],
                         'cc' => $data[1],
                         'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
+                        'ISO3166' => $data[3],
+                        'ISO639-1' => $data[4]
                     );
 
                     $this->eventManager()->fire('onDissectPhone', array_merge(array($this->_phoneNumber), $phone));
