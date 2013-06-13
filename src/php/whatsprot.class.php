@@ -1735,12 +1735,18 @@ class WhatsProt
      *   - param: The missing_param/bad_param.
      *   - retry_after: Waiting time before requesting a new code.
      */
-    public function requestCode($method = 'sms', $countryCode = 'US', $langCode = 'en')
+    public function requestCode($method = 'sms', $countryCode = false, $langCode = false)
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The provided phone number is not valid.');
             return FALSE;
         }
+        
+        if($countryCode === false && $phone->ISO3166 != '') $countryCode = $phone->ISO3166;
+        if($countryCode === false) $countryCode = 'US';
+        
+        if($langCode === false && $phone->ISO639 != '') $langCode = $phone->ISO639;
+        if($langCode === false) $langCode = 'en';
 
         // Build the token.
         $token = md5(WhatsProt::_whatsAppToken . $phone['phone']);
@@ -1946,8 +1952,10 @@ class WhatsProt
      * @return array
      *   An associative array with country code and phone number.
      *   - country: The detected country name.
-     *   - cc: The detected country code.
+     *   - cc: The detected country code (phone prefix).
      *   - phone: The phone number.
+     *   - ISO3166: 2-Letter country code
+     *   - ISO639: 2-Letter language code
      *   Return FALSE if country code is not found.
      */
     protected function dissectPhone()
@@ -1962,6 +1970,8 @@ class WhatsProt
                         'country' => $data[0],
                         'cc' => $data[1],
                         'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
+                        'ISO3166' => $data[3],
+                        'ISO639' => $data[4]
                     );
 
                     $this->eventManager()->fire('onDissectPhone', array_merge(array($this->_phoneNumber), $phone));
