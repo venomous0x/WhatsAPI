@@ -1738,7 +1738,7 @@ class WhatsProt
     public function requestCode($method = 'sms', $countryCode = 'US', $langCode = 'en')
     {
         if (!$phone = $this->dissectPhone()) {
-            throw new Exception('The prived phone number is not valid.');
+            throw new Exception('The provided phone number is not valid.');
             return FALSE;
         }
 
