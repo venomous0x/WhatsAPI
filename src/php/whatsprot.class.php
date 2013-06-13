@@ -1735,12 +1735,18 @@ class WhatsProt
      *   - param: The missing_param/bad_param.
      *   - retry_after: Waiting time before requesting a new code.
      */
-    public function requestCode($method = 'sms', $countryCode = 'US', $langCode = 'en')
+    public function requestCode($method = 'sms', $countryCode = false, $langCode = false)
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The prived phone number is not valid.');
             return FALSE;
         }
+        
+        if($countryCode === false && $phone->ISO3166 != '') $countryCode = $phone->ISO3166;
+        if($countryCode === false) $countryCode = 'US';
+        
+        if($langCode === false && $phone->ISO639 != '') $langCode = $phone->ISO639;
+        if($langCode === false) $langCode = 'en';
 
         // Build the token.
         $token = md5(WhatsProt::_whatsAppToken . $phone['phone']);
