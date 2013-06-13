@@ -5,17 +5,9 @@
 //$wasync = new WhatsAppContactSync($username, $password, contacts);
 //$wacontacts = $wasync->executeSync();
 //
-//$username = phonenumber (*see NOTE*)
+//$username = phonenumber
 //$password = base64 encoded password
 //$contact = single phonenumber or array of phonenumbers
-//
-//NOTE:
-//contact phonenumber must be either without cc or with cc and leading +
-//e.g.
-//  "650568134" (will use same country code as you)
-//  or
-//  "+31650568134" (uses specified country code [NL])
-//
 //
 //this class will only return existing whatsapp accounts
 //return value on success example:
@@ -47,6 +39,7 @@ class WhatsAppContactSync
     protected $_username;
     protected $_password;
     protected $_contacts = array();
+    protected $debug = false;
     
     protected function _getCnonce()
     {
@@ -73,15 +66,11 @@ class WhatsAppContactSync
         //generate auth string
         $cnonce = $this->_getCnonce();
         $nc = "00000001";
-        $realm = "s.whatsapp.net";
-        $qop = "auth";
         $digestUri = "WAWA/s.whatsapp.net";
-        $charSet = "utf-8";
-        $authMethod = "X-WAWA";
         $credentials = $this->_username . ":s.whatsapp.net:";
         $credentials .= $this->_password;
         $response = md5(md5(md5($credentials, true) . ":$nonce:" . $cnonce) . ":$nonce:" . $nc . ":" . $cnonce . ":auth:" . md5("AUTHENTICATE:" . $digestUri));
-        return "$authMethod:username=\"" . $this->_username . "\",realm=\"$realm\",nonce=\"$nonce\",cnonce=\"$cnonce\",nc=\"$nc\",qop=\"auth\",digest-uri=\"$digestUri\",response=\"$response\",charset=\"utf-8\"";
+        return "X-WAWA:username=\"" . $this->_username . "\",realm=\"s.whatsapp.net\",nonce=\"$nonce\",cnonce=\"$cnonce\",nc=\"$nc\",qop=\"auth\",digest-uri=\"$digestUri\",response=\"$response\",charset=\"utf-8\"";
     }
     
     protected function _curlRequest($url, $headers, $postfields = false)
@@ -92,7 +81,7 @@ class WhatsAppContactSync
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_VERBOSE, 1);
+        curl_setopt($ch, CURLOPT_VERBOSE, 0);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_HEADER, 1);
         if($postfields)
@@ -108,6 +97,7 @@ class WhatsAppContactSync
     {
         //process curl response
         $return = array();
+        $return["data"] = $result;
         
         $lines = explode("\n", $result);
         foreach($lines as $line)
@@ -145,7 +135,7 @@ class WhatsAppContactSync
         return $return;
     }
     
-    public function __construct($username, $password, $contact)
+    public function __construct($username, $password, $contact, $debug = false)
     {
         $this->_username = $username;
         $this->_password = base64_decode($password);
@@ -155,6 +145,7 @@ class WhatsAppContactSync
             $contact = array($contact);
         }
         $this->_contacts = $contact;
+        $this->debug = $debug;
     }
     
     public function executeSync()
@@ -172,6 +163,11 @@ class WhatsAppContactSync
             $postfields = "ut=all&t=c";
             foreach($this->_contacts as $contact)
             {
+                if(!stristr($contact, "+"))
+                {
+                    //automatically add leading plus sign
+                    $contact = "+" . $contact;
+                }
                 $postfields .= "&u[]=" . urlencode($contact);
             }
             $headers = $this->_getHeaders($result["nonce"], strlen($postfields));
@@ -179,28 +175,49 @@ class WhatsAppContactSync
             $result = $this->_processCurlResponse($result);
             if(isset($result["obj"]))
             {
+                //succes!
                 return($this->_processJSONResponse($result["obj"]));
             }
             elseif(isset($result["message"]))
             {
+                if($this->debug)
+                {
+                    throw new Exception("Received unexpected message: " . $result["message"]);
+                }
                 return $result["message"];
             }
             elseif(isset($result["error"]))
             {
+                if($this->debug)
+                {
+                    throw new Exception("Received error: " . $result["error"]);
+                }
                 return $result["error"];
             }
             else
             {
+                if($this->debug)
+                {
+                    throw new Exception("Received unknown response: " . print_r($result["data"], true));
+                }
                 return false;
             }
         }
         elseif(isset($result["error"]))
         {
             //error
+            if($this->debug)
+            {
+                throw new Exception("Received error: " . $result["error"]);
+            }
             return $result["error"];
         }
         else
         {
+            if($this->debug)
+            {
+                throw new Exception("Received unknown response: " . print_r($result["data"], true));
+            }
             return false;
         }
     }

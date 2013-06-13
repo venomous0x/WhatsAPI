@@ -6,7 +6,7 @@
  */
 
 /**
- * 
+ *
  */
 class WhatsAppEvent
 {
@@ -14,7 +14,7 @@ class WhatsAppEvent
 
     /**
      * Constructor.
-     * 
+     *
      * @param string $event
      *   Name of the event (optional).
      */
@@ -25,23 +25,23 @@ class WhatsAppEvent
             $this->register($event);
         }
     }
-  
+
     /**
      * Registers an event.
-     * 
+     *
      * @param string $event
      *   Name of the event.
      */
     protected function register($event)
     {
-        if (empty($this->event_callbacks[$event])) {
-            $this->event_callbacks[$event] = array();
+        if (empty(self::$event_callbacks[$event])) {
+            self::$event_callbacks[$event] = array();
         }
     }
 
     /**
      * Binds a callback to a event.
-     * 
+     *
      * @param string $event
      *   Name of the event.
      * @param string $callback
@@ -49,12 +49,12 @@ class WhatsAppEvent
      */
     public function bind($event, $callback)
     {
-        $this->event_callbacks[$event][] = $callback;
+        self::$event_callbacks[$event][] = $callback;
     }
 
     /**
      * Executes all the binded callbacks when the event is fired.
-     * 
+     *
      * @param string $event
      *   Name of the event.
      * @param array $arguments
@@ -62,8 +62,8 @@ class WhatsAppEvent
      */
     public function fire($event, $arguments = array())
     {
-        if (!empty($this->event_callbacks[$event])) {
-            foreach ($this->event_callbacks[$event] as $callback) {
+        if (!empty(self::$event_callbacks[$event])) {
+            foreach (self::$event_callbacks[$event] as $callback) {
                 call_user_func_array($callback, $arguments);
             }
         }
