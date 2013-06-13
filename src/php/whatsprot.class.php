@@ -1742,10 +1742,10 @@ class WhatsProt
             return FALSE;
         }
         
-        if($countryCode === false && $phone->ISO3166 != '') $countryCode = $phone->ISO3166;
+        if($countryCode === false && $phone['ISO3166'] != '') $countryCode = $phone['ISO3166'];
         if($countryCode === false) $countryCode = 'US';
         
-        if($langCode === false && $phone->ISO639 != '') $langCode = $phone->ISO639;
+        if($langCode === false && $phone['ISO639'] != '') $langCode = $phone['ISO639'];
         if($langCode === false) $langCode = 'en';
 
         // Build the token.
