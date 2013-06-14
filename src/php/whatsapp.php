@@ -976,7 +976,7 @@ class Whatsapp
                 <script type="text/javascript" src="//code.jquery.com/jquery-1.8.3.min.js"></script>
                 <script type="text/javascript" src="//ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js"></script>
                 <!-- Chosen "fork" originally from here due ability to add number not found in list: https://github.com/koenpunt/chosen  -->
-                <script type="text/javascript" src="chosen/chosen.jquery.js"></script>
+                <script type="text/javascript" src="chosen/chosen.jquery.min.js"></script>
                 <!-- Blockui fork from: http://www.malsup.com/jquery/block/-->
                 <script type="text/javascript" src="//scottjehl.github.io/iOS-Orientationchange-Fix/ios-orientationchange-fix.js"></script>
                 <script type="text/javascript" src="//bainternet-js-cdn.googlecode.com/svn/trunk/js/jQuery%20BlockUI%20Plugin/2.39/jquery.blockUI.js"></script>
