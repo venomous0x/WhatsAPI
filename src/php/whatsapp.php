@@ -263,10 +263,12 @@ class GoogleContacts implements Contacts
  * Start session so we don't always have to
  * log in.
  */
-$cookieParams = session_get_cookie_params(); // Gets current cookies params.
-session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], false, true);
-session_name('wa_session'); // Sets the session name to the one set above.
-session_start(); // Start the php session
+if (!isset($_SESSION)) {
+    $cookieParams = session_get_cookie_params(); // Gets current cookies params.
+    session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], false, true);
+    session_name('wa_session'); // Sets the session name to the one set above.
+    session_start(); // Start the php session
+}
 
 /**
  * Detect how the script was called. If it was POSTED too, we have
@@ -276,7 +278,7 @@ session_start(); // Start the php session
 $whatsapp = new Whatsapp($config);
 
 if ($_SERVER['REQUEST_METHOD'] !== "POST") {
-    if ($_SESSION['logged_in'] !== true) {
+    if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] !== true) {
         exit($whatsapp->showWebLoginForm());
     }
 }
@@ -419,7 +421,7 @@ class Whatsapp
                 break;
 
             default:
-                if ($_SESSION['logged_in'] == true) {
+                if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
                     exit($this->showWebForm());
                 }
                 exit($this->showWebLoginForm());
@@ -790,8 +792,10 @@ class Whatsapp
     private function showWebForm()
     {
         ob_start();
-        session_name('wa_session');
-        session_start(); // Start the php session
+        if (!isset($_SESSION)) {
+            session_name('wa_session');
+            session_start(); // Start the php session
+        }
         ?>
         <!DOCTYPE html>
         <html lang="en">
