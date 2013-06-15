@@ -579,7 +579,7 @@ class Whatsapp
             $this->wa->sendStatusUpdate($this->inputs['status']);
             exit(json_encode(array(
                 "success" => true,
-                "data" => "Status Updated to: {$this->inputs['status']}",
+                "data" => "<br />Your status was updated to - <b>{$this->inputs['status']}</b>",
                 "messages" => $this->messages
             )));
         } else {
