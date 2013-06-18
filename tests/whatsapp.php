@@ -18,6 +18,7 @@ function fgets_u($pStdn)
 $nickname = "WhatsAPI Test";
 $sender = 	""; // Mobile number with country code (but without + or 00)
 $imei = 	""; // MAC Address for iOS IMEI for other platform (Android/etc)
+$password =     ""; // Password you received from WhatsApp
 
 if ($argc < 2) {
     echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>] [-set <status>]\n";
@@ -39,7 +40,7 @@ echo "[] Logging in as '$nickname' ($sender)\n";
 $wa = new WhatsProt($sender, $imei, $nickname, TRUE);
 
 $wa->Connect();
-$wa->Login();
+$wa->LoginWithPassword($password);
 
 if ($_SERVER['argv'][1] == "-i") {
     echo "\n[] Interactive conversation with $dst:\n";
@@ -63,17 +64,13 @@ if ($_SERVER['argv'][1] == "-i") {
                     $dst = trim(strstr($line, ' ', FALSE));
                     echo "[] Interactive conversation with $dst:\n";
                     break;
-                case "/accountinfo":
-                    echo "[] Account Info: ";
-                    $wa->accountInfo();
-                    break;
                 case "/lastseen":
                     echo "[] Request last seen $dst: ";
-                    $wa->RequestLastSeen(time()."-1", "$dst");
+                    $wa->RequestLastSeen($dst);
                     break;
                 default:
                     echo "[] Send message to $dst: $line\n";
-                    $wa->Message(time()."-1", $dst , $line);
+                    $wa->Message($dst , $line);
                     break;
             }
         }
@@ -94,15 +91,15 @@ if ($_SERVER['argv'][1] == "-l") {
 
 if ($_SERVER['argv'][1] == "-set") {
     echo "\n[] Setting status:\n";
-    $wa->sendStatusUpdate(1,$_SERVER['argv'][2]);
+    $wa->sendStatusUpdate($_SERVER['argv'][2]);
     exit(0);
 }
 
 echo "\n[] Request last seen $dst: ";
-$wa->RequestLastSeen(time()."-1", $dst);
+$wa->RequestLastSeen($dst);
 
 echo "\n[] Send message to $dst: $msg\n";
-$wa->Message(time()."-1", $dst , $msg);
+$wa->Message($dst , $msg);
 echo "\n";
 
 ?>

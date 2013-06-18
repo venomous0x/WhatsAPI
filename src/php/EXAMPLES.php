@@ -10,23 +10,26 @@ require_once('whatsprot.class.php');
 
 /**
  * Config data.
- * WhatsApp now changes your password everytime you use this.
- * Do not worry, WhatsAPI saves it for you every time.
  */
 $userPhone        = '34666554433';       # Telephone number including the country code without '+' or '00'.
+
 $userIdentity     = '00:00:00:00:00:00'; # This is tipically the IMEI number.
                                          # If you are using an iOS device you should input your WLAN MAC address.
+
 $userName         = 'John Doe';          # This is the username displayed by WhatsApp clients.
 
 $destinationPhone = '34666443322';       # Destination telephone number including the country code without '+' or '00'.
                                          # For groups: [phone number]-[group id].
+
+$password         = 'fgdfaughregnfagun=' # Password you received from WhatsApp
+
 $debug = TRUE;
 
 # Create a instance of WhastPort.
 $w = new WhatsProt($userPhone, $userIdentity, $userName, $debug);
 
 # How to create an account __ONLY__ if you do not have a associated to our phone number.
-# You can test your credentials with: $w->checkCredentials();
+# You can test your credentials with: $w->checkCredentials() (ONLY IF NUMBER IS REGISTERED THROUGH WhatsAPI);
 
 /**
  * First request a registration code from WhatsApp.
@@ -46,10 +49,10 @@ $w = new WhatsProt($userPhone, $userIdentity, $userName, $debug);
  *   - method: Used method.
  *   - retry_after: Waiting time before requesting a new code.
  */
-$w->requestCode('sms', 'ES', 'es');
+$w->requestCode();
 
 /**
- * Second register account on WhatsApp using the provided code with $w->requestCode('sms', 'ES', 'es');.
+ * Second register account on WhatsApp using the provided code with $w->requestCode();.
  *
  * @param integer $code
  *   Numeric code value provided on requestCode().
@@ -71,8 +74,8 @@ $w->registerCode('123456');
 
 # Connect to WhatsApp servers.
 $w->Connect();
-# Now Login function sends Nickname and (Available) Presence.
-$w->Login();
+# Now LoginWithPassword function sends Nickname and (Available) Presence.
+$w->LoginWithPassword($password);
 
 # Send messages:
 
@@ -92,9 +95,9 @@ $w->Message($destinationPhone, 'This is an example!');
  * @param $to
  *   The reciepient to send.
  * @param $file
- *   The url/uri to the image.
+ *   The path/url/uri to the image.
  */
-$w->MessageImage($destinationPhone, 'http://example.com/photo.jpg');
+$w->MessageImage($destinationPhone, 'demo/x3.jpg');
 
 /**
  * Send a video to the user/group.
@@ -102,7 +105,7 @@ $w->MessageImage($destinationPhone, 'http://example.com/photo.jpg');
  * @param $to
  *   The reciepient to send.
  * @param $file
- *   The url/uri to the MP4 video.
+ *   The path/url/uri to the MP4 video.
  */
 $w->MessageVideo($destinationPhone, 'http://example.com/video.mp4');
 
@@ -112,7 +115,7 @@ $w->MessageVideo($destinationPhone, 'http://example.com/video.mp4');
  * @param $to
  *   The reciepient to send.
  * @param $file
- *   The url/uri to the 3GP audio.
+ *   The path/url/uri to the 3GP audio.
  */
 $w->MessageAudio($destinationPhone, 'http://example.com/audio.3gp');
 
@@ -163,5 +166,6 @@ while (TRUE) {
     $msgs = $w->GetMessages();
     foreach ($msgs as $m) {
         # process inbound messages
+        sleep(1);
     }
 }
