@@ -352,7 +352,7 @@ class WhatsProt
                     array_push($this->_messageQueue, $node);
 
                     //do not send received confirmation if sender is yourself
-                    if (!((reset(explode('@',$node->_attributeHash['from']))==$this->_phoneNumber) || ($node->getChild('received') != NULL))){
+                    if (strpos($node->_attributeHash['from'], $this->_phoneNumber.'@'.WhatsProt::_whatsAppServer) === false || ($node->getChild('received') != NULL)) {
                         $this->sendMessageReceived($node);
                     }
 
