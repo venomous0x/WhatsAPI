@@ -4,16 +4,17 @@ Interface to WhatsApp Messenger
 
 ----------
 
-####Note June 7th, 2013####
-*venomous0x has been inactive for many months now and all the latest changes/fixes/updates are pushed to this repository instead. So I'll try to promote using this as the main repository for WhatsAPI instead as the original from venomous0x until they return.*	
+####Note June 18th, 2013####
 
-*\- shirioko*
-
-*Big thanks to:*
+*Big overhaul in the code. Big thanks to:*
+- *[Ali Hubail](https://github.com/hubail) and*
+- *[Ahmed Moh'd](fb.com/ahmed.mhd) for making this project happen (and adding me as a member)*
 - *[Jannik Vogel](https://github.com/JayFoxRox) for helping me retrieve the latest WhatsApp token, someone should write a book about it some day..*
 - *[Tarek Galal](https://github.com/tgalal) for providing the latest WhatsApp functionality in yowsup*
 - *[Atans](https://github.com/atans) and*
 - *[Jonathan Williamson](https://github.com/jonnywilliamson) for additional fixes*
+
+*\- [shirioko](https://github.com/shirioko)*
 
 
 ----------
