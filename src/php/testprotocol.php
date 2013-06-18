@@ -1,15 +1,22 @@
 <?php
-require 'whatsprot.class.php';
+require_once 'whatsprot.class.php';
 # phone number, IMEI, and name, the IMEI.
 $options = getopt("d::", array("debug::"));
 $debug = (array_key_exists("debug", $options) || array_key_exists("d", $options)) ? TRUE : FALSE;
-# Target phone number
-$target = "**********";
 
-$w = new WhatsProt("************", "********", "John Doe", true);
+
+
+$username = "**your phone number**";
+$identity = "**your IMEI code**";
+$password = "**server generated whatsapp password**";
+$nickname = "**your nickname**";
+$target = "**contact's phone number**";
+
+
+$w = new WhatsProt($username, $identity, $nickname, $debug);
 $w->Connect();
-# Now Login function sends Nickname and (Available) Presence
-$w->Login();
+# Now LoginWithPassword function sends Nickname and (Available) Presence
+$w->LoginWithPassword($password);
 
 //retrieve large profile picture/ output is in /src/php/pictures/
 $w->GetProfilePicture($target, true);
