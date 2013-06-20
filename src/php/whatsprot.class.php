@@ -1835,6 +1835,11 @@ class WhatsProt
 
         if ($response->status != 'ok') {
             $this->eventManager()->fire('onFailedRegisterCode', array($this->_phoneNumber, $response->status, $response->reason, $response->retry_after));
+            if($this->_debug)
+            {
+                print_r($query);
+                print_r($response);
+            }
             throw new Exception('An error occurred registering the registration code from WhatsApp.');
         } else {
             $this->eventManager()->fire('onRegisterCode', array(
