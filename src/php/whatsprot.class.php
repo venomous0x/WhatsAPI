@@ -518,25 +518,25 @@ class WhatsProt
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0) {
                     $this->_serverReceivedId = $node->_attributeHash['id'];
-                    if (strcmp($node->_children[0]->_tag, "query") == 0) {
+                    if ($node->_children[0] != null && strcmp($node->_children[0]->_tag, "query") == 0) {
                         array_push($this->_messageQueue, $node);
                     }
-                    if (strcmp($node->_children[0]->_tag, "picture") == 0) {
+                    if ($node->_children[0] != null && strcmp($node->_children[0]->_tag, "picture") == 0) {
                         $this->eventManager()->fire("onProfilePicture", array(
                             $node->getAttribute("from"),
                             $node->getChild("picture")->getAttribute("type"),
                             $node->getChild("picture")->_data
                         ));
                     }
-                    if (strcmp($node->_children[0]->_tag, "media") == 0) {
+                    if ($node->_children[0] != null && strcmp($node->_children[0]->_tag, "media") == 0) {
                         $this->processUploadResponse($node);
                     }
-                    if (strcmp($node->_children[0]->_tag, "duplicate") == 0) {
+                    if ($node->_children[0] != null && strcmp($node->_children[0]->_tag, "duplicate") == 0) {
                         $this->processUploadResponse($node);
                     }
                 }
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0) {
-                    if (strcmp($node->_children[0]->_tag, "group") == 0) {
+                    if ($node->_children[0] != null && strcmp($node->_children[0]->_tag, "group") == 0) {
                         if (isset($node->_children[0]->_attributeHash['owner'])) {
                             foreach ($node->_children as $key => $group) {
                                 $this->_groupList[] = array(
@@ -1055,6 +1055,17 @@ class WhatsProt
         $hash["to"] = "g.us";
         $hash["type"] = "set";
         $node = new ProtocolNode("iq", $hash, array($leave), null);
+        $this->sendNode($node);
+    }
+    
+    public function SendGetGroupInfo($gjid)
+    {
+        $child = new ProtocolNode("query", array("xmlns" => "w:g"), null, null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->msgId(),
+            "type" => "get",
+            "to" => $gjid
+        ), array($child), null);
         $this->sendNode($node);
     }
     
