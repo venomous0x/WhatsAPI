@@ -901,6 +901,17 @@ class WhatsProt
         $node = new ProtocolNode("presence", array("type" => "subscribe", "to" => $this->GetJID($to)), NULL, "");
         $this->sendNode($node);
     }
+    
+    public function SendGetClientConfig()
+    {
+        $child = new ProtocolNode("config", array("xmlns" => "urn:xmpp:whatsapp:push"), null, null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->msgId(),
+            "type" => "get",
+            "to" => WhatsProt::_whatsAppServer
+        ), array($child), null);
+        $this->sendNode($node);
+    }
 
     /**
      * Set your profile picture
