@@ -676,6 +676,19 @@ class WhatsProt
 
         return $ret;
     }
+    
+    public function SendGetStatus($jid)
+    {
+        $parts = explode("@", $jid);
+        $to = $parts[0] . "@s.us";
+        $child = new ProtocolNode("action", array("type" => "get"), null, null);
+        $node = new ProtocolNode("message", array(
+            "to" => $to,
+            "type" => "action",
+            "id" => $this->msgId()
+        ), array($child), null);
+        $this->sendNode($node);
+    }
 
     /**
      * Get profile picture of user
