@@ -1121,6 +1121,19 @@ class WhatsProt
         $this->sendNode($node);
     }
     
+    public function SendGetServerProperties()
+    {
+        $child = new ProtocolNode("props", array(
+            "xmlns" => "w"
+        ), null, null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->msgId(),
+            "type" => "get",
+            "to" => "s.whatsapp.net"
+        ), array($child), null);
+        $this->sendNode($node);
+    }
+    
     public function SendEndGroupChat($gjid)
     {
         $gjid = $this->GetJID($gjid);
