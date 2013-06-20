@@ -1106,6 +1106,21 @@ class WhatsProt
         $this->sendNode($node);
     }
     
+    public function SendGetPrivacyList()
+    {
+        $child = new ProtocolNode("list", array(
+            "name" => "default"
+        ), null, null);
+        $child2 = new ProtocolNode("query", array(
+            "xmlns" => "jabber:iq:privacy"
+        ), null, null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->msgId(),
+            "type" => "get"
+        ), array($child, $child2), null);
+        $this->sendNode($node);
+    }
+    
     public function SendEndGroupChat($gjid)
     {
         $gjid = $this->GetJID($gjid);
