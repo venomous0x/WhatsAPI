@@ -1093,6 +1093,19 @@ class WhatsProt
         $this->sendNode($node);
     }
     
+    public function SendGetParticipants($gjid)
+    {
+        $child = new ProtocolNode("list", array(
+            "xmlns" => "w:g"
+        ), null, null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->msgId(),
+            "type" => "get",
+            "to" => $gjid
+        ), array($child), null);
+        $this->sendNode($node);
+    }
+    
     public function SendEndGroupChat($gjid)
     {
         $gjid = $this->GetJID($gjid);
