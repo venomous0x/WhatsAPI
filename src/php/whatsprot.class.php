@@ -479,6 +479,19 @@ class WhatsProt
                         ));
                     }
                 }
+                if ($node->_tag == "presence" && $node->getAttribute("status") == "dirty") {
+                    //clear dirty
+                    $categories = array();
+                    if(count($node->_children) > 0)
+                    foreach($node->_children as $child)
+                    {
+                        if($child->_tag == "category")
+                        {
+                            $categories[] = $child->getAttribute("name");
+                        }
+                    }
+                    $this->SendClearDirty($categories);
+                }
                 if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") !== FALSE && isset($node->_attributeHash['type'])) {
                     $this->eventManager()->fire('onGetPresence', array(
                         $this->_phoneNumber,
@@ -900,6 +913,24 @@ class WhatsProt
     {
         $node = new ProtocolNode("presence", array("type" => "subscribe", "to" => $this->GetJID($to)), NULL, "");
         $this->sendNode($node);
+    }
+    
+    public function SendClearDirty($categories)
+    {
+        $catnodes = array();
+        foreach($categories as $category)
+        {
+            $catnode = new ProtocolNode("category", array("name" => $category), null, null);
+            $catnodes[] = $catnode;
+        }
+        $clean = new ProtocolNode("clean", array("xmlns" => "urn:xmpp:whatsapp:dirty"), $catnodes, null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->msgId(),
+            "type" => "set",
+            "to" => "s.whatsapp.net"
+        ), array($clean), null);
+        $this->sendNode($node);
+        
     }
     
     public function SendGetClientConfig()
