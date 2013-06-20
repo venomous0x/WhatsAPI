@@ -21,7 +21,7 @@ $userName         = 'John Doe';          # This is the username displayed by Wha
 $destinationPhone = '34666443322';       # Destination telephone number including the country code without '+' or '00'.
                                          # For groups: [phone number]-[group id].
 
-$password         = 'fgdfaughregnfagun=' # Password you received from WhatsApp
+$password         = 'fgdfaughregnfagun='; # Password you received from WhatsApp
 
 $debug = TRUE;
 
