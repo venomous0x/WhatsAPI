@@ -1069,6 +1069,30 @@ class WhatsProt
         $this->sendNode($node);
     }
     
+    public function SendGetOwningGroups()
+    {
+        $this->_sendGetGroups("owning");
+    }
+    
+    public function SendGetGroups()
+    {
+        $this->_sendGetGroups("participating");
+    }
+    
+    protected function _sendGetGroups($type)
+    {
+        $child = new ProtocolNode("list", array(
+            "xmlns" => "w:g",
+            "type" => $type
+        ), null, null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->msgId(),
+            "type" => "get",
+            "to" => "g.us"
+        ), array($child), null);
+        $this->sendNode($node);
+    }
+    
     public function SendEndGroupChat($gjid)
     {
         $gjid = $this->GetJID($gjid);
