@@ -1077,7 +1077,7 @@ class WhatsProt
         $node = new ProtocolNode("iq", array(
             "id" => $this->msgId(),
             "type" => "get",
-            "to" => $gjid
+            "to" => $this->GetJID($gjid)
         ), array($child), null);
         $this->sendNode($node);
     }
@@ -1114,7 +1114,7 @@ class WhatsProt
         $node = new ProtocolNode("iq", array(
             "id" => $this->msgId(),
             "type" => "get",
-            "to" => $gjid
+            "to" => $this->GetJID($gjid)
         ), array($child), null);
         $this->sendNode($node);
     }
