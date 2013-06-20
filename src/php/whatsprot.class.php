@@ -919,7 +919,6 @@ class WhatsProt
                 //this is where the fun starts
                 $hash = array();
                 $hash["xmlns"] = "w:profile:picture";
-                $hash["type"] = "image";
                 $picture = new ProtocolNode("picture", $hash, null, $data);
 
                 $hash = array();
