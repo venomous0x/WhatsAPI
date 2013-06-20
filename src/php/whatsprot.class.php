@@ -923,7 +923,6 @@ class WhatsProt
                 $picture = new ProtocolNode("picture", $hash, null, $data);
                 
                 $icon = createIconGD($filepath, 96);
-                $icon = base64_decode($icon);
                 $thumb = new ProtocolNode("picture", array("type" => "preview"), null, $icon);
 
                 $hash = array();
