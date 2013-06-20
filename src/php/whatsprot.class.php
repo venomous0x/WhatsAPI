@@ -1240,34 +1240,6 @@ class WhatsProt
     }
 
     /**
-     * Get a List of all groups user belongs too.
-     *
-     * @param string $type
-     * The type of group you belong to, either
-     * 'participating' or 'owning' .
-     *
-     * @return array
-     * An array with all the groups user is involved with.
-     */
-    public function getGroupList($type = 'participating')
-    {
-        $groupHash = array();
-        $groupHash["xmlns"] = "w:g";
-        $groupHash["type"] = $type;
-        $list = new ProtocolNode("list", $groupHash, NULL, "");
-
-        $setHash = array();
-        $setHash["id"] = $this->msgId();
-        $setHash["type"] = "get";
-        $setHash["to"] = WhatsProt::_whatsAppGroupServer;
-        $groupNode = new ProtocolNode("iq", $setHash, array($list), "");
-        $this->sendNode($groupNode);
-        $this->WaitforServer($setHash["id"]);
-        $group_list = $this->_groupList;
-        return $group_list;
-    }
-
-    /**
      * Add participants to a group.
      *
      * @param string $groupId
