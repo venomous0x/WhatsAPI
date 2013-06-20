@@ -910,6 +910,7 @@ class WhatsProt
      */
     public function SetProfilePicture($filepath)
     {
+        preprocessProfilePicture($filepath);
         $fp = @fopen($filepath, "r");
         if($fp)
         {
@@ -920,12 +921,16 @@ class WhatsProt
                 $hash = array();
                 $hash["xmlns"] = "w:profile:picture";
                 $picture = new ProtocolNode("picture", $hash, null, $data);
+                
+                $icon = createIconGD($filepath, 96);
+                $icon = base64_decode($icon);
+                $thumb = new ProtocolNode("picture", array("type" => "preview"), null, $icon);
 
                 $hash = array();
                 $hash["id"] = $this->msgId();
                 $hash["to"] = $this->GetJID($this->_phoneNumber);
                 $hash["type"] = "set";
-                $node = new ProtocolNode("iq", $hash, array($picture), null);
+                $node = new ProtocolNode("iq", $hash, array($picture, $thumb), null);
 
                 $this->sendNode($node);
             }

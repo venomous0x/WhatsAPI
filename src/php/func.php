@@ -30,6 +30,22 @@ function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output =
     }
 }
 
+function preprocessProfilePicture($path)
+{
+    list($width, $height) = getimagesize($path);
+    if($width != $height)
+    {
+	throw new Exception("Profile picture needs to be square (image is $width x $height)");
+    }
+    if($width > 640)
+    {
+	throw new Exception("Profile picture maximum size of 640 x 640 (image is $width x $height)");
+    }
+    $img = imagecreatefromjpeg($path);
+    imagejpeg($img, $path, 50);
+    imagedestroy($img);
+}
+
 function createIcon($file)
 {
     // @todo: Add support for others methods.
@@ -48,19 +64,19 @@ function createIcon($file)
     }
 }
 
-function createIconGD($file)
+function createIconGD($file, $size = 100)
 {
     list($width, $height) = getimagesize($file);
     if($width > $height)
     {
 	//landscape
-	$nheight = ($height / $width) * 100;
-	$nwidth = 100;
+	$nheight = ($height / $width) * $size;
+	$nwidth = $size;
     }
     else
     {
-	$nwidth = ($width / $height) * 100;
-	$nheight = 100;
+	$nwidth = ($width / $height) * $size;
+	$nheight = $size;
     }
     $image_p = imagecreatetruecolor($nwidth, $nheight);
     $image = imagecreatefromjpeg($file);
