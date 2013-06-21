@@ -117,7 +117,16 @@ class WhatsProt
         $this->_reader = new BinTreeNodeReader($dict);
         $this->_debug = $debug;
         $this->_phoneNumber = $number;
-        $this->_identity = $this->getIdentity($identity);
+        if(strlen($identity) < 32)
+        {
+            //compute md5 identity hash
+            $this->_identity = $this->getIdentity($identity);
+        }
+        else
+        {
+            //use provided identity hash
+            $this->_identity = $identity;
+        }
         $this->_name = $nickname;
         $this->_loginStatus = WhatsProt::_disconnectedStatus;
     }
@@ -609,14 +618,8 @@ class WhatsProt
     /**
      * Logs us in to the server.
      */
-    public function Login($identity = null, $profileSubscribe = false)
+    public function Login($profileSubscribe = false)
     {
-        if($identity != null)
-        {
-            //override default identity generated from IMEI
-            //use in combination with MissVenom or WhtaSNiff
-            $this->_identity = $identity;
-        }
         $this->_accountinfo = (array) $this->checkCredentials();
         if ($this->_accountinfo['status'] == 'ok') {
             $this->_password = $this->_accountinfo['pw'];
