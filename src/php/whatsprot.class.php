@@ -16,9 +16,9 @@ class WhatsProt
     const _whatsAppServer = 's.whatsapp.net';
     const _whatsAppGroupServer = 'g.us';
     // The device name.
-    const _device = 'iPhone';
+    const _device = 'WP7';
     // The WhatsApp version.
-    const _whatsAppVer = '2.8.7';
+    const _whatsAppVer = '2.9.4';
     // The port of the whatsapp server.
     const _port = 5222;
     // The timeout for the connection with the Whatsapp servers.
@@ -268,7 +268,7 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = $this->GetJID($to);
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->msgId();
+        $messageHash["id"] = $this->msgId("message");
         $messageHash["t"] = time();
 
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
@@ -688,7 +688,7 @@ class WhatsProt
         $node = new ProtocolNode("message", array(
             "to" => $to,
             "type" => "action",
-            "id" => $this->msgId()
+            "id" => $this->msgId("message")
         ), array($child), null);
         $this->sendNode($node);
     }
@@ -714,7 +714,7 @@ class WhatsProt
         $picture = new ProtocolNode("picture", $hash, null, null);
 
         $hash = array();
-        $hash["id"] = $this->msgId();
+        $hash["id"] = $this->msgId("getpicture");
         $hash["type"] = "get";
         $hash["to"] = $this->GetJID($number);
         $node = new ProtocolNode("iq", $hash, array($picture), null);
@@ -941,7 +941,7 @@ class WhatsProt
         }
         $clean = new ProtocolNode("clean", array("xmlns" => "urn:xmpp:whatsapp:dirty"), $catnodes, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->msgId(),
+            "id" => $this->msgId("cleardirty"),
             "type" => "set",
             "to" => "s.whatsapp.net"
         ), array($clean), null);
@@ -953,7 +953,7 @@ class WhatsProt
     {
         $child = new ProtocolNode("config", array("xmlns" => "urn:xmpp:whatsapp:push"), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->msgId(),
+            "id" => $this->msgId("sendconfig"),
             "type" => "get",
             "to" => WhatsProt::_whatsAppServer
         ), array($child), null);
@@ -995,7 +995,7 @@ class WhatsProt
                 $thumb = new ProtocolNode("picture", array("type" => "preview"), null, $icon);
 
                 $hash = array();
-                $hash["id"] = $this->msgId();
+                $hash["id"] = $this->msgId("setphoto");
                 $hash["to"] = $this->GetJID($jid);
                 $hash["type"] = "set";
                 $node = new ProtocolNode("iq", $hash, array($picture, $thumb), null);
@@ -1047,7 +1047,7 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = 's.us';
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->msgId();
+        $messageHash["id"] = $this->msgId("sendstatus");
 
         $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
         $this->sendNode($messsageNode);
@@ -1078,7 +1078,7 @@ class WhatsProt
         }
         $leave = new ProtocolNode("leave", array("xmlns" => "w:g"), $nodes, null);
         $hash = array();
-        $hash["id"] = $this->msgId();
+        $hash["id"] = $this->msgId("leavegroups");
         $hash["to"] = "g.us";
         $hash["type"] = "set";
         $node = new ProtocolNode("iq", $hash, array($leave), null);
@@ -1089,7 +1089,7 @@ class WhatsProt
     {
         $child = new ProtocolNode("query", array("xmlns" => "w:g"), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->msgId(),
+            "id" => $this->msgId("getgroupinfo"),
             "type" => "get",
             "to" => $this->GetJID($gjid)
         ), array($child), null);
@@ -1113,7 +1113,7 @@ class WhatsProt
             "type" => $type
         ), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->msgId(),
+            "id" => $this->msgId("getgroups"),
             "type" => "get",
             "to" => "g.us"
         ), array($child), null);
@@ -1126,7 +1126,7 @@ class WhatsProt
             "xmlns" => "w:g"
         ), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->msgId(),
+            "id" => $this->msgId("getparticipants"),
             "type" => "get",
             "to" => $this->GetJID($gjid)
         ), array($child), null);
@@ -1137,7 +1137,7 @@ class WhatsProt
     {
         $child = new ProtocolNode("pin", array("xmlns" => "w:ch:p"), null, $token);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->msgId(),
+            "id" => $this->msgId("settoken"),
             "type" => "set",
             "to" => "s.whatsapp.net"
         ), array($child), null);
@@ -1153,9 +1153,35 @@ class WhatsProt
             "xmlns" => "jabber:iq:privacy"
         ), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->msgId(),
+            "id" => $this->msgId("getprivacy"),
             "type" => "get"
         ), array($child, $child2), null);
+        $this->sendNode($node);
+    }
+    
+    public function SendSetPrivacyBlockedList($blockedJids)
+    {
+        if(!is_array($blockedJids))
+        {
+            $blockedJids = array($blockedJids);
+        }
+        $items = array();
+        foreach($blockedJids as $index=>$jid)
+        {
+            $item = new ProtocolNode("item", array(
+                "type" => "jid",
+                "value" => $this->GetJID($jid),
+                "action" => "deny",
+                "order" => $index + 1//WhatsApp stream crashes on zero index
+            ), null, null);
+            $items[] = $item;
+        }
+        $child = new ProtocolNode("list", array("name" => "default"), $items, null);
+        $child2 = new ProtocolNode("query", array("xmlns" => "jabber:iq:privacy"), array($child), null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->msgId("setprivacy"),
+            "type" => "set"
+        ), array($child2), null);
         $this->sendNode($node);
     }
     
@@ -1165,7 +1191,7 @@ class WhatsProt
             "xmlns" => "w"
         ), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->msgId(),
+            "id" => $this->msgId("getproperties"),
             "type" => "get",
             "to" => "s.whatsapp.net"
         ), array($child), null);
@@ -1181,7 +1207,7 @@ class WhatsProt
         $child = new ProtocolNode("group", $hash, null, null);
         
         $hash = array();
-        $hash["id"] = $this->msgId();
+        $hash["id"] = $this->msgId("endgroup");
         $hash["type"] = "set";
         $hash["to"] = $gjid;
         $node = new ProtocolNode("iq", $hash, array($child), null);
@@ -1212,7 +1238,7 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = $this->GetJID($to);
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->msgId();
+        $messageHash["id"] = $this->msgId("composing");
         $messageHash["t"] = time();
 
         $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
@@ -1234,7 +1260,7 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = $this->GetJID($to);
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->msgId();
+        $messageHash["id"] = $this->msgId("paused");
         $messageHash["t"] = time();
 
         $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
@@ -1261,7 +1287,7 @@ class WhatsProt
         $group = new ProtocolNode("group", $groupHash, NULL, "");
 
         $setHash = array();
-        $setHash["id"] = $this->msgId();
+        $setHash["id"] = $this->msgId("creategroup");
         $setHash["type"] = "set";
         $setHash["to"] = WhatsProt::_whatsAppGroupServer;
         $groupNode = new ProtocolNode("iq", $setHash, array($group), "");
@@ -1325,7 +1351,7 @@ class WhatsProt
         $child = new ProtocolNode($tag, $childHash, $Participants, "");
 
         $setHash = array();
-        $setHash["id"] = $this->msgId();
+        $setHash["id"] = $this->msgId("participants");
         $setHash["type"] = "set";
         $setHash["to"] = $this->GetJID($groupId);
 
@@ -1363,7 +1389,7 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = "broadcast";
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->msgId();
+        $messageHash["id"] = $this->msgId("broadcast");
 
         $messsageNode = new ProtocolNode("message", $messageHash, array($broadcastnode, $xNode, $bodynode), null);
         if (!$this->_lastId) {
@@ -1660,7 +1686,7 @@ class WhatsProt
         $medianode = new ProtocolNode("media", $hash, null, null);
 
         $hash = array();
-        $id = $this->msgId();
+        $id = $this->msgId("upload");
         $hash["id"] = $id;
         $hash["to"] = self::_whatsAppServer;
         $hash["type"] = "set";
@@ -1804,7 +1830,7 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = $this->GetJID($to);
         $messageHash["type"] = "get";
-        $messageHash["id"] = $this->msgId();
+        $messageHash["id"] = $this->msgId("lastseen");
         $messageHash["from"] = $this->GetJID($this->_phoneNumber);
 
         $messsageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
@@ -1839,9 +1865,9 @@ class WhatsProt
      * @return string
      *   A message id string.
      */
-    protected function msgId()
+    protected function msgId($prefix)
     {
-        $msgid = time() . '-' . $this->_msgCounter;
+        $msgid = "$prefix-" . time() . '-' . $this->_msgCounter;
         $this->_msgCounter++;
 
         return $msgid;
