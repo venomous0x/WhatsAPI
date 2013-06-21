@@ -1151,11 +1151,11 @@ class WhatsProt
         ), null, null);
         $child2 = new ProtocolNode("query", array(
             "xmlns" => "jabber:iq:privacy"
-        ), null, null);
+        ), array($child), null);
         $node = new ProtocolNode("iq", array(
             "id" => $this->msgId("getprivacy"),
             "type" => "get"
-        ), array($child, $child2), null);
+        ), array($child2), null);
         $this->sendNode($node);
     }
     
