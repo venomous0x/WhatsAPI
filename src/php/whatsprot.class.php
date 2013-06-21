@@ -609,7 +609,7 @@ class WhatsProt
     /**
      * Logs us in to the server.
      */
-    public function Login($identity = null)
+    public function Login($identity = null, $profileSubscribe = false)
     {
         if($identity != null)
         {
@@ -621,7 +621,7 @@ class WhatsProt
         if ($this->_accountinfo['status'] == 'ok') {
             $this->_password = $this->_accountinfo['pw'];
         }
-        $this->doLogin();
+        $this->doLogin($profileSubscribe);
     }
 
     public function LoginWithPassword($password, $profileSubscribe = false)
@@ -1115,6 +1115,17 @@ class WhatsProt
             "id" => $this->msgId(),
             "type" => "get",
             "to" => $this->GetJID($gjid)
+        ), array($child), null);
+        $this->sendNode($node);
+    }
+    
+    public function SendSetRecoveryToken($token)
+    {
+        $child = new ProtocolNode("pin", array("xmlns" => "w:ch:p"), null, $token);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->msgId(),
+            "type" => "set",
+            "to" => "s.whatsapp.net"
         ), array($child), null);
         $this->sendNode($node);
     }
@@ -1996,7 +2007,7 @@ class WhatsProt
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
-            'udid' => $this->_identity,
+            'id' => $this->_identity,
             'c' => 'cookie',
         );
 
@@ -2081,8 +2092,8 @@ class WhatsProt
                         'country' => $data[0],
                         'cc' => $data[1],
                         'phone' => substr($this->_phoneNumber, strlen($data[1]), strlen($this->_phoneNumber)),
-                        'ISO3166' => $data[3],
-                        'ISO639' => $data[4]
+                        'ISO3166' => @$data[3],
+                        'ISO639' => @$data[4]
                     );
 
                     $this->eventManager()->fire('onDissectPhone', array_merge(array($this->_phoneNumber), $phone));
