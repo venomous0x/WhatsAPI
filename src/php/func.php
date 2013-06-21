@@ -42,6 +42,7 @@ function preprocessProfilePicture($path)
 	throw new Exception("Profile picture maximum size of 640 x 640 (image is $width x $height)");
     }
     $img = imagecreatefromjpeg($path);
+    unlink($path);
     imagejpeg($img, $path, 50);
     imagedestroy($img);
 }
@@ -64,7 +65,7 @@ function createIcon($file)
     }
 }
 
-function createIconGD($file, $size = 100)
+function createIconGD($file, $size = 100, $raw = false)
 {
     list($width, $height) = getimagesize($file);
     if($width > $height)
@@ -85,7 +86,14 @@ function createIconGD($file, $size = 100)
     imagejpeg($image_p);
     $i = ob_get_contents();
     ob_end_clean();
-    return base64_encode($i);
+    if($raw)
+    {
+	return $i;
+    }
+    else
+    {
+	return base64_encode($i);
+    }
 }
 
 function createVideoIcon($file)
