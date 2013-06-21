@@ -104,7 +104,7 @@ class WhatsProt
      * @param $Number
      *   The user phone number including the country code without '+' or '00'.
      * @param $identity
-     *   The IMEI/MAC adress.
+     *   The IMEI/MAC adress or Recovery Token.
      * @param $Nickname
      *   The user name.
      * @param $debug
@@ -959,6 +959,17 @@ class WhatsProt
         ), array($child), null);
         $this->sendNode($node);
     }
+    
+    
+    public function SetProfilePicture($path)
+    {
+        $this->_sendSetPhoto($this->_phoneNumber, $path);
+    }
+    
+    public function SetGroupPicture($gjid, $path)
+    {
+        $this->_sendSetPhoto($gjid, $path);
+    }
 
     /**
      * Set your profile picture
@@ -966,7 +977,7 @@ class WhatsProt
      * @param $filepath
      *  Path to image file
      */
-    public function SetProfilePicture($filepath)
+    protected function _sendSetPhoto($jid, $filepath)
     {
         preprocessProfilePicture($filepath);
         $fp = @fopen($filepath, "r");
@@ -980,12 +991,12 @@ class WhatsProt
                 $hash["xmlns"] = "w:profile:picture";
                 $picture = new ProtocolNode("picture", $hash, null, $data);
                 
-                $icon = createIconGD($filepath, 96);
+                $icon = createIconGD($filepath, 96, true);
                 $thumb = new ProtocolNode("picture", array("type" => "preview"), null, $icon);
 
                 $hash = array();
                 $hash["id"] = $this->msgId();
-                $hash["to"] = $this->GetJID($this->_phoneNumber);
+                $hash["to"] = $this->GetJID($jid);
                 $hash["type"] = "set";
                 $node = new ProtocolNode("iq", $hash, array($picture, $thumb), null);
 
