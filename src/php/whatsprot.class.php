@@ -622,6 +622,10 @@ class WhatsProt
     {
         $this->_accountinfo = (array) $this->checkCredentials();
         if ($this->_accountinfo['status'] == 'ok') {
+            if($this->_debug)
+            {
+                echo "New password received: " . $this->_accountinfo['pw'] . "\r\n";
+            }
             $this->_password = $this->_accountinfo['pw'];
         }
         $this->doLogin($profileSubscribe);
