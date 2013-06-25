@@ -1159,7 +1159,7 @@ class WhatsProt
         $this->sendNode($node);
     }
     
-    public function SendSetPrivacyBlockedList($blockedJids)
+    public function SendSetPrivacyBlockedList($blockedJids = array())
     {
         if(!is_array($blockedJids))
         {
