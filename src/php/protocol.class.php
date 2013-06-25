@@ -44,7 +44,14 @@ class ProtocolNode
         }
         $ret .= ">";
         if (strlen($this->_data) > 0) {
-            $ret .= " " . strlen($this->_data) . " byte data ";
+            if(strlen($this->_data) <= 1024)
+            {
+                $ret .= $this->_data;
+            }
+            else
+            {
+                $ret .= " " . strlen($this->_data) . " byte data ";
+            }
         }
         if ($this->_children) {
             foreach ($this->_children as $child) {
