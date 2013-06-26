@@ -890,7 +890,6 @@ class WhatsProt
         $this->_lastGroupId = FALSE;
         do {
             $this->PollMessages();
-            $this->GetMessages();
         } while (!$this->_lastGroupId);
     }
 
