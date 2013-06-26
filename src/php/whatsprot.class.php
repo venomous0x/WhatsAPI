@@ -97,6 +97,8 @@ class WhatsProt
     protected $_debug;
 
     protected $_newmsgBind = FALSE;
+    
+    protected $challengeData;
 
     /**
      * Default class constructor.
