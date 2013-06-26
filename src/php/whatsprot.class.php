@@ -1902,7 +1902,6 @@ class WhatsProt
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The provided phone number is not valid.');
-            return FALSE;
         }
         
         if($countryCode === false && $phone['ISO3166'] != '') $countryCode = $phone['ISO3166'];
