@@ -10,18 +10,18 @@ class WhatsProt
     /**
      * Constant declarations.
      */
-    // The hostname of the whatsapp server.
+    // The hostname of the WhatsApp server.
     const _whatsAppHost = 'c.whatsapp.net';
-    // The hostnames used to login/send messages.
+    // The hostname used to login/send messages.
     const _whatsAppServer = 's.whatsapp.net';
     const _whatsAppGroupServer = 'g.us';
     // The device name.
     const _device = 'WP7';
     // The WhatsApp version.
     const _whatsAppVer = '2.9.4';
-    // The port of the whatsapp server.
+    // The port of the WhatsApp server.
     const _port = 5222;
-    // The timeout for the connection with the Whatsapp servers.
+    // The timeout for the connection with the WhatsApp servers.
     const _timeoutSec = 2;
     const _timeoutUsec = 0;
     // The request code host.
@@ -30,14 +30,14 @@ class WhatsProt
     const _whatsAppRegHost = 'v.whatsapp.net/v2/register';
     // The check credentials host.
     const _whatsAppCheHost = 'v.whatsapp.net/v2/exist';
-    // User agent and token used in reques/registration code.
+    // User agent and token used in request/registration code.
     const _whatsAppUserAgent = 'WhatsApp/2.9.4 WP7/7.10.8858 Device/HTC-HTC-H0002';
     const _whatsAppToken = 'Od52pFozHNWF9XbTN5lrqDtnsiZGL2G3l9yw1GiQ21a31a2d9dbdc9a8ce324ef2df918064fd26e30a';
 
     // The upload host.
     const _whatsAppUploadHost = 'https://mms.whatsapp.net/client/iphone/upload.php';
 
-    // Describes the connection status with the whatsapp server.
+    // Describes the connection status with the WhatsApp server.
     const _disconnectedStatus = 'disconnected';
     const _connectedStatus = 'connected';
 
@@ -46,7 +46,7 @@ class WhatsProt
      */
     // The user phone number including the country code without '+' or '00'.
     protected $_phoneNumber;
-    // The IMEI/MAC adress.
+    // The IMEI/MAC address.
     protected $_identity;
     // The user password.
     protected $_password;
@@ -59,7 +59,7 @@ class WhatsProt
     // Holds the login status.
     protected $_loginStatus;
     // The AccountInfo object.
-    protected $_accountinfo;
+    protected $_accountInfo;
 
     // Queue for media message nodes
     protected $_mediaQueue = array();
@@ -69,7 +69,7 @@ class WhatsProt
     protected $_outQueue = array();
     // Id to the last message sent.
     protected $_lastId = FALSE;
-    // Id to the last grouip id created.
+    // Id to the last group id created.
     protected $_lastGroupId = FALSE;
     // Confirm that the *server* has received your command.
     protected $_serverReceivedId;
@@ -77,7 +77,7 @@ class WhatsProt
     protected $_groupList = array();
     // Message counter for auto-id.
     protected $_msgCounter = 1;
-    // A socket to connect to the whatsapp network.
+    // A socket to connect to the WhatsApp network.
     protected $_socket;
     // An instance of the BinaryTreeNodeWriter class.
     protected $_writer;
@@ -97,17 +97,17 @@ class WhatsProt
     protected $_debug;
 
     protected $_newmsgBind = FALSE;
-    
+
     protected $challengeData;
 
     /**
      * Default class constructor.
      *
-     * @param $Number
+     * @param string $number
      *   The user phone number including the country code without '+' or '00'.
-     * @param $identity
-     *   The IMEI/MAC adress or Recovery Token.
-     * @param $Nickname
+     * @param string $identity
+     *   The IMEI/MAC address or Recovery Token.
+     * @param string $nickname
      *   The user name.
      * @param $debug
      *   Debug on or off, false by default.
@@ -119,18 +119,15 @@ class WhatsProt
         $this->_reader = new BinTreeNodeReader($dict);
         $this->_debug = $debug;
         $this->_phoneNumber = $number;
-        if(strlen($identity) < 32)
-        {
+        if(strlen($identity) < 32) {
             //compute md5 identity hash
             $this->_identity = $this->getIdentity($identity);
-        }
-        else
-        {
+        } else {
             //use provided identity hash
             $this->_identity = $identity;
         }
         $this->_name = $nickname;
-        $this->_loginStatus = WhatsProt::_disconnectedStatus;
+        $this->_loginStatus = static::_disconnectedStatus;
     }
 
     protected function getIdentity($imei)
@@ -158,7 +155,7 @@ class WhatsProt
     }
 
     /**
-     * Add the authenication nodes.
+     * Add the authentication nodes.
      *
      * @return ProtocolNode
      *   Return itself.
@@ -237,7 +234,7 @@ class WhatsProt
     }
 
     /**
-     * Send node to the whatsapp server.
+     * Send node to the WhatsApp server.
      */
     protected function sendNode($node)
     {
@@ -273,14 +270,14 @@ class WhatsProt
         $messageHash["id"] = $this->msgId("message");
         $messageHash["t"] = time();
 
-        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
+        $messageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
         if (!$this->_lastId) {
             $this->_lastId = $messageHash["id"];
-            $this->sendNode($messsageNode);
+            $this->sendNode($messageNode);
             //listen for response
             $this->WaitforServer($messageHash["id"]);
         } else {
-            $this->_outQueue[] = $messsageNode;
+            $this->_outQueue[] = $messageNode;
         }
     }
 
@@ -327,9 +324,9 @@ class WhatsProt
         $requestNode = $msg->getChild("request");
         $receivedNode = $msg->getChild("received");
         if ($requestNode != NULL || $receivedNode != NULL) {
-            $recievedHash = array();
-            $recievedHash["xmlns"] = "urn:xmpp:receipts";
-            $receivedNode = new ProtocolNode("received", $recievedHash, NULL, "");
+            $receivedHash = array();
+            $receivedHash["xmlns"] = "urn:xmpp:receipts";
+            $receivedNode = new ProtocolNode("received", $receivedHash, NULL, "");
 
             $messageHash = array();
             $messageHash["to"] = $msg->getAttribute("from");
@@ -345,7 +342,7 @@ class WhatsProt
     /**
      * Process inbound data.
      *
-     * @param $Data
+     * @param string $data
      *   The data to process.
      */
     protected function processInboundData($data)
@@ -357,13 +354,13 @@ class WhatsProt
                 if (strcmp($node->_tag, "challenge") == 0) {
                     $this->processChallenge($node);
                 } elseif (strcmp($node->_tag, "success") == 0) {
-                    $this->_loginStatus = WhatsProt::_connectedStatus;
+                    $this->_loginStatus = static::_connectedStatus;
                 }
                 if (strcmp($node->_tag, "message") == 0) {
                     array_push($this->_messageQueue, $node);
 
                     //do not send received confirmation if sender is yourself
-                    if (strpos($node->_attributeHash['from'], $this->_phoneNumber.'@'.WhatsProt::_whatsAppServer) === false) {
+                    if (strpos($node->_attributeHash['from'], $this->_phoneNumber.'@'.static::_whatsAppServer) === false) {
                         $this->sendMessageReceived($node);
                     }
 
@@ -602,8 +599,8 @@ class WhatsProt
      */
     public function Connect()
     {
-        $Socket = fsockopen(WhatsProt::_whatsAppHost, WhatsProt::_port);
-        stream_set_timeout($Socket, WhatsProt::_timeoutSec, WhatsProt::_timeoutUsec);
+        $Socket = fsockopen(static::_whatsAppHost, static::_port);
+        stream_set_timeout($Socket, static::_timeoutSec, static::_timeoutUsec);
         $this->_socket = $Socket;
         $this->eventManager()->fire('onConnect', array($this->_phoneNumber, $this->_socket));
     }
@@ -622,13 +619,13 @@ class WhatsProt
      */
     public function Login($profileSubscribe = false)
     {
-        $this->_accountinfo = (array) $this->checkCredentials();
-        if ($this->_accountinfo['status'] == 'ok') {
+        $this->_accountInfo = (array) $this->checkCredentials();
+        if ($this->_accountInfo['status'] == 'ok') {
             if($this->_debug)
             {
-                echo "New password received: " . $this->_accountinfo['pw'] . "\r\n";
+                echo "New password received: " . $this->_accountInfo['pw'] . "\r\n";
             }
-            $this->_password = $this->_accountinfo['pw'];
+            $this->_password = $this->_accountInfo['pw'];
         }
         $this->doLogin($profileSubscribe);
     }
@@ -643,8 +640,8 @@ class WhatsProt
     {
         $this->_writer->resetKey();
         $this->_reader->resetKey();
-        $resource = WhatsProt::_device . '-' . WhatsProt::_whatsAppVer . '-' . WhatsProt::_port;
-        $data = $this->_writer->StartStream(WhatsProt::_whatsAppServer, $resource);
+        $resource = static::_device . '-' . static::_whatsAppVer . '-' . static::_port;
+        $data = $this->_writer->StartStream(static::_whatsAppServer, $resource);
         $feat = $this->addFeatures($profileSubscribe);
         $auth = $this->addAuth();
         $this->sendData($data);
@@ -659,7 +656,7 @@ class WhatsProt
         $cnt = 0;
         do {
             $this->processInboundData($this->readData());
-        } while (($cnt++ < 100) && (strcmp($this->_loginStatus, WhatsProt::_disconnectedStatus) == 0));
+        } while (($cnt++ < 100) && (strcmp($this->_loginStatus, static::_disconnectedStatus) == 0));
         $this->eventManager()->fire('onLogin', array($this->_phoneNumber));
         $this->SendPresence();
     }
@@ -893,7 +890,7 @@ class WhatsProt
         $this->_lastGroupId = FALSE;
         do {
             $this->PollMessages();
-            $msgs = $this->GetMessages();
+            $this->GetMessages();
         } while (!$this->_lastGroupId);
     }
 
@@ -961,7 +958,7 @@ class WhatsProt
         $node = new ProtocolNode("iq", array(
             "id" => $this->msgId("sendconfig"),
             "type" => "get",
-            "to" => WhatsProt::_whatsAppServer
+            "to" => static::_whatsAppServer
         ), array($child), null);
         $this->sendNode($node);
     }
@@ -980,7 +977,8 @@ class WhatsProt
     /**
      * Set your profile picture
      *
-     * @param $filepath
+     * @param string $jid
+     * @param string $filepath
      *  Path to image file
      */
     protected function _sendSetPhoto($jid, $filepath)
@@ -1025,12 +1023,12 @@ class WhatsProt
             if(stristr($number, '-'))
             {
                 //to group
-                $number .= "@" . self::_whatsAppGroupServer;
+                $number .= "@" . static::_whatsAppGroupServer;
             }
             else
             {
                 //to normal user
-                $number .= "@" . self::_whatsAppServer;
+                $number .= "@" . static::_whatsAppServer;
             }
         }
         return $number;
@@ -1039,7 +1037,7 @@ class WhatsProt
     /**
      * Update de user status.
      *
-     * @param $text
+     * @param string $txt
      *   The text message status to send.
      */
     public function sendStatusUpdate($txt)
@@ -1055,8 +1053,8 @@ class WhatsProt
         $messageHash["type"] = "chat";
         $messageHash["id"] = $this->msgId("sendstatus");
 
-        $messsageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
-        $this->sendNode($messsageNode);
+        $messageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
+        $this->sendNode($messageNode);
         $this->eventManager()->fire('onSendStatusUpdate', array($this->_phoneNumber, $txt));
         //listen for response
         $this->PollMessages();
@@ -1167,13 +1165,11 @@ class WhatsProt
     
     public function SendSetPrivacyBlockedList($blockedJids = array())
     {
-        if(!is_array($blockedJids))
-        {
+        if(!is_array($blockedJids)) {
             $blockedJids = array($blockedJids);
         }
         $items = array();
-        foreach($blockedJids as $index=>$jid)
-        {
+        foreach($blockedJids as $index=>$jid) {
             $item = new ProtocolNode("item", array(
                 "type" => "jid",
                 "value" => $this->GetJID($jid),
@@ -1279,7 +1275,7 @@ class WhatsProt
      * @param string $subject
      *   The reciepient to send.
      * @param array $participants
-     *   An array with the participans.
+     *   An array with the participants.
      *
      * @return string
      *   The group ID.
@@ -1295,7 +1291,7 @@ class WhatsProt
         $setHash = array();
         $setHash["id"] = $this->msgId("creategroup");
         $setHash["type"] = "set";
-        $setHash["to"] = WhatsProt::_whatsAppGroupServer;
+        $setHash["to"] = static::_whatsAppGroupServer;
         $groupNode = new ProtocolNode("iq", $setHash, array($group), "");
 
         $this->sendNode($groupNode);
@@ -1315,7 +1311,7 @@ class WhatsProt
      * @param string $groupId
      *   The group ID.
      * @param array $participants
-     *   An array with the participans.
+     *   An array with the participants.
      */
     public function addGroupParticipants($groupId, $participants)
     {
@@ -1328,7 +1324,7 @@ class WhatsProt
      * @param string $groupId
      *   The group ID.
      * @param array $participants
-     *   An array with the participans.
+     *   An array with the participants.
      */
     public function removeGroupParticipants($groupId, $participants)
     {
@@ -1336,12 +1332,12 @@ class WhatsProt
     }
 
     /**
-     * Sent anctio to participants of a group.
+     * Sent action to participants of a group.
      *
      * @param string $groupId
      *   The group ID.
      * @param array $participants
-     *   An array with the participans.
+     *   An array with the participants.
      * @param string $tag
      *   The tag action.
      */
@@ -1368,43 +1364,40 @@ class WhatsProt
     
     public function BroadcastMessage($targets, $message)
     {
-        if(!is_array($targets))
-        {
+        if(!is_array($targets)) {
             $targets = array($targets);
         }
-        $bodynode = new ProtocolNode("body", null, null, $message);
-        
-        
-        
+        $bodyNode = new ProtocolNode("body", null, null, $message);
+
         $serverNode = new ProtocolNode("server", NULL, NULL, "");
         $xHash = array();
         $xHash["xmlns"] = "jabber:x:event";
         $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
 
-        $tonodes = array();
+        $toNodes = array();
         foreach($targets as $target)
         {
             $jid = $this->GetJID($target);
             $hash = array("jid" => $jid);
-            $tonode = new ProtocolNode("to", $hash, null, null);
-            $tonodes[] = $tonode;
+            $toNode = new ProtocolNode("to", $hash, null, null);
+            $toNodes[] = $toNode;
         }
         
-        $broadcastnode = new ProtocolNode("broadcast", null, $tonodes, null);
+        $broadcastNode = new ProtocolNode("broadcast", null, $toNodes, null);
 
         $messageHash = array();
         $messageHash["to"] = "broadcast";
         $messageHash["type"] = "chat";
         $messageHash["id"] = $this->msgId("broadcast");
 
-        $messsageNode = new ProtocolNode("message", $messageHash, array($broadcastnode, $xNode, $bodynode), null);
+        $messageNode = new ProtocolNode("message", $messageHash, array($broadcastNode, $xNode, $bodyNode), null);
         if (!$this->_lastId) {
             $this->_lastId = $messageHash["id"];
-            $this->sendNode($messsageNode);
+            $this->sendNode($messageNode);
             //listen for response
             $this->WaitforServer($messageHash["id"]);
         } else {
-            $this->_outQueue[] = $messsageNode;
+            $this->_outQueue[] = $messageNode;
         }
     }
     
@@ -1467,9 +1460,9 @@ class WhatsProt
     private function unichr($int)
     {
         $string = null;
-        $multichars = explode('_', $int);
+        $multiChars = explode('_', $int);
 
-        foreach ($multichars as $char) {
+        foreach ($multiChars as $char) {
             $string .= mb_convert_encoding('&#' . intval($char, 16) . ';', 'UTF-8', 'HTML-ENTITIES');
         }
         return $string;
@@ -1479,10 +1472,12 @@ class WhatsProt
     /**
      * Send an image file to group/user
      *
-     * @param $to
+     * @param  string $to
      *  recepient
-     * @param $filepath
+     * @param  string $filepath
      *  path to local image file
+     * @param  bool $storeURLmedia
+     * @return bool
      */
     public function MessageImage($to, $filepath, $storeURLmedia = false)
     {
@@ -1508,10 +1503,12 @@ class WhatsProt
     /**
      * Send a video to the user/group.
      *
-     * @param $to
+     * @param  string $to
      *   The reciepient to send.
-     * @param $file
+     * @param  string $filepath
      *   The url/uri to the MP4/MOV video.
+     * @param  bool $storeURLmedia
+     * @return bool
      */
     public function MessageVideo($to, $filepath, $storeURLmedia = false)
     {
@@ -1539,8 +1536,10 @@ class WhatsProt
      *
      * @param $to
      *   The reciepient to send.
-     * @param $file
+     * @param $filepath
      *   The url/uri to the 3GP/CAF audio.
+     * @param  bool $storeURLmedia
+     * @return bool
      */
     public function MessageAudio($to, $filepath, $storeURLmedia = false)
     {
@@ -1689,14 +1688,14 @@ class WhatsProt
         $hash["hash"] = $b64hash;
         $hash["type"] = $type;
         $hash["size"] = $size;
-        $medianode = new ProtocolNode("media", $hash, null, null);
+        $mediaNode = new ProtocolNode("media", $hash, null, null);
 
         $hash = array();
         $id = $this->msgId("upload");
         $hash["id"] = $id;
-        $hash["to"] = self::_whatsAppServer;
+        $hash["to"] = static::_whatsAppServer;
         $hash["type"] = "set";
-        $node = new ProtocolNode("iq", $hash, array($medianode), null);
+        $node = new ProtocolNode("iq", $hash, array($mediaNode), null);
 
         //add to queue
         $this->_mediaQueue[$id] = array("messageNode" => $node, "filePath" => $filepath, "to" => $this->GetJID($to));
@@ -1802,7 +1801,7 @@ class WhatsProt
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array( 'Expect:' ) );
-        curl_setopt($ch, CURLOPT_URL, WhatsProt::_whatsAppUploadHost);
+        curl_setopt($ch, CURLOPT_URL, static::_whatsAppUploadHost);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -1839,8 +1838,8 @@ class WhatsProt
         $messageHash["id"] = $this->msgId("lastseen");
         $messageHash["from"] = $this->GetJID($this->_phoneNumber);
 
-        $messsageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
-        $this->sendNode($messsageNode);
+        $messageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
+        $this->sendNode($messageNode);
         $this->WaitforServer($messageHash["id"]);
         $this->eventManager()->fire('onRequestLastSeen', array($this->_phoneNumber, $messageHash["id"], $to));
     }
@@ -1853,21 +1852,22 @@ class WhatsProt
      */
     public function Pong($msgid)
     {
-        $whatsAppServer = WhatsProt::_whatsAppServer;
+        $whatsAppServer = static::_whatsAppServer;
 
         $messageHash = array();
         $messageHash["to"] = $whatsAppServer;
         $messageHash["id"] = $msgid;
         $messageHash["type"] = "result";
 
-        $messsageNode = new ProtocolNode("iq", $messageHash, NULL, "");
-        $this->sendNode($messsageNode);
+        $messageNode = new ProtocolNode("iq", $messageHash, NULL, "");
+        $this->sendNode($messageNode);
         $this->eventManager()->fire('onPong', array($this->_phoneNumber, $msgid));
     }
 
     /**
      * Control msg id.
      *
+     * @param  string $prefix
      * @return string
      *   A message id string.
      */
@@ -1882,11 +1882,11 @@ class WhatsProt
     /**
      * Request a registration code from WhatsApp.
      *
-     * @param $method
+     * @param string $method
      *   Accepts only 'sms' or 'voice' as a value.
-     * @param $countryCody
+     * @param string $countryCody
      *   ISO Country Code, 2 Digit.
-     * @param $langCode
+     * @param string $langCode
      *   ISO 639-1 Language Code: two-letter codes.
      *
      * @return object
@@ -1902,7 +1902,6 @@ class WhatsProt
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The provided phone number is not valid.');
-            return FALSE;
         }
         
         if($countryCode === false && $phone['ISO3166'] != '') $countryCode = $phone['ISO3166'];
@@ -1912,10 +1911,10 @@ class WhatsProt
         if($langCode === false) $langCode = 'en';
 
         // Build the token.
-        $token = md5(WhatsProt::_whatsAppToken . $phone['phone']);
+        $token = md5(static::_whatsAppToken . $phone['phone']);
 
         // Build the url.
-        $host = 'https://' . WhatsProt::_whatsAppReqHost;
+        $host = 'https://' . static::_whatsAppReqHost;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
@@ -1971,7 +1970,7 @@ class WhatsProt
      *   - type: Type of account.
      *   - expiration: Expiration date in UNIX TimeStamp.
      *   - kind: Kind of account.
-     *   - price: Formated price of account.
+     *   - price: Formatted price of account.
      *   - cost: Decimal amount of account.
      *   - currency: Currency price of account.
      *   - price_expiration: Price expiration in UNIX TimeStamp.
@@ -1980,11 +1979,10 @@ class WhatsProt
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The prived phone number is not valid.');
-            return FALSE;
         }
 
         // Build the url.
-        $host = 'https://' . WhatsProt::_whatsAppRegHost;
+        $host = 'https://' . static::_whatsAppRegHost;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
@@ -2036,7 +2034,7 @@ class WhatsProt
      *   - type: Type of account.
      *   - expiration: Expiration date in UNIX TimeStamp.
      *   - kind: Kind of account.
-     *   - price: Formated price of account.
+     *   - price: Formatted price of account.
      *   - cost: Decimal amount of account.
      *   - currency: Currency price of account.
      *   - price_expiration: Price expiration in UNIX TimeStamp.
@@ -2045,11 +2043,10 @@ class WhatsProt
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The prived phone number is not valid.');
-            return FALSE;
         }
 
         // Build the url.
-        $host = 'https://' . WhatsProt::_whatsAppCheHost;
+        $host = 'https://' . static::_whatsAppCheHost;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
@@ -2061,8 +2058,7 @@ class WhatsProt
 
         if ($response->status != 'ok') {
             $this->eventManager()->fire('onBadCredentials', array($this->_phoneNumber, $response->status, $response->reason));
-            if($this->_debug)
-            {
+            if($this->_debug) {
                 print_r($query);
                 print_r($response);
             }
@@ -2100,7 +2096,7 @@ class WhatsProt
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_USERAGENT, WhatsProt::_whatsAppUserAgent);
+        curl_setopt($ch, CURLOPT_USERAGENT, static::_whatsAppUserAgent);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: text/json'));
         // This makes CURL accept any peer!
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -2163,7 +2159,7 @@ class WhatsProt
     protected function DebugPrint($debugMsg)
     {
         if ($this->_debug) {
-            print($debugMsg);
+            echo $debugMsg;
         }
     }
 
