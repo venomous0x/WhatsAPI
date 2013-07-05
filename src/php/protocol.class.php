@@ -145,9 +145,16 @@ class BinTreeNodeReader
             throw $exception;
         }
         $this->readInt24();
-        if (($stanzaFlag & 8) && isset($this->_key)) {
-            $remainingData = substr($this->_input, $stanzaSize);
-            $this->_input = $this->_key->decode($this->_input, 0, $stanzaSize) . $remainingData;
+        if ($stanzaFlag & 8)
+        {
+            if(isset($this->_key)) {
+                $remainingData = substr($this->_input, $stanzaSize);
+                $this->_input = $this->_key->decode($this->_input, 0, $stanzaSize) . $remainingData;
+            }
+            else
+            {
+                throw new Exception("Encountered encrypted message, missing key");
+            }
         }
         if ($stanzaSize > 0) {
             return $this->nextTreeInternal();
