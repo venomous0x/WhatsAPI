@@ -500,7 +500,7 @@ class WhatsProt
                     }
                     $this->SendClearDirty($categories);
                 }
-                if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") !== FALSE && isset($node->_attributeHash['type'])) {
+                if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") == FALSE && isset($node->_attributeHash['type'])) {
                     $this->eventManager()->fire('onGetPresence', array(
                         $this->_phoneNumber,
                         $node->_attributeHash['from'], $node->_attributeHash['type']
