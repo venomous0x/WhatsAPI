@@ -1383,7 +1383,7 @@ class WhatsProt
             $toNode = new ProtocolNode("to", $hash, null, null);
             $toNodes[] = $toNode;
         }
-
+        
         $broadcastNode = new ProtocolNode("broadcast", null, $toNodes, null);
 
         $messageHash = array();
