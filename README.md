@@ -45,6 +45,12 @@ Messages are application level encrypted using RC4 keystreams
 ### Multimedia Message sending
 Photos, Videos and Audio files shared with WhatsApp contacts are HTTP-uploaded to a server before being sent to the recipient(s) along with Base64 thumbnail of media file (if applicable) along with the generated HTTP link as the message body.
 
+### Event system
+WhatsApi uses an event manager (created by [facine](https://github.com/facine)) which allows you to respond to certain events.
+
+List of events and example code on how to bind an event handler:
+https://github.com/shirioko/WhatsAPI/wiki/WhatsApi-events
+
 # FAQ
 
 
