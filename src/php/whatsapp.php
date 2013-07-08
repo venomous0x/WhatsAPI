@@ -297,6 +297,7 @@ class Whatsapp
     private $messages;
     private $wa;
     private $connected;
+    private $waGroupList;
 
     public function __construct(array $config)
     {
@@ -324,6 +325,7 @@ class Whatsapp
                         $this->wa = new WhatsProt($this->number, $this->id, $this->nick, FALSE);
                         $this->wa->eventManager()->bind('onGetMessage', array($this, 'processReceivedMessage'));
                         $this->wa->eventManager()->bind('onConnect', array($this, 'connected'));
+                        $this->wa->eventManager()->bind('onGetGroupList', array($this, 'processGroupArray'));
                     }
                 }
             } catch (Exception $e) {
@@ -445,10 +447,10 @@ class Whatsapp
     {
         try {
             //Get whatsapp's Groups this user belongs to.
-            $wagroups = array();
-            $wagroups = $this->getGroupList();
-            if (is_array($wagroups)) {
-                $this->contacts = array_merge($this->contacts, $wagroups);
+            $this->waGroupList = array();
+            $this->getGroupList();
+            if (is_array($this->waGroupList)) {
+                $this->contacts = array_merge($this->contacts, $this->waGroupList);
             }
 
             //Get contacts from google if gmail account configured.
@@ -522,22 +524,12 @@ class Whatsapp
      * Log into the whatsapp servers and return a list
      * of all the groups a user participates in.
      *
-     * @return array List of groups in correct format or
-     * empty array if no groups.
+     * @return void
      */
     private function getGroupList()
     {
-        $wagroups = array();
         $this->connectToWhatsApp();
-        $wagroups = $this->wa->getGroupList('participating');
-
-        $listGroups = array();
-        if (!empty($wagroups)) {
-            foreach ($wagroups as $group) {
-                $listGroups[] = array('name' => "GROUP: " . $group['subject'], 'id' => $group['group_id']);
-            }
-        }
-        return $listGroups;
+        $this->wa->SendGetGroups();
     }
 
     /**
@@ -565,6 +557,28 @@ class Whatsapp
             $from = $matches[0];
         }
         $this->messages[] = array('phone' => $phone, 'from' => $from, 'id' => $id, 'type' => $type, 'time' => $time, 'name' => $name, 'data' => $data);
+    }
+
+    /**
+     * Process the event onGetGroupList and sets a formatted array of groups the user belongs to.
+     *
+     * @param string $phone The phone number (jid ) of the user
+     * @param array $groupArray Array with details of all groups user eitehr belongs to or owns.
+     * @return array|boolean
+     */
+    public function processGroupArray($phone, $groupArray)
+    {
+        $formattedGroups = array();
+
+        if (!empty($groupArray)) {
+            foreach ($groupArray as $group) {
+                $formattedGroups[] = array('name' => "GROUP: " . $group['subject'], 'id' => $group['group_id']);
+            }
+
+            $this->waGroupList = $formattedGroups;
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -606,6 +620,7 @@ class Whatsapp
             foreach ($this->inputs['to'] as $to) {
                 if (trim($to) !== '') {
                     if (isset($this->inputs['message']) && trim($this->inputs['message'] !== '')) {
+                        $this->wa->sendComposingMessage($to);
                         $this->wa->Message($to, $this->inputs['message']);
                     }
                     if (isset($this->inputs['image']) && $this->inputs['image'] !== false) {

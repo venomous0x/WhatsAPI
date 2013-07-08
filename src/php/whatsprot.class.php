@@ -1111,16 +1111,18 @@ class WhatsProt
 
     protected function _sendGetGroups($type)
     {
+        $msgID = $this->msgId("getgroups");
         $child = new ProtocolNode("list", array(
             "xmlns" => "w:g",
             "type" => $type
         ), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->msgId("getgroups"),
+            "id" => $msgID,
             "type" => "get",
             "to" => "g.us"
         ), array($child), null);
         $this->sendNode($node);
+        $this->WaitforServer($msgID);
     }
 
     public function SendGetParticipants($gjid)
