@@ -1220,7 +1220,7 @@ class Whatsapp
                                 $(this).replaceWith('##' + emojiUnicode + '##');
                             });
                             //Replace all BR's with line breaks.
-                            var message =$.trim($('#faketextbox').html().replace(/<br\s?\/?>/g, "\n"));
+                            var message = $.trim($('#faketextbox').html().replace(/<br\s?\/?>/g, "\n"));
                             //Copy the corrected message text to our hidden input field to be serialised.
                             $('#message').val($('#faketextbox').html(message).text());
                             //Replace the corrected text with the original html so it shows properly on a browser.
