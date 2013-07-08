@@ -546,7 +546,7 @@ class WhatsProt
                 if (strcmp($node->_tag, "iq") == 0 && strcmp($node->_attributeHash['type'], "result") == 0) {
                     if ($node->_children[0] != null && strcmp($node->_children[0]->_tag, "group") == 0) {
                         if (isset($node->_children[0]->_attributeHash['owner'])) {
-                            foreach ($node->_children as $key => $group) {
+                            foreach ($node->_children as $group) {
                                 $this->_groupList[] = array(
                                     'group_id' => $group->_attributeHash['id'],
                                     'owner' => $group->_attributeHash['owner'],
@@ -682,7 +682,7 @@ class WhatsProt
 
         return $ret;
     }
-    
+
     public function SendGetStatus($jid)
     {
         $parts = explode("@", $jid);
@@ -784,7 +784,7 @@ class WhatsProt
         {
             //upload new file
             $json = WhatsMediaUploader::pushFile($node, $messageNode, $this->_mediafileinfo, $this->_phoneNumber);
-            
+
             if(!$json)
             {
                 //failed upload
@@ -933,7 +933,7 @@ class WhatsProt
         $node = new ProtocolNode("presence", array("type" => "subscribe", "to" => $this->GetJID($to)), NULL, "");
         $this->sendNode($node);
     }
-    
+
     public function SendClearDirty($categories)
     {
         $catnodes = array();
@@ -949,9 +949,9 @@ class WhatsProt
             "to" => "s.whatsapp.net"
         ), array($clean), null);
         $this->sendNode($node);
-        
+
     }
-    
+
     public function SendGetClientConfig()
     {
         $child = new ProtocolNode("config", array("xmlns" => "urn:xmpp:whatsapp:push"), null, null);
@@ -962,13 +962,13 @@ class WhatsProt
         ), array($child), null);
         $this->sendNode($node);
     }
-    
-    
+
+
     public function SetProfilePicture($path)
     {
         $this->_sendSetPhoto($this->_phoneNumber, $path);
     }
-    
+
     public function SetGroupPicture($gjid, $path)
     {
         $this->_sendSetPhoto($gjid, $path);
@@ -994,7 +994,7 @@ class WhatsProt
                 $hash = array();
                 $hash["xmlns"] = "w:profile:picture";
                 $picture = new ProtocolNode("picture", $hash, null, $data);
-                
+
                 $icon = createIconGD($filepath, 96, true);
                 $thumb = new ProtocolNode("picture", array("type" => "preview"), null, $icon);
 
@@ -1068,7 +1068,7 @@ class WhatsProt
         $messageNode = new ProtocolNode("presence", array("type" => "active"), null, "");
         $this->sendNode($messageNode);
     }
-    
+
     public function SendLeaveGroups($gjids)
     {
         if(!is_array($gjids))
@@ -1088,7 +1088,7 @@ class WhatsProt
         $node = new ProtocolNode("iq", $hash, array($leave), null);
         $this->sendNode($node);
     }
-    
+
     public function SendGetGroupInfo($gjid)
     {
         $child = new ProtocolNode("query", array("xmlns" => "w:g"), null, null);
@@ -1099,17 +1099,17 @@ class WhatsProt
         ), array($child), null);
         $this->sendNode($node);
     }
-    
+
     public function SendGetOwningGroups()
     {
         $this->_sendGetGroups("owning");
     }
-    
+
     public function SendGetGroups()
     {
         $this->_sendGetGroups("participating");
     }
-    
+
     protected function _sendGetGroups($type)
     {
         $child = new ProtocolNode("list", array(
@@ -1123,7 +1123,7 @@ class WhatsProt
         ), array($child), null);
         $this->sendNode($node);
     }
-    
+
     public function SendGetParticipants($gjid)
     {
         $child = new ProtocolNode("list", array(
@@ -1136,7 +1136,7 @@ class WhatsProt
         ), array($child), null);
         $this->sendNode($node);
     }
-    
+
     public function SendSetRecoveryToken($token)
     {
         $child = new ProtocolNode("pin", array("xmlns" => "w:ch:p"), null, $token);
@@ -1147,7 +1147,7 @@ class WhatsProt
         ), array($child), null);
         $this->sendNode($node);
     }
-    
+
     public function SendGetPrivacyList()
     {
         $child = new ProtocolNode("list", array(
@@ -1162,7 +1162,7 @@ class WhatsProt
         ), array($child2), null);
         $this->sendNode($node);
     }
-    
+
     public function SendSetPrivacyBlockedList($blockedJids = array())
     {
         if(!is_array($blockedJids)) {
@@ -1186,7 +1186,7 @@ class WhatsProt
         ), array($child2), null);
         $this->sendNode($node);
     }
-    
+
     public function SendGetServerProperties()
     {
         $child = new ProtocolNode("props", array(
@@ -1199,7 +1199,7 @@ class WhatsProt
         ), array($child), null);
         $this->sendNode($node);
     }
-    
+
     public function SendEndGroupChat($gjid)
     {
         $gjid = $this->GetJID($gjid);
@@ -1207,7 +1207,7 @@ class WhatsProt
         $hash["xmlns"] = "w:g";
         $hash["action"] = "delete";
         $child = new ProtocolNode("group", $hash, null, null);
-        
+
         $hash = array();
         $hash["id"] = $this->msgId("endgroup");
         $hash["type"] = "set";
@@ -1361,7 +1361,7 @@ class WhatsProt
 
         $this->sendNode($node);
     }
-    
+
     public function BroadcastMessage($targets, $message)
     {
         if(!is_array($targets)) {
@@ -1382,7 +1382,7 @@ class WhatsProt
             $toNode = new ProtocolNode("to", $hash, null, null);
             $toNodes[] = $toNode;
         }
-        
+
         $broadcastNode = new ProtocolNode("broadcast", null, $toNodes, null);
 
         $messageHash = array();
@@ -1400,7 +1400,7 @@ class WhatsProt
             $this->_outQueue[] = $messageNode;
         }
     }
-    
+
     /**
      * Send a text message to the user/group.
      *
@@ -1903,10 +1903,10 @@ class WhatsProt
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The provided phone number is not valid.');
         }
-        
+
         if($countryCode === false && $phone['ISO3166'] != '') $countryCode = $phone['ISO3166'];
         if($countryCode === false) $countryCode = 'US';
-        
+
         if($langCode === false && $phone['ISO639'] != '') $langCode = $phone['ISO639'];
         if($langCode === false) $langCode = 'en';
 
