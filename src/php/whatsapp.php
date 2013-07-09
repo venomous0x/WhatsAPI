@@ -221,7 +221,7 @@ class GoogleContacts implements Contacts
         if (isset($contactgroup)) {
             return $contactgroup;
         } else {
-            return true;
+            return false;
         }
     }
 
