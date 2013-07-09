@@ -2,7 +2,7 @@
 function decode($hex)
 {
     $hexarr = str_split($hex, 2);
-    $str = NULL;
+    $str = null;
     foreach ($hexarr as $k => $v) {
         $str .= "  " . getToken(hexdec($v));
     }

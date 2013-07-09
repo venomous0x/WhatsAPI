@@ -17,7 +17,7 @@ class WhatsAppEvent
      * @param string $event
      *   Name of the event (optional).
      */
-    function __construct($event = NULL)
+    function __construct($event = null)
     {
         // Register the event if any.
         if (!empty($event)) {

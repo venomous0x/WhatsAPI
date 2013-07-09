@@ -11,7 +11,7 @@ interface IException
 
     /* Overrideable methods inherited from Exception class */
     public function __toString();                 // formated string for display
-    public function __construct($message = NULL, $code = 0);
+    public function __construct($message = null, $code = 0);
 }
 
 abstract class CustomException extends Exception implements IException
@@ -23,7 +23,7 @@ abstract class CustomException extends Exception implements IException
     private $string;                            // Unknown
     private $trace;                             // Unknown
 
-    public function __construct($message = NULL, $code = 0)
+    public function __construct($message = null, $code = 0)
     {
         if (!$message) {
             throw new $this('Unknown ' . get_class($this));

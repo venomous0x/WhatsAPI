@@ -6,7 +6,7 @@ class IncompleteMessageException extends CustomException
 {
     private $_input;
 
-    public function __construct($message = NULL, $code = 0)
+    public function __construct($message = null, $code = 0)
     {
         parent::__construct($message, $code);
     }
@@ -41,7 +41,7 @@ class ProtocolNode
     public function NodeString($indent = "")
     {
         $ret = "\n" . $indent . "<" . $this->_tag;
-        if ($this->_attributeHash != NULL) {
+        if ($this->_attributeHash != null) {
             foreach ($this->_attributeHash as $key => $value) {
                 $ret .= " " . $key . "=\"" . $value . "\"";
             }
@@ -77,7 +77,7 @@ class ProtocolNode
 
     public function getChild($tag)
     {
-        $ret = NULL;
+        $ret = null;
         if ($this->_children) {
             foreach ($this->_children as $child) {
                 if (strcmp($child->_tag, $tag) == 0) {
@@ -90,12 +90,12 @@ class ProtocolNode
             }
         }
 
-        return NULL;
+        return null;
     }
 
     public function hasChild($tag)
     {
-        return $this->getChild($tag) == NULL ? false : true;
+        return $this->getChild($tag) == null ? false : true;
     }
 
     public function refreshTimes($offset = 0)
@@ -134,9 +134,9 @@ class BinTreeNodeReader
         $this->_key = $key;
     }
 
-    public function nextTree($input = NULL)
+    public function nextTree($input = null)
     {
-        if ($input != NULL) {
+        if ($input != null) {
             $this->_input = $input;
         }
         $stanzaFlag = ($this->peekInt8() & 0xF0) >> 4;
@@ -159,7 +159,7 @@ class BinTreeNodeReader
             return $this->nextTreeInternal();
         }
 
-        return NULL;
+        return null;
     }
 
     protected function getToken($token)
@@ -227,21 +227,21 @@ class BinTreeNodeReader
         if ($token == 1) {
             $attributes = $this->readAttributes($size);
 
-            return new ProtocolNode("start", $attributes, NULL, "");
+            return new ProtocolNode("start", $attributes, null, "");
         } elseif ($token == 2) {
-            return NULL;
+            return null;
         }
         $tag = $this->readString($token);
         $attributes = $this->readAttributes($size);
         if (($size % 2) == 1) {
-            return new ProtocolNode($tag, $attributes, NULL, "");
+            return new ProtocolNode($tag, $attributes, null, "");
         }
         $token = $this->readInt8();
         if ($this->isListTag($token)) {
             return new ProtocolNode($tag, $attributes, $this->readList($token), "");
         }
 
-        return new ProtocolNode($tag, $attributes, NULL, $this->readString($token));
+        return new ProtocolNode($tag, $attributes, null, $this->readString($token));
     }
 
     protected function isListTag($token)
@@ -396,7 +396,7 @@ class BinTreeNodeWriter
 
     public function write($node)
     {
-        if ($node == NULL) {
+        if ($node == null) {
             $this->_output .= "\x00";
         } else {
             $this->writeInternal($node);
@@ -408,7 +408,7 @@ class BinTreeNodeWriter
     protected function writeInternal($node)
     {
         $len = 1;
-        if ($node->_attributeHash != NULL) {
+        if ($node->_attributeHash != null) {
             $len += count($node->_attributeHash) * 2;
         }
         if (count($node->_children) > 0) {
