@@ -21,7 +21,7 @@ $destinationPhone = '34666443322';       # Destination telephone number includin
 
 $password = 'fgdfaughregnfagun='; # Password you received from WhatsApp
 
-$debug = TRUE;
+$debug = true;
 
 # Create a instance of WhastPort.
 $w = new WhatsProt($userPhone, $userIdentity, $userName, $debug);
@@ -159,7 +159,7 @@ $w->WaitforReceipt();
 /**
  * Or get all incoming messages and process it.
  */
-while (TRUE) {
+while (true) {
     $w->PollMessages();
     $msgs = $w->GetMessages();
     foreach ($msgs as $m) {

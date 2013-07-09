@@ -2,7 +2,7 @@
 require_once 'whatsprot.class.php';
 # phone number, IMEI, and name, the IMEI.
 $options = getopt("d::", array("debug::"));
-$debug = (array_key_exists("debug", $options) || array_key_exists("d", $options)) ? TRUE : FALSE;
+$debug = (array_key_exists("debug", $options) || array_key_exists("d", $options)) ? true : false;
 
 $username = "**your phone number**";
 $identity = "**your IMEI code**";

@@ -63,9 +63,9 @@ class WhatsProt
     // Queue for outgoing messages.
     protected $_outQueue = array();
     // Id to the last message sent.
-    protected $_lastId = FALSE;
+    protected $_lastId = false;
     // Id to the last group id created.
-    protected $_lastGroupId = FALSE;
+    protected $_lastGroupId = false;
     // Confirm that the *server* has received your command.
     protected $_serverReceivedId;
     // An array with all the groups a user belongs in.
@@ -87,7 +87,7 @@ class WhatsProt
     protected $_mediafileinfo = array();
     // Determines wether debug mode is on or off.
     protected $_debug;
-    protected $_newmsgBind = FALSE;
+    protected $_newmsgBind = false;
     protected $challengeData;
 
     /**
@@ -102,7 +102,7 @@ class WhatsProt
      * @param $debug
      *   Debug on or off, false by default.
      */
-    public function __construct($number, $identity, $nickname, $debug = FALSE)
+    public function __construct($number, $identity, $nickname, $debug = false)
     {
         $dict = getDictionary();
         $this->_writer = new BinTreeNodeWriter($dict);
@@ -173,11 +173,11 @@ class WhatsProt
 
     protected function authenticate()
     {
-        $key = pbkdf2('sha1', $this->encryptPassword(), $this->challengeData, 16, 20, TRUE);
+        $key = pbkdf2('sha1', $this->encryptPassword(), $this->challengeData, 16, 20, true);
         $this->_inputKey = new KeyStream($key);
         $this->_outputKey = new KeyStream($key);
         $array = $this->_phoneNumber . $this->challengeData . time();
-        $response = $this->_outputKey->encode($array, 0, strlen($array), FALSE);
+        $response = $this->_outputKey->encode($array, 0, strlen($array), false);
 
         return $response;
     }
@@ -488,13 +488,13 @@ class WhatsProt
                         }
                     $this->SendClearDirty($categories);
                 }
-                if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") == FALSE && isset($node->_attributeHash['type'])) {
+                if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") == false && isset($node->_attributeHash['type'])) {
                     $this->eventManager()->fire('onGetPresence', array(
                         $this->_phoneNumber,
                         $node->_attributeHash['from'], $node->_attributeHash['type']
                     ));
                 }
-                if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") !== FALSE && isset($node->_attributeHash['type'])) {
+                if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") !== false && isset($node->_attributeHash['type'])) {
                     $groupId = reset(explode('@', $node->_attributeHash['from']));
                     if (isset($node->_attributeHash['add'])) {
                         $this->eventManager()->fire('onAddParticipantGroup', array(
@@ -578,7 +578,7 @@ class WhatsProt
             $this->_lastId = $msgnode->getAttribute('id');
             $this->sendNode($msgnode);
         } else {
-            $this->_lastId = FALSE;
+            $this->_lastId = false;
         }
     }
 
@@ -844,7 +844,7 @@ class WhatsProt
      */
     public function WaitforReceipt()
     {
-        $received = FALSE;
+        $received = false;
         do {
             $this->PollMessages();
             $msgs = $this->GetMessages();
@@ -852,7 +852,7 @@ class WhatsProt
                 // Process inbound messages.
                 if ($m->_tag == "message") {
                     if ($m->getChild('received') != NULL && !isset($m->_attributeHas['retry'])) {
-                        $received = TRUE;
+                        $received = true;
                     } elseif ($m->getChild('received') != NULL && isset($m->_attributeHas['retry'])) {
                         throw new Exception('There was a problem trying to send the message, please retry.');
                     }
@@ -867,7 +867,7 @@ class WhatsProt
      */
     public function WaitforGroupId()
     {
-        $this->_lastGroupId = FALSE;
+        $this->_lastGroupId = false;
         do {
             $this->PollMessages();
         } while (!$this->_lastGroupId);
@@ -879,7 +879,7 @@ class WhatsProt
     public function WaitforServer($id)
     {
         $time = time();
-        $this->_serverReceivedId = FALSE;
+        $this->_serverReceivedId = false;
         do {
             $this->PollMessages();
         } while ($this->_serverReceivedId !== $id && time() - $time < 5);
@@ -1544,7 +1544,7 @@ class WhatsProt
      */
     protected function getMediaFile($filepath, $maxsizebytes = 1048576)
     {
-        if (filter_var($filepath, FILTER_VALIDATE_URL) !== FALSE) {
+        if (filter_var($filepath, FILTER_VALIDATE_URL) !== false) {
             $this->_mediafileinfo = array();
             $this->_mediafileinfo['url'] = $filepath;
 
@@ -1555,7 +1555,7 @@ class WhatsProt
             curl_setopt($curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11");
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_HEADER, false);
-            curl_setopt($curl, CURLOPT_NOBODY, TRUE);
+            curl_setopt($curl, CURLOPT_NOBODY, true);
 
             if (curl_exec($curl) === false) {
                 return false;
@@ -1574,7 +1574,7 @@ class WhatsProt
                 $this->_mediafileinfo['filepath'] = tempnam(getcwd() . '/media', 'WHA');
                 $fp = fopen($this->_mediafileinfo['filepath'], 'w');
                 if ($fp) {
-                    curl_setopt($curl, CURLOPT_NOBODY, FALSE);
+                    curl_setopt($curl, CURLOPT_NOBODY, false);
                     curl_setopt($curl, CURLOPT_BUFFERSIZE, 1024);
                     curl_setopt($curl, CURLOPT_FILE, $fp);
                     curl_exec($curl);
@@ -1787,7 +1787,7 @@ class WhatsProt
             return $url;
         } else {
             $this->eventManager()->fire('onFailedUploadFile', array($this->_phoneNumber, basename($file)));
-            return FALSE;
+            return false;
         }
     }
 
@@ -2071,12 +2071,12 @@ class WhatsProt
 
         // Configure the connection.
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_USERAGENT, static::_whatsAppUserAgent);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: text/json'));
         // This makes CURL accept any peer!
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         // Get the response.
         $response = curl_exec($ch);
@@ -2097,12 +2097,12 @@ class WhatsProt
      *   - phone: The phone number.
      *   - ISO3166: 2-Letter country code
      *   - ISO639: 2-Letter language code
-     *   Return FALSE if country code is not found.
+     *   Return false if country code is not found.
      */
     protected function dissectPhone()
     {
-        if (($handle = fopen('countries.csv', 'rb')) !== FALSE) {
-            while (($data = fgetcsv($handle, 1000)) !== FALSE) {
+        if (($handle = fopen('countries.csv', 'rb')) !== false) {
+            while (($data = fgetcsv($handle, 1000)) !== false) {
                 if (strpos($this->_phoneNumber, $data[1]) === 0) {
                     // Return the first appearance.
                     fclose($handle);
@@ -2125,7 +2125,7 @@ class WhatsProt
 
         $this->eventManager()->fire('onFailedDissectPhone', array($this->_phoneNumber));
 
-        return FALSE;
+        return false;
     }
 
     /**

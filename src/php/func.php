@@ -1,23 +1,23 @@
 <?php
-function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output = FALSE)
+function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output = false)
 {
     $algorithm = strtolower($algorithm);
-    if (!in_array($algorithm, hash_algos(), TRUE)) {
+    if (!in_array($algorithm, hash_algos(), true)) {
         die('PBKDF2 ERROR: Invalid hash algorithm.');
     }
     if ($count <= 0 || $key_length <= 0) {
         die('PBKDF2 ERROR: Invalid parameters.');
     }
 
-    $hash_length = strlen(hash($algorithm, "", TRUE));
+    $hash_length = strlen(hash($algorithm, "", true));
     $block_count = ceil($key_length / $hash_length);
 
     $output = "";
     for ($i = 1; $i <= $block_count; $i++) {
         $last = $salt . pack("N", $i);
-        $last = $xorsum = hash_hmac($algorithm, $last, $password, TRUE);
+        $last = $xorsum = hash_hmac($algorithm, $last, $password, true);
         for ($j = 1; $j < $count; $j++) {
-            $xorsum ^= ($last = hash_hmac($algorithm, $last, $password, TRUE));
+            $xorsum ^= ($last = hash_hmac($algorithm, $last, $password, true));
         }
         $output .= $xorsum;
     }
@@ -50,7 +50,7 @@ function createIcon($file)
     if (class_exists("Imagick")) {
         $img = new Imagick();
         $img->readImageBlob(file_get_contents($file));
-        $img->thumbnailImage(100, 100, TRUE);
+        $img->thumbnailImage(100, 100, true);
 
         return base64_encode($img);
     } elseif (extension_loaded('gd')) {

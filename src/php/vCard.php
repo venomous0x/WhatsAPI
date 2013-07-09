@@ -89,7 +89,7 @@ class vCard
             }
             return $this;
         } else {
-            return FALSE;
+            return false;
         }
     }
 
@@ -222,7 +222,7 @@ class vCard
         header("Pragma: public");
         echo $this->card;
 
-        return TRUE;
+        return true;
     }
 
     /**

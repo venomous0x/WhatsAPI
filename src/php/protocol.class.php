@@ -95,7 +95,7 @@ class ProtocolNode
 
     public function hasChild($tag)
     {
-        return $this->getChild($tag) == NULL ? FALSE : TRUE;
+        return $this->getChild($tag) == NULL ? false : true;
     }
 
     public function refreshTimes($offset = 0)
