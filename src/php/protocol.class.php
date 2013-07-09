@@ -5,18 +5,22 @@ require 'exception.php';
 class IncompleteMessageException extends CustomException
 {
     private $_input;
+
     public function __construct($message = NULL, $code = 0)
     {
         parent::__construct($message, $code);
     }
+
     public function setInput($input)
     {
         $this->_input = $input;
     }
+
     public function getInput()
     {
         return $this->_input;
     }
+
 }
 
 class ProtocolNode
@@ -44,12 +48,9 @@ class ProtocolNode
         }
         $ret .= ">";
         if (strlen($this->_data) > 0) {
-            if(strlen($this->_data) <= 1024)
-            {
+            if (strlen($this->_data) <= 1024) {
                 $ret .= $this->_data;
-            }
-            else
-            {
+            } else {
                 $ret .= " " . strlen($this->_data) . " byte data ";
             }
         }
@@ -97,18 +98,19 @@ class ProtocolNode
         return $this->getChild($tag) == NULL ? FALSE : TRUE;
     }
 
-    public function refreshTimes($offset=0)
+    public function refreshTimes($offset = 0)
     {
         if (isset($this->_attributeHash['id'])) {
             $id = $this->_attributeHash['id'];
             $parts = explode('-', $id);
             $parts[0] = time() + $offset;
-            $this->_attributeHash['id'] = implode('-',$parts);
+            $this->_attributeHash['id'] = implode('-', $parts);
         }
         if (isset($this->_attributeHash['t'])) {
             $this->_attributeHash['t'] = time();
         }
     }
+
 }
 
 class BinTreeNodeReader
@@ -121,7 +123,7 @@ class BinTreeNodeReader
     {
         $this->_dictionary = $dictionary;
     }
-    
+
     public function resetKey()
     {
         $this->_key = null;
@@ -145,14 +147,11 @@ class BinTreeNodeReader
             throw $exception;
         }
         $this->readInt24();
-        if ($stanzaFlag & 8)
-        {
-            if(isset($this->_key)) {
+        if ($stanzaFlag & 8) {
+            if (isset($this->_key)) {
                 $remainingData = substr($this->_input, $stanzaSize);
                 $this->_input = $this->_key->decode($this->_input, 0, $stanzaSize) . $remainingData;
-            }
-            else
-            {
+            } else {
                 throw new Exception("Encountered encrypted message, missing key");
             }
         }
@@ -279,7 +278,7 @@ class BinTreeNodeReader
     {
         $ret = 0;
         if (strlen($this->_input) >= (3 + $offset)) {
-            $ret  = ord(substr($this->_input, $offset, 1)) << 16;
+            $ret = ord(substr($this->_input, $offset, 1)) << 16;
             $ret |= ord(substr($this->_input, $offset + 1, 1)) << 8;
             $ret |= ord(substr($this->_input, $offset + 2, 1)) << 0;
         }
@@ -301,7 +300,7 @@ class BinTreeNodeReader
     {
         $ret = 0;
         if (strlen($this->_input) >= (2 + $offset)) {
-            $ret  = ord(substr($this->_input, $offset, 1)) << 8;
+            $ret = ord(substr($this->_input, $offset, 1)) << 8;
             $ret |= ord(substr($this->_input, $offset + 1, 1)) << 0;
         }
 
@@ -349,6 +348,7 @@ class BinTreeNodeReader
 
         return $ret;
     }
+
 }
 
 class BinTreeNodeWriter
@@ -365,7 +365,7 @@ class BinTreeNodeWriter
             }
         }
     }
-    
+
     public function resetKey()
     {
         $this->_key = null;
@@ -389,7 +389,7 @@ class BinTreeNodeWriter
 
         $this->_output .= "\x01";
         $this->writeAttributes($attributes);
-        $ret = $header.$this->flushBuffer();
+        $ret = $header . $this->flushBuffer();
 
         return $ret;
     }
@@ -435,7 +435,7 @@ class BinTreeNodeWriter
     {
         $data = (isset($this->_key)) ? $this->_key->encode($this->_output, 0, strlen($this->_output)) : $this->_output;
         $size = strlen($data);
-        $ret  = $this->writeInt8(isset($this->_key) ? (1 << 4) : 0);
+        $ret = $this->writeInt8(isset($this->_key) ? (1 << 4) : 0);
         $ret .= $this->writeInt16($size);
         $ret .= $data;
         $this->_output = "";
@@ -537,4 +537,5 @@ class BinTreeNodeWriter
             $this->_output .= "\xf9" . chr($len);
         }
     }
+
 }

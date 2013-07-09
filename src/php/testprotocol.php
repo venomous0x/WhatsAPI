@@ -4,14 +4,11 @@ require_once 'whatsprot.class.php';
 $options = getopt("d::", array("debug::"));
 $debug = (array_key_exists("debug", $options) || array_key_exists("d", $options)) ? TRUE : FALSE;
 
-
-
 $username = "**your phone number**";
 $identity = "**your IMEI code**";
 $password = "**server generated whatsapp password**";
 $nickname = "**your nickname**";
 $target = "**contact's phone number**";
-
 
 $w = new WhatsProt($username, $identity, $nickname, $debug);
 $w->Connect();
@@ -33,7 +30,7 @@ $w->Message($target, "Sent from WhatsApi at " . $time());
 # You can create a ProcessNode class (or whatever name you want) that has a process($node) function
 # and pass it through setNewMessageBind, that way everytime the class receives a text message it will run
 # the process function to it.
-$pn = new ProcessNode($w,$target);
+$pn = new ProcessNode($w, $target);
 $w->setNewMessageBind($pn);
 
 while (1) {
@@ -49,18 +46,20 @@ class ProcessNode
 {
     protected $_wp = false;
     protected $_target = false;
-    public function __construct($wp,$target)
+
+    public function __construct($wp, $target)
     {
         $this->_wp = $wp;
         $this->_target = $target;
     }
+
     public function process($node)
     {
         # Example of process function, you have to guess a number (psss it's 5)
         # If you guess it right you get a gift
         $text = $node->getChild('body');
         $text = $text->_data;
-        if ($text && ($text == "5" || trim($text)=="5")) {
+        if ($text && ($text == "5" || trim($text) == "5")) {
             $iconfile = "../../tests/Gift.jpgb64";
             $fp = fopen($iconfile, "r");
             $icon = fread($fp, filesize($iconfile));

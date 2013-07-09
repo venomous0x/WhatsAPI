@@ -1,5 +1,4 @@
 <?php
-
 function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output = FALSE)
 {
     $algorithm = strtolower($algorithm);
@@ -33,13 +32,11 @@ function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output =
 function preprocessProfilePicture($path)
 {
     list($width, $height) = getimagesize($path);
-    if($width != $height)
-    {
-	throw new Exception("Profile picture needs to be square (image is $width x $height)");
+    if ($width != $height) {
+        throw new Exception("Profile picture needs to be square (image is $width x $height)");
     }
-    if($width > 640)
-    {
-	throw new Exception("Profile picture maximum size of 640 x 640 (image is $width x $height)");
+    if ($width > 640) {
+        throw new Exception("Profile picture maximum size of 640 x 640 (image is $width x $height)");
     }
     $img = imagecreatefromjpeg($path);
     unlink($path);
@@ -56,28 +53,23 @@ function createIcon($file)
         $img->thumbnailImage(100, 100, TRUE);
 
         return base64_encode($img);
-    } elseif(extension_loaded('gd')) {
+    } elseif (extension_loaded('gd')) {
         return createIconGD($file);
-    }
-    else
-    {
-	return giftThumbnail();
+    } else {
+        return giftThumbnail();
     }
 }
 
 function createIconGD($file, $size = 100, $raw = false)
 {
     list($width, $height) = getimagesize($file);
-    if($width > $height)
-    {
-	//landscape
-	$nheight = ($height / $width) * $size;
-	$nwidth = $size;
-    }
-    else
-    {
-	$nwidth = ($width / $height) * $size;
-	$nheight = $size;
+    if ($width > $height) {
+        //landscape
+        $nheight = ($height / $width) * $size;
+        $nwidth = $size;
+    } else {
+        $nwidth = ($width / $height) * $size;
+        $nheight = $size;
     }
     $image_p = imagecreatetruecolor($nwidth, $nheight);
     $image = imagecreatefromjpeg($file);
@@ -86,20 +78,17 @@ function createIconGD($file, $size = 100, $raw = false)
     imagejpeg($image_p);
     $i = ob_get_contents();
     ob_end_clean();
-    if($raw)
-    {
-	return $i;
-    }
-    else
-    {
-	return base64_encode($i);
+    if ($raw) {
+        return $i;
+    } else {
+        return base64_encode($i);
     }
 }
 
 function createVideoIcon($file)
 {
     // @todo: Add support for video thumbnail create.
-	// @see: http://stackoverflow.com/questions/14662027/generate-thumbnail-for-a-bunch-of-mp4-video-in-a-folder
+    // @see: http://stackoverflow.com/questions/14662027/generate-thumbnail-for-a-bunch-of-mp4-video-in-a-folder
     return giftThumbnail();
 }
 

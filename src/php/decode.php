@@ -1,5 +1,4 @@
 <?php
-
 function decode($hex)
 {
     $hexarr = str_split($hex, 2);
@@ -36,7 +35,7 @@ function printhexstr($data, $name)
         if ((($i - 1) % 32) == 31) {
             print("\n");
         }
-        printf(" %s%s", $data[$i], $data[$i+1]);
+        printf(" %s%s", $data[$i], $data[$i + 1]);
     }
 
     print("\n");

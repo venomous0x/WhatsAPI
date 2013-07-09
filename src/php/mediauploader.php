@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Media uploader class
  */
@@ -15,8 +16,7 @@ class WhatsMediaUploader
         $buf = 1024;
         $totalread = 0;
         $fp = fopen($filepath, "r");
-        while($totalread < $mediafile['filesize'])
-        {
+        while ($totalread < $mediafile['filesize']) {
             $buff = fread($fp, $buf);
             fwrite($sock, $buff, $buf);
             $totalread += $buf;
@@ -37,7 +37,7 @@ class WhatsMediaUploader
         list($header, $body) = preg_split("/\R\R/", $data, 2);
 
         $json = json_decode($body);
-        if (!is_null($json)){
+        if (!is_null($json)) {
             return $json;
         }
         return false;
@@ -85,5 +85,7 @@ class WhatsMediaUploader
 
         return self::sendData($host, $POST, $hBAOS, $filepath, $mediafile, $fBAOS);
     }
+
 }
+
 ?>

@@ -73,7 +73,7 @@ $config['YOURNAME'] = array(
  * NOTHING ELSE TO EDIT BELOW THIS LINE.
  *
  */
-require "whatsprot.class.php";
+require 'whatsprot.class.php';
 
 /**
  * For the future, other ways of getting contacts from various sources
@@ -147,6 +147,7 @@ class GoogleContacts implements Contacts
         } catch (Exception $e) {
             throw $e;
         }
+
         return $contacts;
     }
 
@@ -178,6 +179,7 @@ class GoogleContacts implements Contacts
         $res = preg_match("/Auth=([a-z0-9_-]+)/i", $authresponse, $matches);
         if ($res == 1) {
             $this->auth = $matches[1];
+
             return $matches[1];
         }
         throw new Exception('Could not get Authentication code from google');
@@ -219,7 +221,7 @@ class GoogleContacts implements Contacts
         if (isset($contactgroup)) {
             return $contactgroup;
         } else {
-            return FALSE;
+            return true;
         }
     }
 
@@ -249,6 +251,7 @@ class GoogleContacts implements Contacts
             }
         }
         usort($data, array($this, 'sortByName'));
+
         return($data);
     }
 
@@ -322,7 +325,7 @@ class Whatsapp
                         $this->nick = $this->config[$this->from]['nick'];
                         $this->password = $this->config[$this->from]['waPassword'];
 
-                        $this->wa = new WhatsProt($this->number, $this->id, $this->nick, FALSE);
+                        $this->wa = new WhatsProt($this->number, $this->id, $this->nick, false);
                         $this->wa->eventManager()->bind('onGetMessage', array($this, 'processReceivedMessage'));
                         $this->wa->eventManager()->bind('onConnect', array($this, 'connected'));
                         $this->wa->eventManager()->bind('onGetGroupList', array($this, 'processGroupArray'));
@@ -356,7 +359,7 @@ class Whatsapp
      * a database etc, this is probably not required, but it should help
      * if someone wishes to extend this project later.
      *
-     * @return array array with values that have been filtered.
+     * @return array     array with values that have been filtered.
      * @throws Exception If no $_POST values submitted.
      */
     private function cleanPostInputs()
@@ -383,6 +386,7 @@ class Whatsapp
         if (!$myinputs) {
             throw Exception("Problem Filtering the inputs");
         }
+
         return $myinputs;
     }
 
@@ -400,28 +404,22 @@ class Whatsapp
             case 'login':
                 $this->webLogin();
                 break;
-
             case 'logout':
                 $this->webLogout();
                 exit($this->showWebLoginForm());
                 break;
-
             case 'getContacts':
                 $this->getContacts();
                 break;
-
             case 'updateStatus':
                 $this->updateStatus();
                 break;
-
             case 'sendMessage':
                 $this->sendMessage();
                 break;
-
             case 'sendBroadcast':
                 $this->sendBroadcast();
                 break;
-
             default:
                 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true) {
                     exit($this->showWebForm());
@@ -515,6 +513,7 @@ class Whatsapp
             $this->wa->LoginWithPassword($this->password);
             return true;
         }
+
         return false;
     }
 
@@ -540,12 +539,12 @@ class Whatsapp
      * at a suitable time.
      *
      * @param string $phone The number that is receiving the message
-     * @param string $from The number that is sending the message
-     * @param string $id The unique ID for the message
-     * @param string $type Type of inbound message
-     * @param string $time Y-m-d H:m:s formatted string
-     * @param string $name The Name of sender (nick)
-     * @param string $data The actual message
+     * @param string $from  The number that is sending the message
+     * @param string $id    The unique ID for the message
+     * @param string $type  Type of inbound message
+     * @param string $time  Y-m-d H:m:s formatted string
+     * @param string $name  The Name of sender (nick)
+     * @param string $data  The actual message
      *
      * @return void
      */
@@ -562,8 +561,8 @@ class Whatsapp
     /**
      * Process the event onGetGroupList and sets a formatted array of groups the user belongs to.
      *
-     * @param string $phone The phone number (jid ) of the user
-     * @param array $groupArray Array with details of all groups user eitehr belongs to or owns.
+     * @param  string        $phone      The phone number (jid ) of the user
+     * @param  array         $groupArray Array with details of all groups user eitehr belongs to or owns.
      * @return array|boolean
      */
     public function processGroupArray($phone, $groupArray)
@@ -576,8 +575,10 @@ class Whatsapp
             }
 
             $this->waGroupList = $formattedGroups;
+
             return true;
         }
+
         return false;
     }
 
@@ -673,16 +674,16 @@ class Whatsapp
                 $this->wa->BroadcastMessage($this->inputs['to'], $this->inputs['message']);
             }
             if (isset($this->inputs['image']) && $this->inputs['image'] !== false) {
-//                $this->wa->MessageImage($this->inputs['to'], $this->inputs['image']);
+                //$this->wa->MessageImage($this->inputs['to'], $this->inputs['image']);
             }
             if (isset($this->inputs['audio']) && $this->inputs['audio'] !== false) {
-//                $this->wa->MessageAudio($this->inputs['to'], $this->inputs['audio']);
+                //$this->wa->MessageAudio($this->inputs['to'], $this->inputs['audio']);
             }
             if (isset($this->inputs['video']) && $this->inputs['video'] !== false) {
-//                $this->wa->MessageVideo($this->inputs['to'], $this->inputs['video']);
+                //$this->wa->MessageVideo($this->inputs['to'], $this->inputs['video']);
             }
             if (isset($this->inputs['locationname']) && trim($this->inputs['locationname'] !== '')) {
-//                $this->wa->Place($this->inputs['to'], $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
+                //$this->wa->Place($this->inputs['to'], $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
             }
             exit(json_encode(array(
                 "success" => true,
@@ -796,6 +797,7 @@ class Whatsapp
             </body>
         </html>
         <?php
+
         return ob_get_clean();
     }
 
@@ -1113,15 +1115,18 @@ class Whatsapp
                                             $.unblockUI();
                                         }
                                     });
+
                                     return false;
 
                                 default:
                                     alert('Error. An action should have been specified.');
+
                                     return false;
                             }
                         }
 
-                        function createChosen() {
+                        function createChosen()
+                        {
                             $('#to_chzn').remove();
                             $('#to').removeClass('chzn-done');
                             $("#to").chosen({
@@ -1142,16 +1147,18 @@ class Whatsapp
                         $('#pickLocation').click(function() {
                             if ($('#mapContainer').is(':visible')) {
                                 $('#mapContainer').hide();
+
                                 return false;
-                            }
-                            else {
+                            } else {
                                 $('#mapContainer').show();
                                 createMap();
+
                                 return false;
                             }
                         });
 
-                        function createMap() {
+                        function createMap()
+                        {
                             var map = new google.maps.Map(document.getElementById('map_canvas'), {
                                 center: new google.maps.LatLng(53.4, -7.778),
                                 mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -1183,8 +1190,8 @@ class Whatsapp
                                 map.setCenter(marker.getPosition());
                             });
 
-
-                            function placeMarker(location) {
+                            function placeMarker(location)
+                            {
                                 if (marker) {
                                     marker.setPosition(location);
                                 } else {
@@ -1196,7 +1203,8 @@ class Whatsapp
                                 updateLocation(location);
                             }
 
-                            function updateLocation(event) {
+                            function updateLocation(event)
+                            {
                                 if ($('#target').val() !== '') {
                                     $('#locationname').val($('#target').val());
                                 }
@@ -1206,7 +1214,6 @@ class Whatsapp
 
                             google.maps.event.addListener(map, 'click', function(event) {
                                 placeMarker(event.latLng);
-
 
                                 var geocoder = new google.maps.Geocoder();
                                 geocoder.geocode({
@@ -1258,6 +1265,7 @@ class Whatsapp
                                     $.unblockUI();
                                 }
                             });
+
                             return false;
                         });
 
@@ -1300,7 +1308,8 @@ class Whatsapp
 
                         });
 
-                        function onSuccess(data, textStatus, jqXHR) {
+                        function onSuccess(data, textStatus, jqXHR)
+                        {
                             switch (data.success) {
 
                                 case false:
@@ -1350,7 +1359,8 @@ class Whatsapp
                             newAlert('error', message);
                         }
 
-                        function newAlert(type, message) {
+                        function newAlert(type, message)
+                        {
                             $("#results").append("<div class='alert alert-block alert-" + type + "' ><strong>" + type.charAt(0).toUpperCase() + type.substr(1) + ": </strong>" + message + "</div>");
                             $(".alert-success").delay(5000).fadeOut("slow", function() {
                                 $(".alert-error").remove();
@@ -1653,8 +1663,8 @@ class Whatsapp
             </body>
         </html>
         <?php
+
         return ob_get_clean();
     }
 
 }
-?>

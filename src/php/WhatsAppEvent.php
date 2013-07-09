@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Event class to fire WhatsApp related events.
@@ -68,4 +67,5 @@ class WhatsAppEvent
             }
         }
     }
+
 }

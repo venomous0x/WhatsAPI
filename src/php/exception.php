@@ -17,10 +17,10 @@ interface IException
 abstract class CustomException extends Exception implements IException
 {
     protected $message = 'Unknown exception';     // Exception message
-    private $string;                            // Unknown
-    protected $code    = 0;                       // User-defined exception code
+    protected $code = 0;                       // User-defined exception code
     protected $file;                              // Source filename of exception
     protected $line;                              // Source line of exception
+    private $string;                            // Unknown
     private $trace;                             // Unknown
 
     public function __construct($message = NULL, $code = 0)
@@ -34,6 +34,7 @@ abstract class CustomException extends Exception implements IException
     public function __toString()
     {
         return get_class($this) . " '{$this->message}' in {$this->file}({$this->line})\n"
-                                . "{$this->getTraceAsString()}";
+                . "{$this->getTraceAsString()}";
     }
+
 }

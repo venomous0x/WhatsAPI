@@ -1,27 +1,25 @@
 <?php
-
 /**
  * @file
  * Show the use of different types of messaging.
  */
-
 # Require the class.
 require_once('whatsprot.class.php');
 
 /**
  * Config data.
  */
-$userPhone        = '34666554433';       # Telephone number including the country code without '+' or '00'.
+$userPhone = '34666554433';       # Telephone number including the country code without '+' or '00'.
 
-$userIdentity     = '00:00:00:00:00:00'; # This is tipically the IMEI number.
-                                         # If you are using an iOS device you should input your WLAN MAC address.
+$userIdentity = '00:00:00:00:00:00'; # This is tipically the IMEI number.
+# If you are using an iOS device you should input your WLAN MAC address.
 
-$userName         = 'John Doe';          # This is the username displayed by WhatsApp clients.
+$userName = 'John Doe';          # This is the username displayed by WhatsApp clients.
 
 $destinationPhone = '34666443322';       # Destination telephone number including the country code without '+' or '00'.
-                                         # For groups: [phone number]-[group id].
+# For groups: [phone number]-[group id].
 
-$password         = 'fgdfaughregnfagun='; # Password you received from WhatsApp
+$password = 'fgdfaughregnfagun='; # Password you received from WhatsApp
 
 $debug = TRUE;
 

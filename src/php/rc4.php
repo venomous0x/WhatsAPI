@@ -1,4 +1,5 @@
 <?php
+
 class rc4
 {
     private $s;
@@ -39,6 +40,7 @@ class rc4
         $this->s[$i] = $this->s[$j];
         $this->s[$j] = $c;
     }
+
 }
 
 class KeyStream
@@ -68,4 +70,5 @@ class KeyStream
 
         return $this->_rc4->cipher($data, $offset + 4, $length - 4);
     }
+
 }

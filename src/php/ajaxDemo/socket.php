@@ -1,5 +1,5 @@
 <?php
-set_time_limit(60);//1 minute
+set_time_limit(60); //1 minute
 session_start();
 session_write_close();
 //Calling session_write_close a lot because of session locks.
@@ -10,20 +10,15 @@ session_write_close();
 //here because this page has a very long lifetime (1 minute).
 
 $time = $_SESSION["running"];
-
 function onProfilePicture($from, $type, $data)
 {
-    if($type == "preview")
-    {
+    if ($type == "preview") {
         $filename = "../pictures/preview_" . $from . ".jpg";
-    }
-    else
-    {
+    } else {
         $filename = "../pictures/" . $from . ".jpg";
     }
     $fp = @fopen($filename, "w");
-    if($fp)
-    {
+    if ($fp) {
         fwrite($fp, $data);
         fclose($fp);
     }
@@ -41,13 +36,13 @@ function running($time)
     //kill the old socket.php processes.
     session_start();
     $running = $_SESSION["running"];
-    if($running != $time)
-    {
+    if ($running != $time) {
         //index.php refreshed by user
         die();
     }
     session_write_close();
-    return true;//continue running
+    
+    return true; //continue running
 }
 
 function onGetImage($mynumber, $from, $id, $type, $t, $name, $size, $url, $file, $mimetype, $filehash, $width, $height, $preview)
@@ -55,25 +50,23 @@ function onGetImage($mynumber, $from, $id, $type, $t, $name, $size, $url, $file,
     //save thumbnail
     $previewuri = "../media/thumb_" . $file;
     $fp = @fopen($previewuri, "w");
-    if($fp)
-    {
+    if ($fp) {
         fwrite($fp, $preview);
         fclose($fp);
     }
-    
+
     //download and save original
     $data = file_get_contents($url);
     $fulluri = "../media/" . $file;
     $fp = @fopen($fulluri, "w");
-    if($fp)
-    {
+    if ($fp) {
         fwrite($fp, $data);
         fclose($fp);
     }
-    
+
     //format message
     $msg = "<a href='$fulluri' target='_blank'><img src='$previewuri' /></a>";
-    
+
     //insert message
     session_start();
     $in = $_SESSION["inbound"];
@@ -91,8 +84,7 @@ $w->Connect();
 $w->LoginWithPassword($password);
 
 $initial = @$_POST["initial"];
-if($initial == "true" && $target != null)
-{
+if ($initial == "true" && $target != null) {
     //request contact picture only on first call
     $w->GetProfilePicture($target);
     //finally starting to use the event manager!
@@ -103,39 +95,32 @@ $w->eventManager()->bind("onGetImage", "onGetImage");
 //$w->SendPresenceSubscription($target);
 //TODO: presense handling (online/offline/typing/last seen)
 
-while(running($time))
-{
+while (running($time)) {
     $w->PollMessages();
-    
-    running($time);//check again if timestamp has been updated
 
+    running($time); //check again if timestamp has been updated
     //check for outbound messages to send:
     session_start();
     $outbound = $_SESSION["outbound"];
     $_SESSION["outbound"] = array();
     session_write_close();
-    if(count($outbound) > 0)
-    {
-        foreach($outbound as $message)
-        {
+    if (count($outbound) > 0) {
+        foreach ($outbound as $message) {
             //send messages
             $w->Message($message["target"], $message["body"]);
             $w->PollMessages();
         }
     }
-    
+
     //check for received messages:
     $messages = $w->GetMessages();
-    if(count($messages) > 0)
-    {
+    if (count($messages) > 0) {
         session_start();
         $inbound = $_SESSION["inbound"];
-        $_SESSION["inbound"] = array();//lock
-        foreach($messages as $message)
-        {
+        $_SESSION["inbound"] = array(); //lock
+        foreach ($messages as $message) {
             $data = @$message->getChild("body")->_data;
-            if($data != null && $data != '')
-            {
+            if ($data != null && $data != '') {
                 $inbound[] = $data;
             }
         }

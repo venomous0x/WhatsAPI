@@ -33,10 +33,8 @@ class WhatsProt
     // User agent and token used in request/registration code.
     const _whatsAppUserAgent = 'WhatsApp/2.9.4 WP7/7.10.8858 Device/HTC-HTC-H0002';
     const _whatsAppToken = 'Od52pFozHNWF9XbTN5lrqDtnsiZGL2G3l9yw1GiQ21a31a2d9dbdc9a8ce324ef2df918064fd26e30a';
-
     // The upload host.
     const _whatsAppUploadHost = 'https://mms.whatsapp.net/client/iphone/upload.php';
-
     // Describes the connection status with the WhatsApp server.
     const _disconnectedStatus = 'disconnected';
     const _connectedStatus = 'connected';
@@ -52,15 +50,12 @@ class WhatsProt
     protected $_password;
     // The user name.
     protected $_name;
-
     // A list of bytes for incomplete messages.
     protected $_incomplete_message = '';
-
     // Holds the login status.
     protected $_loginStatus;
     // The AccountInfo object.
     protected $_accountInfo;
-
     // Queue for media message nodes
     protected $_mediaQueue = array();
     // Queue for received messages.
@@ -85,19 +80,14 @@ class WhatsProt
     protected $_reader;
     // An instance of the WhatsAppEvent class.
     protected $event;
-
     // Instances of the KeyStream class.
     protected $_inputKey;
     protected $_outputKey;
-
     //Media File Information
     protected $_mediafileinfo = array();
-
     // Determines wether debug mode is on or off.
     protected $_debug;
-
     protected $_newmsgBind = FALSE;
-
     protected $challengeData;
 
     /**
@@ -119,7 +109,7 @@ class WhatsProt
         $this->_reader = new BinTreeNodeReader($dict);
         $this->_debug = $debug;
         $this->_phoneNumber = $number;
-        if(strlen($identity) < 32) {
+        if (strlen($identity) < 32) {
             //compute md5 identity hash
             $this->_identity = $this->getIdentity($identity);
         } else {
@@ -145,8 +135,7 @@ class WhatsProt
     {
         $nodes = array();
         $nodes[] = new ProtocolNode("receipt_acks", NULL, NULL, "");
-        if($profileSubscribe)
-        {
+        if ($profileSubscribe) {
             $nodes[] = new ProtocolNode("w:profile:picture", array("type" => "all"), null, '');
         }
         $parent = new ProtocolNode("stream:features", NULL, $nodes, "");
@@ -360,7 +349,7 @@ class WhatsProt
                     array_push($this->_messageQueue, $node);
 
                     //do not send received confirmation if sender is yourself
-                    if (strpos($node->_attributeHash['from'], $this->_phoneNumber.'@'.static::_whatsAppServer) === false) {
+                    if (strpos($node->_attributeHash['from'], $this->_phoneNumber . '@' . static::_whatsAppServer) === false) {
                         $this->sendMessageReceived($node);
                     }
 
@@ -478,7 +467,8 @@ class WhatsProt
                             $node->_attributeHash['from'], $node->_attributeHash['id'], $node->_attributeHash['type'], $node->_attributeHash['t']
                         ));
                     }
-                    if (strcmp($node->_attributeHash['type'], "subject") == 0) {print_r($node);
+                    if (strcmp($node->_attributeHash['type'], "subject") == 0) {
+                        print_r($node);
                         $this->eventManager()->fire('onGetGroupSubject', array(
                             $this->_phoneNumber,
                             reset(explode('@', $node->_attributeHash['from'])), $node->_attributeHash['t'], reset(explode('@', $node->_attributeHash['author'])),
@@ -490,14 +480,12 @@ class WhatsProt
                 if ($node->_tag == "presence" && $node->getAttribute("status") == "dirty") {
                     //clear dirty
                     $categories = array();
-                    if(count($node->_children) > 0)
-                    foreach($node->_children as $child)
-                    {
-                        if($child->_tag == "category")
-                        {
-                            $categories[] = $child->getAttribute("name");
+                    if (count($node->_children) > 0)
+                        foreach ($node->_children as $child) {
+                            if ($child->_tag == "category") {
+                                $categories[] = $child->getAttribute("name");
+                            }
                         }
-                    }
                     $this->SendClearDirty($categories);
                 }
                 if (strcmp($node->_tag, "presence") == 0 && strncmp($node->_attributeHash['from'], $this->_phoneNumber, strlen($this->_phoneNumber)) != 0 && strpos($node->_attributeHash['from'], "-") == FALSE && isset($node->_attributeHash['type'])) {
@@ -621,8 +609,7 @@ class WhatsProt
     {
         $this->_accountInfo = (array) $this->checkCredentials();
         if ($this->_accountInfo['status'] == 'ok') {
-            if($this->_debug)
-            {
+            if ($this->_debug) {
                 echo "New password received: " . $this->_accountInfo['pw'] . "\r\n";
             }
             $this->_password = $this->_accountInfo['pw'];
@@ -692,7 +679,7 @@ class WhatsProt
             "to" => $to,
             "type" => "action",
             "id" => $this->msgId("message")
-        ), array($child), null);
+                ), array($child), null);
         $this->sendNode($node);
     }
 
@@ -710,8 +697,7 @@ class WhatsProt
         $hash = array();
         $hash["xmlns"] = "w:profile:picture";
         $hash["type"] = "image";
-        if(!$large)
-        {
+        if (!$large) {
             $hash["type"] = "preview";
         }
         $picture = new ProtocolNode("picture", $hash, null, null);
@@ -761,15 +747,13 @@ class WhatsProt
     {
         $id = $node->getAttribute("id");
         $messageNode = @$this->_mediaQueue[$id];
-        if($messageNode == null)
-        {
+        if ($messageNode == null) {
             //message not found, can't send!
             return;
         }
 
         $duplicate = $node->getChild("duplicate");
-        if($duplicate != null)
-        {
+        if ($duplicate != null) {
             //file already on whatsapp servers
             $url = $duplicate->getAttribute("url");
             $filesize = $duplicate->getAttribute("size");
@@ -779,14 +763,11 @@ class WhatsProt
             $width = $duplicate->getAttribute("width");
             $height = $duplicate->getAttribute("height");
             $filename = array_pop(explode("/", $url));
-        }
-        else
-        {
+        } else {
             //upload new file
             $json = WhatsMediaUploader::pushFile($node, $messageNode, $this->_mediafileinfo, $this->_phoneNumber);
 
-            if(!$json)
-            {
+            if (!$json) {
                 //failed upload
                 return false;
             }
@@ -811,7 +792,7 @@ class WhatsProt
         $filepath = $this->_mediaQueue[$id]['filePath'];
         $to = $this->_mediaQueue[$id]['to'];
 
-        switch($filetype) {
+        switch ($filetype) {
             case "image":
                 $icon = createIcon($filepath);
                 break;
@@ -881,7 +862,6 @@ class WhatsProt
         } while (!$received);
     }
 
-
     /**
      * Wait for group notification.
      */
@@ -902,7 +882,7 @@ class WhatsProt
         $this->_serverReceivedId = FALSE;
         do {
             $this->PollMessages();
-        } while ($this->_serverReceivedId !== $id && time() - $time < 5 );
+        } while ($this->_serverReceivedId !== $id && time() - $time < 5);
     }
 
     /**
@@ -936,8 +916,7 @@ class WhatsProt
     public function SendClearDirty($categories)
     {
         $catnodes = array();
-        foreach($categories as $category)
-        {
+        foreach ($categories as $category) {
             $catnode = new ProtocolNode("category", array("name" => $category), null, null);
             $catnodes[] = $catnode;
         }
@@ -946,9 +925,8 @@ class WhatsProt
             "id" => $this->msgId("cleardirty"),
             "type" => "set",
             "to" => "s.whatsapp.net"
-        ), array($clean), null);
+                ), array($clean), null);
         $this->sendNode($node);
-
     }
 
     public function SendGetClientConfig()
@@ -958,10 +936,9 @@ class WhatsProt
             "id" => $this->msgId("sendconfig"),
             "type" => "get",
             "to" => static::_whatsAppServer
-        ), array($child), null);
+                ), array($child), null);
         $this->sendNode($node);
     }
-
 
     public function SetProfilePicture($path)
     {
@@ -984,11 +961,9 @@ class WhatsProt
     {
         preprocessProfilePicture($filepath);
         $fp = @fopen($filepath, "r");
-        if($fp)
-        {
+        if ($fp) {
             $data = fread($fp, filesize($filepath));
-            if($data)
-            {
+            if ($data) {
                 //this is where the fun starts
                 $hash = array();
                 $hash["xmlns"] = "w:profile:picture";
@@ -1016,20 +991,17 @@ class WhatsProt
      */
     protected function GetJID($number)
     {
-        if(!stristr($number, '@'))
-        {
+        if (!stristr($number, '@')) {
             //check if group message
-            if(stristr($number, '-'))
-            {
+            if (stristr($number, '-')) {
                 //to group
                 $number .= "@" . static::_whatsAppGroupServer;
-            }
-            else
-            {
+            } else {
                 //to normal user
                 $number .= "@" . static::_whatsAppServer;
             }
         }
+
         return $number;
     }
 
@@ -1070,13 +1042,11 @@ class WhatsProt
 
     public function SendLeaveGroups($gjids)
     {
-        if(!is_array($gjids))
-        {
+        if (!is_array($gjids)) {
             $gjids = array($gjids);
         }
         $nodes = array();
-        foreach($gjids as $gjid)
-        {
+        foreach ($gjids as $gjid) {
             $nodes[] = new ProtocolNode("group", array("id" => $gjid), null, null);
         }
         $leave = new ProtocolNode("leave", array("xmlns" => "w:g"), $nodes, null);
@@ -1095,7 +1065,7 @@ class WhatsProt
             "id" => $this->msgId("getgroupinfo"),
             "type" => "get",
             "to" => $this->GetJID($gjid)
-        ), array($child), null);
+                ), array($child), null);
         $this->sendNode($node);
     }
 
@@ -1115,12 +1085,12 @@ class WhatsProt
         $child = new ProtocolNode("list", array(
             "xmlns" => "w:g",
             "type" => $type
-        ), null, null);
+                ), null, null);
         $node = new ProtocolNode("iq", array(
             "id" => $msgID,
             "type" => "get",
             "to" => "g.us"
-        ), array($child), null);
+                ), array($child), null);
         $this->sendNode($node);
         $this->WaitforServer($msgID);
     }
@@ -1129,12 +1099,12 @@ class WhatsProt
     {
         $child = new ProtocolNode("list", array(
             "xmlns" => "w:g"
-        ), null, null);
+                ), null, null);
         $node = new ProtocolNode("iq", array(
             "id" => $this->msgId("getparticipants"),
             "type" => "get",
             "to" => $this->GetJID($gjid)
-        ), array($child), null);
+                ), array($child), null);
         $this->sendNode($node);
     }
 
@@ -1145,7 +1115,7 @@ class WhatsProt
             "id" => $this->msgId("settoken"),
             "type" => "set",
             "to" => "s.whatsapp.net"
-        ), array($child), null);
+                ), array($child), null);
         $this->sendNode($node);
     }
 
@@ -1153,30 +1123,30 @@ class WhatsProt
     {
         $child = new ProtocolNode("list", array(
             "name" => "default"
-        ), null, null);
+                ), null, null);
         $child2 = new ProtocolNode("query", array(
             "xmlns" => "jabber:iq:privacy"
-        ), array($child), null);
+                ), array($child), null);
         $node = new ProtocolNode("iq", array(
             "id" => $this->msgId("getprivacy"),
             "type" => "get"
-        ), array($child2), null);
+                ), array($child2), null);
         $this->sendNode($node);
     }
 
     public function SendSetPrivacyBlockedList($blockedJids = array())
     {
-        if(!is_array($blockedJids)) {
+        if (!is_array($blockedJids)) {
             $blockedJids = array($blockedJids);
         }
         $items = array();
-        foreach($blockedJids as $index=>$jid) {
+        foreach ($blockedJids as $index => $jid) {
             $item = new ProtocolNode("item", array(
                 "type" => "jid",
                 "value" => $this->GetJID($jid),
                 "action" => "deny",
                 "order" => $index + 1//WhatsApp stream crashes on zero index
-            ), null, null);
+                    ), null, null);
             $items[] = $item;
         }
         $child = new ProtocolNode("list", array("name" => "default"), $items, null);
@@ -1184,7 +1154,7 @@ class WhatsProt
         $node = new ProtocolNode("iq", array(
             "id" => $this->msgId("setprivacy"),
             "type" => "set"
-        ), array($child2), null);
+                ), array($child2), null);
         $this->sendNode($node);
     }
 
@@ -1192,12 +1162,12 @@ class WhatsProt
     {
         $child = new ProtocolNode("props", array(
             "xmlns" => "w"
-        ), null, null);
+                ), null, null);
         $node = new ProtocolNode("iq", array(
             "id" => $this->msgId("getproperties"),
             "type" => "get",
             "to" => "s.whatsapp.net"
-        ), array($child), null);
+                ), array($child), null);
         $this->sendNode($node);
     }
 
@@ -1345,7 +1315,7 @@ class WhatsProt
     protected function sendActionGroupParticipants($groupId, $participants, $tag)
     {
         $Participants = array();
-        foreach($participants as $participant) {
+        foreach ($participants as $participant) {
             $Participants[] = new ProtocolNode("participant", array("jid" => $this->GetJID($participant)), NULL, "");
         }
 
@@ -1365,7 +1335,7 @@ class WhatsProt
 
     public function BroadcastMessage($targets, $message)
     {
-        if(!is_array($targets)) {
+        if (!is_array($targets)) {
             $targets = array($targets);
         }
         $bodyNode = new ProtocolNode("body", null, null, $message);
@@ -1376,14 +1346,13 @@ class WhatsProt
         $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
 
         $toNodes = array();
-        foreach($targets as $target)
-        {
+        foreach ($targets as $target) {
             $jid = $this->GetJID($target);
             $hash = array("jid" => $jid);
             $toNode = new ProtocolNode("to", $hash, null, null);
             $toNodes[] = $toNode;
         }
-        
+
         $broadcastNode = new ProtocolNode("broadcast", null, $toNodes, null);
 
         $messageHash = array();
@@ -1449,6 +1418,7 @@ class WhatsProt
                 $txt = str_ireplace($emoji[0], $this->unichr((string) $emoji[1]), $txt);
             }
         }
+
         return $txt;
     }
 
@@ -1466,9 +1436,9 @@ class WhatsProt
         foreach ($multiChars as $char) {
             $string .= mb_convert_encoding('&#' . intval($char, 16) . ';', 'UTF-8', 'HTML-ENTITIES');
         }
+
         return $string;
     }
-
 
     /**
      * Send an image file to group/user
@@ -1773,7 +1743,7 @@ class WhatsProt
      * @see: https://maps.google.com/maps/place?cid=1421139585205719654
      * @todo: Add support for only pass as argument the place id.
      */
-    public function Place($to,$long, $lat, $name, $url = null)
+    public function Place($to, $long, $lat, $name, $url = null)
     {
         $mediaHash = array();
         $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
@@ -1801,7 +1771,7 @@ class WhatsProt
         $data['file'] = "@" . $file;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array( 'Expect:' ) );
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
         curl_setopt($ch, CURLOPT_URL, static::_whatsAppUploadHost);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -1905,11 +1875,18 @@ class WhatsProt
             throw new Exception('The provided phone number is not valid.');
         }
 
-        if($countryCode === false && $phone['ISO3166'] != '') $countryCode = $phone['ISO3166'];
-        if($countryCode === false) $countryCode = 'US';
-
-        if($langCode === false && $phone['ISO639'] != '') $langCode = $phone['ISO639'];
-        if($langCode === false) $langCode = 'en';
+        if ($countryCode === false && $phone['ISO3166'] != '') {
+            $countryCode = $phone['ISO3166'];
+        }
+        if ($countryCode === false) {
+            $countryCode = 'US';
+        }
+        if ($langCode === false && $phone['ISO639'] != '') {
+            $langCode = $phone['ISO639'];
+        }
+        if ($langCode === false) {
+            $langCode = 'en';
+        }
 
         // Build the token.
         $token = md5(static::_whatsAppToken . $phone['phone']);
@@ -1924,7 +1901,7 @@ class WhatsProt
             'mcc' => '000',
             'mnc' => '000',
             'method' => $method,
-            'id' =>  $this->_identity,
+            'id' => $this->_identity,
             'token' => $token,
             'c' => 'cookie',
         );
@@ -1940,20 +1917,18 @@ class WhatsProt
         }
 
         if ($response->status != 'sent') {
-            if(isset($response->reason) && $response->reason == "too_recent")
-            {
+            if (isset($response->reason) && $response->reason == "too_recent") {
                 $this->eventManager()->fire('onFailedRequestCodeTooRecent', array($this->_phoneNumber, $method, $response->reason, $response->retry_after));
                 $minutes = round($response->retry_after / 60);
                 throw new Exception("Code already sent. Retry after $minutes minutes.");
-            }
-            else
-            {
+            } else {
                 $this->eventManager()->fire('onFailedRequestCode', array($this->_phoneNumber, $method, $response->reason, $response->param));
                 throw new Exception('There was a problem trying to request the code.');
             }
         } else {
             $this->eventManager()->fire('onRequestCode', array($this->_phoneNumber, $method, $response->length));
         }
+
         return $response;
     }
 
@@ -1997,8 +1972,7 @@ class WhatsProt
 
         if ($response->status != 'ok') {
             $this->eventManager()->fire('onFailedRegisterCode', array($this->_phoneNumber, $response->status, $response->reason, $response->retry_after));
-            if($this->_debug)
-            {
+            if ($this->_debug) {
                 print_r($query);
                 print_r($response);
             }
@@ -2017,6 +1991,7 @@ class WhatsProt
                 $response->price_expiration
             ));
         }
+
         return $response;
     }
 
@@ -2059,7 +2034,7 @@ class WhatsProt
 
         if ($response->status != 'ok') {
             $this->eventManager()->fire('onBadCredentials', array($this->_phoneNumber, $response->status, $response->reason));
-            if($this->_debug) {
+            if ($this->_debug) {
                 print_r($query);
                 print_r($response);
             }
@@ -2078,6 +2053,7 @@ class WhatsProt
                 $response->price_expiration
             ));
         }
+
         return $response;
     }
 
@@ -2086,7 +2062,7 @@ class WhatsProt
         // Build the url.
         $url = $host . '?';
         foreach ($query as $key => $value) {
-          $url .= $key . '=' . $value . '&';
+            $url .= $key . '=' . $value . '&';
         }
         $url = rtrim($url, '&');
 
@@ -2148,6 +2124,7 @@ class WhatsProt
         }
 
         $this->eventManager()->fire('onFailedDissectPhone', array($this->_phoneNumber));
+
         return FALSE;
     }
 
@@ -2175,4 +2152,5 @@ class WhatsProt
 
         return $this->event;
     }
+
 }

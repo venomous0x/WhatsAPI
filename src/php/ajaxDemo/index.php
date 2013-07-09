@@ -4,16 +4,15 @@ $_SESSION["running"] = time();
 $_SESSION["inbound"] = array();
 $_SESSION["outbound"] = array();
 
-$target = "***********";//conversation target number/JID
-
+$target = "***********"; //conversation target number/JID
 ?>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript">
-    var target = "<?php echo $target;?>";
+    var target = "<?php echo $target; ?>";
     $(document).ready(function()
     {
         $("#message").keypress(function(e) {
-            if(e.which == 13)
+            if (e.which == 13)
             {
                 sendMessage();
             }
@@ -21,7 +20,7 @@ $target = "***********";//conversation target number/JID
         Listen(true);
         getMessages();
     });
-    
+
     function Listen(initial)
     {
         $.ajax({
@@ -34,18 +33,20 @@ $target = "***********";//conversation target number/JID
                 initial: initial,
                 target: target
             }
-            }).done(function(data) {
-                //write debug info
-                //if(data)
-                //{
-                //    var foo = $("#debug").text();
-                //    $("#debug").text(foo + data);
-                //}
-                setTimeout(function() {Listen(false)}, 1000);
-            });
-        
+        }).done(function(data) {
+            //write debug info
+            //if(data)
+            //{
+            //    var foo = $("#debug").text();
+            //    $("#debug").text(foo + data);
+            //}
+            setTimeout(function() {
+                Listen(false)
+            }, 1000);
+        });
+
     }
-    
+
     function getMessages()
     {
         $.ajax({
@@ -54,32 +55,34 @@ $target = "***********";//conversation target number/JID
             dataType: "json",
             method: "POST",
             data: {
-                    method: "pollMessages",
-                }}).done(function(data) {
-                    if(data)
-                    {
-                        if(data.profilepic != "")
-                        {
-                            $("#profilepic").attr("src", data.profilepic);
-                        }
-                        for(var i in data.messages)
-                        {
-                            addMessage(data.messages[i], "toMe");
-                        }
-                    }
-                    setTimeout(function() {getMessages()}, 1000);
+                method: "pollMessages",
+            }}).done(function(data) {
+            if (data)
+            {
+                if (data.profilepic != "")
+                {
+                    $("#profilepic").attr("src", data.profilepic);
+                }
+                for (var i in data.messages)
+                {
+                    addMessage(data.messages[i], "toMe");
+                }
+            }
+            setTimeout(function() {
+                getMessages()
+            }, 1000);
         });
     }
-    
+
     function addMessage(message, cssclass)
     {
         $("#conversation").append($("<div></div>").addClass("message").addClass(cssclass).html(message));
     }
-    
+
     function sendMessage()
     {
         var message = $("#message").val();
-        if(message != '')
+        if (message != '')
         {
             addMessage(message, "fromMe");
             $("#message").val("");
@@ -89,10 +92,10 @@ $target = "***********";//conversation target number/JID
                 dataType: "html",
                 method: "POST",
                 data: {
-                        method: "sendMessage",
-                        target: target,
-                        message: message
-                    }});
+                    method: "sendMessage",
+                    target: target,
+                    message: message
+                }});
         }
     }
 </script>
