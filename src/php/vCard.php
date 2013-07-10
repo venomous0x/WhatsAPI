@@ -13,7 +13,7 @@ class vCard
     // vCard class: PUBLIC, PRIVATE, CONFIDENTIAL.
     protected $class;
     // vCard revision date.
-    protected $revision_date;
+    protected $revisionDate;
     // The vCard gnerated.
     protected $card;
 
@@ -114,15 +114,15 @@ class vCard
         if (!$this->data['timezone']) {
             $this->data['timezone'] = date("O");
         }
-        if (!$this->revision_date) {
-            $this->revision_date = date('Y-m-d H:i:s');
+        if (!$this->revisionDate) {
+            $this->revisionDate = date('Y-m-d H:i:s');
         }
 
         $this->card = "BEGIN:VCARD\r\n";
         $this->card .= "VERSION:3.0\r\n";
         $this->card .= "CLASS:" . $this->class . "\r\n";
         $this->card .= "PRODID:-//class_vCard from WhatsAPI//NONSGML Version 1//EN\r\n";
-        $this->card .= "REV:" . $this->revision_date . "\r\n";
+        $this->card .= "REV:" . $this->revisionDate . "\r\n";
         $this->card .= "FN:" . $this->data['display_name'] . "\r\n";
         $this->card .= "N:"
                 . $this->data['last_name'] . ";"

@@ -45,19 +45,19 @@ class rc4
 
 class KeyStream
 {
-    private $_rc4;
-    private $_key;
+    private $rc4;
+    private $key;
 
     public function __construct($key)
     {
-        $this->_rc4 = new RC4($key, 256);
-        $this->_key = $key;
+        $this->rc4 = new RC4($key, 256);
+        $this->key = $key;
     }
 
     public function encode($data, $offset, $length, $append = true)
     {
-        $d = $this->_rc4->cipher($data, $offset, $length);
-        $h = substr(hash_hmac('sha1', $d, $this->_key, true), 0, 4);
+        $d = $this->rc4->cipher($data, $offset, $length);
+        $h = substr(hash_hmac('sha1', $d, $this->key, true), 0, 4);
         if ($append)
             return $d . $h;
         else
@@ -68,7 +68,7 @@ class KeyStream
     {
         /* TODO: Hash check */
 
-        return $this->_rc4->cipher($data, $offset + 4, $length - 4);
+        return $this->rc4->cipher($data, $offset + 4, $length - 4);
     }
 
 }

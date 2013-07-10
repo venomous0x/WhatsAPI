@@ -37,9 +37,9 @@
 //
 class WhatsAppContactSync
 {
-    protected $_username;
-    protected $_password;
-    protected $_contacts = array();
+    protected $username;
+    protected $password;
+    protected $contacts = array();
     protected $debug = false;
 
     protected function _getCnonce()
@@ -69,11 +69,11 @@ class WhatsAppContactSync
         $cnonce = $this->_getCnonce();
         $nc = "00000001";
         $digestUri = "WAWA/s.whatsapp.net";
-        $credentials = $this->_username . ":s.whatsapp.net:";
-        $credentials .= $this->_password;
+        $credentials = $this->username . ":s.whatsapp.net:";
+        $credentials .= $this->password;
         $response = md5(md5(md5($credentials, true) . ":$nonce:" . $cnonce) . ":$nonce:" . $nc . ":" . $cnonce . ":auth:" . md5("AUTHENTICATE:" . $digestUri));
 
-        return "X-WAWA:username=\"" . $this->_username . "\",realm=\"s.whatsapp.net\",nonce=\"$nonce\",cnonce=\"$cnonce\",nc=\"$nc\",qop=\"auth\",digest-uri=\"$digestUri\",response=\"$response\",charset=\"utf-8\"";
+        return "X-WAWA:username=\"" . $this->username . "\",realm=\"s.whatsapp.net\",nonce=\"$nonce\",cnonce=\"$cnonce\",nc=\"$nc\",qop=\"auth\",digest-uri=\"$digestUri\",response=\"$response\",charset=\"utf-8\"";
     }
 
     protected function _curlRequest($url, $headers, $postfields = false)
@@ -135,13 +135,13 @@ class WhatsAppContactSync
 
     public function __construct($username, $password, $contact, $debug = false)
     {
-        $this->_username = $username;
-        $this->_password = base64_decode($password);
+        $this->username = $username;
+        $this->password = base64_decode($password);
         if (!is_array($contact)) {
             //single contact
             $contact = array($contact);
         }
-        $this->_contacts = $contact;
+        $this->contacts = $contact;
         $this->debug = $debug;
     }
 
@@ -157,7 +157,7 @@ class WhatsAppContactSync
             //success
             $url = "https://sro.whatsapp.net/v2/sync/q";
             $postfields = "ut=all&t=c";
-            foreach ($this->_contacts as $contact) {
+            foreach ($this->contacts as $contact) {
                 if (!stristr($contact, "+")) {
                     //automatically add leading plus sign
                     $contact = "+" . $contact;
