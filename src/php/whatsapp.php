@@ -494,7 +494,7 @@ class Whatsapp
     public function __destruct()
     {
         if (isset($this->wa) && $this->connected) {
-            $this->wa->Disconnect();
+            $this->wa->disconnect();
         }
     }
 
@@ -509,8 +509,8 @@ class Whatsapp
     private function connectToWhatsApp()
     {
         if (isset($this->wa)) {
-            $this->wa->Connect();
-            $this->wa->LoginWithPassword($this->password);
+            $this->wa->connect();
+            $this->wa->loginWithPassword($this->password);
             return true;
         }
 
@@ -528,7 +528,7 @@ class Whatsapp
     private function getGroupList()
     {
         $this->connectToWhatsApp();
-        $this->wa->SendGetGroups();
+        $this->wa->sendGetGroups();
     }
 
     /**
@@ -621,20 +621,20 @@ class Whatsapp
             foreach ($this->inputs['to'] as $to) {
                 if (trim($to) !== '') {
                     if (isset($this->inputs['message']) && trim($this->inputs['message'] !== '')) {
-                        $this->wa->sendComposingMessage($to);
-                        $this->wa->Message($to, $this->inputs['message']);
+                        $this->wa->sendMessageComposing($to);
+                        $this->wa->sendMessage($to, $this->inputs['message']);
                     }
                     if (isset($this->inputs['image']) && $this->inputs['image'] !== false) {
-                        $this->wa->MessageImage($to, $this->inputs['image']);
+                        $this->wa->sendMessageImage($to, $this->inputs['image']);
                     }
                     if (isset($this->inputs['audio']) && $this->inputs['audio'] !== false) {
-                        $this->wa->MessageAudio($to, $this->inputs['audio']);
+                        $this->wa->sendMessageAudio($to, $this->inputs['audio']);
                     }
                     if (isset($this->inputs['video']) && $this->inputs['video'] !== false) {
-                        $this->wa->MessageVideo($to, $this->inputs['video']);
+                        $this->wa->sendMessageVideo($to, $this->inputs['video']);
                     }
                     if (isset($this->inputs['locationname']) && trim($this->inputs['locationname'] !== '')) {
-                        $this->wa->Place($to, $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
+                        $this->wa->sendPlace($to, $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
                     }
                 } else {
                     exit(json_encode(array(
@@ -671,7 +671,7 @@ class Whatsapp
 
             $this->connectToWhatsApp();
             if (isset($this->inputs['message']) && trim($this->inputs['message'] !== '')) {
-                $this->wa->BroadcastMessage($this->inputs['to'], $this->inputs['message']);
+                $this->wa->sendMessageBroadcast($this->inputs['to'], $this->inputs['message']);
             }
             if (isset($this->inputs['image']) && $this->inputs['image'] !== false) {
                 //$this->wa->MessageImage($this->inputs['to'], $this->inputs['image']);

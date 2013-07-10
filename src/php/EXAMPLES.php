@@ -47,7 +47,7 @@ $w = new WhatsProt($userPhone, $userIdentity, $userName, $debug);
  *   - method: Used method.
  *   - retry_after: Waiting time before requesting a new code.
  */
-$w->requestCode();
+$w->codeRequest();
 
 /**
  * Second register account on WhatsApp using the provided code with $w->requestCode();.
@@ -68,12 +68,12 @@ $w->requestCode();
  *   - currency: Currency price of account.
  *   - price_expiration: Price expiration in UNIX TimeStamp.
  */
-$w->registerCode('123456');
+$w->codeRegister('123456');
 
 # Connect to WhatsApp servers.
-$w->Connect();
+$w->connect();
 # Now LoginWithPassword function sends Nickname and (Available) Presence.
-$w->LoginWithPassword($password);
+$w->loginWithPassword($password);
 
 # Send messages:
 
@@ -85,7 +85,7 @@ $w->LoginWithPassword($password);
  * @param $txt
  *   The text message.
  */
-$w->Message($destinationPhone, 'This is an example!');
+$w->sendMessage($destinationPhone, 'This is an example!');
 
 /**
  * Send a image to the user/group.
@@ -95,7 +95,7 @@ $w->Message($destinationPhone, 'This is an example!');
  * @param $file
  *   The path/url/uri to the image.
  */
-$w->MessageImage($destinationPhone, 'demo/x3.jpg');
+$w->sendMessageImage($destinationPhone, 'demo/x3.jpg');
 
 /**
  * Send a video to the user/group.
@@ -105,7 +105,7 @@ $w->MessageImage($destinationPhone, 'demo/x3.jpg');
  * @param $file
  *   The path/url/uri to the MP4 video.
  */
-$w->MessageVideo($destinationPhone, 'http://example.com/video.mp4');
+$w->sendMessageVideo($destinationPhone, 'http://example.com/video.mp4');
 
 /**
  * Send a audio to the user/group.
@@ -115,7 +115,7 @@ $w->MessageVideo($destinationPhone, 'http://example.com/video.mp4');
  * @param $file
  *   The path/url/uri to the 3GP audio.
  */
-$w->MessageAudio($destinationPhone, 'http://example.com/audio.3gp');
+$w->sendMessageAudio($destinationPhone, 'http://example.com/audio.3gp');
 
 /**
  * Send a vCard to the user/group.
@@ -137,7 +137,7 @@ $v->set('data', array(
     'cell_tel' => '34666554433',
     'photo' => base64_encode($image),
 ));
-$w->vCard($destinationPhone, 'John Doe', $v->show());
+$w->sendVcard($destinationPhone, 'John Doe', $v->show());
 
 /**
  * Send a location to the user/group.
@@ -149,19 +149,19 @@ $w->vCard($destinationPhone, 'John Doe', $v->show());
  * @param $lat
  *   The latitude to send.
  */
-$w->Location($destinationPhone, '4.948568', '52.352957');
+$w->sendLocation($destinationPhone, '4.948568', '52.352957');
 
 /**
  * Wait for message delivery notification.
  */
-$w->WaitforReceipt();
+$w->waitForMessageReceipt();
 
 /**
  * Or get all incoming messages and process it.
  */
 while (true) {
-    $w->PollMessages();
-    $msgs = $w->GetMessages();
+    $w->pollMessages();
+    $msgs = $w->getMessages();
     foreach ($msgs as $m) {
         # process inbound messages
         sleep(1);

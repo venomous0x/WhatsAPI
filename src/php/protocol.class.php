@@ -38,7 +38,7 @@ class ProtocolNode
         $this->data = $data;
     }
 
-    public function NodeString($indent = "")
+    public function nodeString($indent = "")
     {
         $ret = "\n" . $indent . "<" . $this->tag;
         if ($this->attributeHash != null) {
@@ -56,7 +56,7 @@ class ProtocolNode
         }
         if ($this->children) {
             foreach ($this->children as $child) {
-                $ret .= $child->NodeString($indent . "  ");
+                $ret .= $child->nodeString($indent . "  ");
             }
             $ret .= "\n" . $indent;
         }

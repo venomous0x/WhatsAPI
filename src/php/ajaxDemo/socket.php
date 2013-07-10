@@ -80,13 +80,13 @@ $target = @$_POST["target"];
 $username = "************";
 $password = "******************************";
 $w = new WhatsProt($username, 0, "WhatsApi AJAX Demo", true);
-$w->Connect();
-$w->LoginWithPassword($password);
+$w->connect();
+$w->loginWithPassword($password);
 
 $initial = @$_POST["initial"];
 if ($initial == "true" && $target != null) {
     //request contact picture only on first call
-    $w->GetProfilePicture($target);
+    $w->sendGetProfilePicture($target);
     //finally starting to use the event manager!
     $w->eventManager()->bind("onProfilePicture", "onProfilePicture");
 }
@@ -96,7 +96,7 @@ $w->eventManager()->bind("onGetImage", "onGetImage");
 //TODO: presense handling (online/offline/typing/last seen)
 
 while (running($time)) {
-    $w->PollMessages();
+    $w->pollMessages();
 
     running($time); //check again if timestamp has been updated
     //check for outbound messages to send:
@@ -107,19 +107,19 @@ while (running($time)) {
     if (count($outbound) > 0) {
         foreach ($outbound as $message) {
             //send messages
-            $w->Message($message["target"], $message["body"]);
-            $w->PollMessages();
+            $w->sendMessage($message["target"], $message["body"]);
+            $w->pollMessages();
         }
     }
 
     //check for received messages:
-    $messages = $w->GetMessages();
+    $messages = $w->getMessages();
     if (count($messages) > 0) {
         session_start();
         $inbound = $_SESSION["inbound"];
         $_SESSION["inbound"] = array(); //lock
         foreach ($messages as $message) {
-            $data = @$message->getChild("body")->_data;
+            $data = @$message->getChild("body")->data;
             if ($data != null && $data != '') {
                 $inbound[] = $data;
             }

@@ -42,20 +42,20 @@ class WhatsAppContactSync
     protected $contacts = array();
     protected $debug = false;
 
-    protected function _getCnonce()
+    protected function getCnonce()
     {
         //generate random 10char string
         return substr(md5(microtime()), 0, 10);
     }
 
-    protected function _getHeaders($nonce = 0, $contentLength = 0)
+    protected function getHeaders($nonce = 0, $contentLength = 0)
     {
         //get HTTP headers
         $headers = array(
             "User-Agent: WhatsApp/2.4.7 S40Version/14.26 Device/Nokia302",
             "Accept: text/json",
             "Content-Type: application/x-www-form-urlencoded",
-            "Authorization: " . $this->_generateAuth($nonce),
+            "Authorization: " . $this->generateAuth($nonce),
             'Accept-Encoding: identity',
             "Content-Length: $contentLength"
         );
@@ -63,10 +63,10 @@ class WhatsAppContactSync
         return $headers;
     }
 
-    protected function _generateAuth($nonce = 0)
+    protected function generateAuth($nonce = 0)
     {
         //generate auth string
-        $cnonce = $this->_getCnonce();
+        $cnonce = $this->getCnonce();
         $nc = "00000001";
         $digestUri = "WAWA/s.whatsapp.net";
         $credentials = $this->username . ":s.whatsapp.net:";
@@ -76,7 +76,7 @@ class WhatsAppContactSync
         return "X-WAWA:username=\"" . $this->username . "\",realm=\"s.whatsapp.net\",nonce=\"$nonce\",cnonce=\"$cnonce\",nc=\"$nc\",qop=\"auth\",digest-uri=\"$digestUri\",response=\"$response\",charset=\"utf-8\"";
     }
 
-    protected function _curlRequest($url, $headers, $postfields = false)
+    protected function curlRequest($url, $headers, $postfields = false)
     {
         //execute curl request
         $ch = curl_init();
@@ -96,7 +96,7 @@ class WhatsAppContactSync
         return $result;
     }
 
-    protected function _processCurlResponse($result)
+    protected function processCurlResponse($result)
     {
         //process curl response
         $return = array();
@@ -150,9 +150,9 @@ class WhatsAppContactSync
         //main method!
         //get auth
         $url = "https://sro.whatsapp.net/v2/sync/a";
-        $headers = $this->_getHeaders();
-        $result = $this->_curlRequest($url, $headers);
-        $result = $this->_processCurlResponse($result);
+        $headers = $this->getHeaders();
+        $result = $this->curlRequest($url, $headers);
+        $result = $this->processCurlResponse($result);
         if (isset($result["message"]) && $result["message"] == "next token" && isset($result["nonce"])) {
             //success
             $url = "https://sro.whatsapp.net/v2/sync/q";
@@ -164,12 +164,12 @@ class WhatsAppContactSync
                 }
                 $postfields .= "&u[]=" . urlencode($contact);
             }
-            $headers = $this->_getHeaders($result["nonce"], strlen($postfields));
-            $result = $this->_curlRequest($url, $headers, $postfields);
-            $result = $this->_processCurlResponse($result);
+            $headers = $this->getHeaders($result["nonce"], strlen($postfields));
+            $result = $this->curlRequest($url, $headers, $postfields);
+            $result = $this->processCurlResponse($result);
             if (isset($result["obj"])) {
                 //succes!
-                return($this->_processJSONResponse($result["obj"]));
+                return($this->processJSONResponse($result["obj"]));
             } elseif (isset($result["message"])) {
                 if ($this->debug) {
                     throw new Exception("Received unexpected message: " . $result["message"]);
@@ -200,7 +200,7 @@ class WhatsAppContactSync
         }
     }
 
-    protected function _processJSONResponse($json)
+    protected function processJSONResponse($json)
     {
         //process decoded JSON object
         $contacts = $json->c;
