@@ -15,11 +15,11 @@ class WhatsProt
     const PORT = 5222;                                      // The port of the WhatsApp server.
     const TIMEOUT_SEC = 2;                                  // The timeout for the connection with the WhatsApp servers.
     const TIMEOUT_USEC = 0;                                 //
-    const WHATSAPP_CHE_HOST = 'v.whatsapp.net/v2/exist';    // The check credentials host.
+    const WHATSAPP_CHECK_HOST = 'v.whatsapp.net/v2/exist';  // The check credentials host.
     const WHATSAPP_GROUP_SERVER = 'g.us';                   // The Group server hostname
     const WHATSAPP_HOST = 'c.whatsapp.net';                 // The hostname of the WhatsApp server.
-    const WHATSAPP_REG_HOST = 'v.whatsapp.net/v2/register'; // The register code host.
-    const WHATSAPP_REQ_HOST = 'v.whatsapp.net/v2/code';     // The request code host.
+    const WHATSAPP_REGISTER_HOST = 'v.whatsapp.net/v2/register'; // The register code host.
+    const WHATSAPP_REQUEST_HOST = 'v.whatsapp.net/v2/code';      // The request code host.
     const WHATSAPP_SERVER = 's.whatsapp.net';               // The hostname used to login/send messages.
     const WHATSAPP_UPLOAD_HOST = 'https://mms.whatsapp.net/client/iphone/upload.php'; // The upload host.
     const WHATSAPP_DEVICE = 'Android';                      // The device name.
@@ -121,7 +121,7 @@ class WhatsProt
         }
 
         // Build the url.
-        $host = 'https://' . static::WHATSAPP_CHE_HOST;
+        $host = 'https://' . static::WHATSAPP_CHECK_HOST;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
@@ -182,7 +182,7 @@ class WhatsProt
         }
 
         // Build the url.
-        $host = 'https://' . static::WHATSAPP_REG_HOST;
+        $host = 'https://' . static::WHATSAPP_REGISTER_HOST;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
@@ -261,7 +261,7 @@ class WhatsProt
         $token = md5(static::WHATSAPP_TOKEN . $phone['phone']);
 
         // Build the url.
-        $host = 'https://' . static::WHATSAPP_REQ_HOST;
+        $host = 'https://' . static::WHATSAPP_REQUEST_HOST;
         $query = array(
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
