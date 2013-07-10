@@ -4,7 +4,7 @@
  * from the WhatsAPP server, register that code and retrieve your password.
  *
  * Once you have your password you will then be able to use it in
- * functionalexample.php to actually send and receive messages.
+ * examplefunctional.php to actually send and receive messages.
  *
  */
 
@@ -17,7 +17,7 @@ require_once('whatsprot.class.php');
 $debug = true;
 
 $username = '34666554433';                      // Telephone number including the country code without '+' or '00'.
-$identity = 'e807f1fcf82d132f9bb018ca6738a19f'; // Obtained during registration with this API or using MissVenom (https://github.com/shirioko/MissVenom)to sniff from your phone.
+$identity = 'e807f1fcf82d132f9bb018ca6738a19f'; // Obtained during registration with this API or using MissVenom (https://github.com/shirioko/MissVenom) to sniff from your phone.
 $nickname = 'John Doe';                         // This is the username displayed by WhatsApp clients.
 
 
@@ -25,7 +25,7 @@ $nickname = 'John Doe';                         // This is the username displaye
 $w = new WhatsProt($username, $identity, $nickname, $debug);
 
 // How to create an account __ONLY__ if you do not have a associated to our phone number.
-// You can test your credentials with: $w->checkCredentials() (BUT ONLY IF NUMBER IS REGISTERED THROUGH WhatsAPI);
+// You can test your credentials with: $w->checkCredentials() (BUT ONLY ONLY IF YOU HAVE THE IDENTITY);
 
 /**
  * First request a registration code from WhatsApp.
@@ -41,7 +41,7 @@ $w = new WhatsProt($username, $identity, $nickname, $debug);
  *   An object with server response.
  *   - status: Status of the request (sent/fail).
  *   - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
- *   - length: Registration code lenght.
+ *   - length: Registration code length.
  *   - method: Used method.
  *   - retry_after: Waiting time before requesting a new code.
  */
