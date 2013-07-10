@@ -37,10 +37,10 @@ $config['webpassword'] = 'MakeUpPassword';
 
 //Config Template
 //$config['YourFirstName'] = array(
-//    'id' => '<iOS WIFI MAC eg 11:22:33:44:55   Android: IMEI number>',
+//    'id' => '<The Device Identity token. Obtained during registration with this API or using MissVenom (https://github.com/shirioko/MissVenom)to sniff from your phone.>',
 //    'fromNumber' => '<Your Mobile Number eg: 44123456789>',
 //    'nick' => '<A Nickname for your phone>',
-//    'waPassword' => "<Your WhatsAPP password>"
+//    'waPassword' => "<Your WhatsAPP password. Obtained during registration with this API or using Missvenom to sniff from your phone.>"
 //
 //OPTIONAL
 //    'email' => 'testemail@gmail.com',
@@ -51,7 +51,7 @@ $config['webpassword'] = 'MakeUpPassword';
 //
 //Example
 //$config['Jonathan'] = array(
-//    'id' => '11:11:11:11:11:11',
+//    'id' => 'e807f1fcf82d132f9bb018ca6738a19f',
 //    'fromNumber' => '441234567890',
 //    'nick' => "Jonathan's iPhone",
 //    'waPassword' => "EsdfsawS+/ffdskjsdhwebdgxbs=",
@@ -60,7 +60,7 @@ $config['webpassword'] = 'MakeUpPassword';
 //);
 
 $config['YOURNAME'] = array(
-    'id' => '11:11:11:11:11:11',
+    'id' => 'e807f1fcf82d132f9bb018ca6738a19f',
     'fromNumber' => '441234567890',
     'nick' => "YOURNICKNAME",
     'waPassword' => "EsdfsawS+/ffdskjsdhwebdgxbs=",

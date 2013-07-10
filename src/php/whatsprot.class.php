@@ -35,7 +35,7 @@ class WhatsProt
     protected $debug;                   // Determines whether debug mode is on or off.
     protected $event;                   // An instance of the WhatsAppEvent class.
     protected $groupList = array();     // An array with all the groups a user belongs in.
-    protected $identity;                // The IMEI/MAC address.
+    protected $identity;                // The Device Identity token. Obtained during registration with this API or using Missvenom to sniff from your phone.
     protected $incompleteMessage = '';  // A list of bytes for incomplete messages.
     protected $inputKey;                // Instances of the KeyStream class.
     protected $outputKey;               // Instances of the KeyStream class.
@@ -62,7 +62,8 @@ class WhatsProt
      * @param string $number
      *   The user phone number including the country code without '+' or '00'.
      * @param string $identity
-     *   The IMEI/MAC address or Recovery Token.
+     *  The Device Identity token. Obtained during registration with this API
+     *  or using Missvenom to sniff from your phone.
      * @param string $nickname
      *   The user name.
      * @param $debug
