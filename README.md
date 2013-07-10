@@ -4,6 +4,16 @@ Interface to WhatsApp Messenger
 
 ----------
 
+####Note July 10th, 2013####
+*Another massive overhaul in the code:*
+- *MAJOR RENAMING OF MOST METHODS!! Old legacy code will break, we are sorry but it is necessary to provide a cleaner interface. Please check the new code.*
+- *Methods renamed to give a more consistent feel to the API - all methods are now camelCase watch out for typo's!*
+- *Initial movement towards bringing the code into alignment with PSR-2 (http://www.php-fig.org/psr/2/)*
+- *There is absolutely NO, NONE, NADA, ZIP, 100% FREE of any need to use/enter a MAC address or IMEI in this code. DO NOT TRY!*
+- *New Android token used. Love live the WP7 token? :'/*
+----------
+
+
 ####Note June 18th, 2013####
 
 *Big overhaul in the code. Big thanks to:*
@@ -20,7 +30,7 @@ Interface to WhatsApp Messenger
 ----------
 
 ### What is WhatsApp?
-According to [the company](http://www.whatsapp.com/): 
+According to [the company](http://www.whatsapp.com/):
 
 > “WhatsApp Messenger is a cross-platform mobile messenger that replaces SMS and works through the existing internet data plan of your device. WhatsApp is available for iPhone, BlackBerry, Android, Windows Phone, Nokia Symbian60 & S40 phones. Because WhatsApp Messenger uses the same internet data plan that you use for email and web browsing, there is no cost to message and stay in touch with your friends.”
 
