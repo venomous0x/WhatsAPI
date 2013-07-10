@@ -386,6 +386,39 @@ class WhatsProt
         $this->sendNode($messageNode);
     }
 
+    public function sendBroadcastAudio($targets, $path, $storeURLmedia = false)
+    {
+        if(!is_array($targets))
+        {
+            $targets = array($targets);
+        }
+        $this->sendMessageAudio($targets, $path, $storeURLmedia);
+    }
+
+    public function sendBroadcastImage($targets, $path, $storeURLmedia = false)
+    {
+        if(!is_array($targets))
+        {
+            $targets = array($targets);
+        }
+        $this->sendMessageImage($targets, $path, $storeURLmedia);
+    }
+
+    public function sendBroadcastMessage($targets, $message)
+    {
+        $bodyNode = new ProtocolNode("body", null, null, $message);
+        $this->sendBroadcast($targets, $bodyNode, "chat");
+    }
+
+    public function sendBroadcastVideo($targets, $path, $storeURLmedia = false)
+    {
+        if(!is_array($targets))
+        {
+            $targets = array($targets);
+        }
+        $this->sendMessageVideo($targets, $path, $storeURLmedia);
+    }
+
     public function sendClearDirty($categories)
     {
         $catnodes = array();
@@ -703,76 +736,6 @@ class WhatsProt
         } else {
             //Didn't get media file details.
             return false;
-        }
-    }
-
-    public function sendImageBroadcast($targets, $path, $storeURLmedia = false)
-    {
-        if(!is_array($targets))
-        {
-            $targets = array($targets);
-        }
-        $this->sendMessageImage($targets, $path, $storeURLmedia);
-    }
-
-    public function sendAudioBroadcast($targets, $path, $storeURLmedia = false)
-    {
-        if(!is_array($targets))
-        {
-            $targets = array($targets);
-        }
-        $this->sendMessageAudio($targets, $path, $storeURLmedia);
-    }
-
-    public function sendVideoBroadcast($targets, $path, $storeURLmedia = false)
-    {
-        if(!is_array($targets))
-        {
-            $targets = array($targets);
-        }
-        $this->sendMessageVideo($targets, $path, $storeURLmedia);
-    }
-
-    public function sendMessageBroadcast($targets, $message)
-    {
-        $bodyNode = new ProtocolNode("body", null, null, $message);
-        $this->sendBroadcast($targets, $bodyNode, "chat");
-    }
-
-    protected function sendBroadcast($targets, $node)
-    {
-        if (!is_array($targets)) {
-            $targets = array($targets);
-        }
-
-        $serverNode = new ProtocolNode("server", null, null, "");
-        $xHash = array();
-        $xHash["xmlns"] = "jabber:x:event";
-        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
-
-        $toNodes = array();
-        foreach ($targets as $target) {
-            $jid = $this->getJID($target);
-            $hash = array("jid" => $jid);
-            $toNode = new ProtocolNode("to", $hash, null, null);
-            $toNodes[] = $toNode;
-        }
-
-        $broadcastNode = new ProtocolNode("broadcast", null, $toNodes, null);
-
-        $messageHash = array();
-        $messageHash["to"] = "broadcast";
-        $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->createMsgId("broadcast");
-
-        $messageNode = new ProtocolNode("message", $messageHash, array($broadcastNode, $xNode, $node), null);
-        if (!$this->lastId) {
-            $this->lastId = $messageHash["id"];
-            $this->sendNode($messageNode);
-            //listen for response
-            $this->waitForServer($messageHash["id"]);
-        } else {
-            $this->outQueue[] = $messageNode;
         }
     }
 
@@ -1893,6 +1856,43 @@ class WhatsProt
         }
 
         return $buff;
+    }
+
+    protected function sendBroadcast($targets, $node)
+    {
+        if (!is_array($targets)) {
+            $targets = array($targets);
+        }
+
+        $serverNode = new ProtocolNode("server", null, null, "");
+        $xHash = array();
+        $xHash["xmlns"] = "jabber:x:event";
+        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
+
+        $toNodes = array();
+        foreach ($targets as $target) {
+            $jid = $this->getJID($target);
+            $hash = array("jid" => $jid);
+            $toNode = new ProtocolNode("to", $hash, null, null);
+            $toNodes[] = $toNode;
+        }
+
+        $broadcastNode = new ProtocolNode("broadcast", null, $toNodes, null);
+
+        $messageHash = array();
+        $messageHash["to"] = "broadcast";
+        $messageHash["type"] = "chat";
+        $messageHash["id"] = $this->createMsgId("broadcast");
+
+        $messageNode = new ProtocolNode("message", $messageHash, array($broadcastNode, $xNode, $node), null);
+        if (!$this->lastId) {
+            $this->lastId = $messageHash["id"];
+            $this->sendNode($messageNode);
+            //listen for response
+            $this->waitForServer($messageHash["id"]);
+        } else {
+            $this->outQueue[] = $messageNode;
+        }
     }
 
     /**

@@ -671,7 +671,7 @@ class Whatsapp
 
             $this->connectToWhatsApp();
             if (isset($this->inputs['message']) && trim($this->inputs['message'] !== '')) {
-                $this->wa->sendMessageBroadcast($this->inputs['to'], $this->inputs['message']);
+                $this->wa->sendBroadcastMessage($this->inputs['to'], $this->inputs['message']);
             }
             if (isset($this->inputs['image']) && $this->inputs['image'] !== false) {
                 //$this->wa->MessageImage($this->inputs['to'], $this->inputs['image']);
