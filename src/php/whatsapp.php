@@ -674,16 +674,16 @@ class Whatsapp
                 $this->wa->sendBroadcastMessage($this->inputs['to'], $this->inputs['message']);
             }
             if (isset($this->inputs['image']) && $this->inputs['image'] !== false) {
-                //$this->wa->MessageImage($this->inputs['to'], $this->inputs['image']);
+                $this->wa->sendBroadcastImage($this->inputs['to'], $this->inputs['image']);
             }
             if (isset($this->inputs['audio']) && $this->inputs['audio'] !== false) {
-                //$this->wa->MessageAudio($this->inputs['to'], $this->inputs['audio']);
+                $this->wa->sendBroadcastAudio($this->inputs['to'], $this->inputs['audio']);
             }
             if (isset($this->inputs['video']) && $this->inputs['video'] !== false) {
-                //$this->wa->MessageVideo($this->inputs['to'], $this->inputs['video']);
+                $this->wa->sendBroadcastVideo($this->inputs['to'], $this->inputs['video']);
             }
             if (isset($this->inputs['locationname']) && trim($this->inputs['locationname'] !== '')) {
-                //$this->wa->Place($this->inputs['to'], $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
+                $this->wa->sendBroadcastPlace($this->inputs['to'], $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
             }
             exit(json_encode(array(
                 "success" => true,
@@ -1135,8 +1135,8 @@ class Whatsapp
                                 no_results_text: "Can't Find:",
                                 create_option_text: 'Click to Add '
                             });
-                        }
-                        ;
+                            $('#to_chzn').css('width', '220px');
+                        };
 
                         $("img").on('click', function() {
                             var txtToAdd = this.outerHTML;

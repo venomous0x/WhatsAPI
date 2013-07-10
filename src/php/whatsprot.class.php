@@ -388,8 +388,7 @@ class WhatsProt
 
     public function sendBroadcastAudio($targets, $path, $storeURLmedia = false)
     {
-        if(!is_array($targets))
-        {
+        if (!is_array($targets)) {
             $targets = array($targets);
         }
         $this->sendMessageAudio($targets, $path, $storeURLmedia);
@@ -397,11 +396,18 @@ class WhatsProt
 
     public function sendBroadcastImage($targets, $path, $storeURLmedia = false)
     {
-        if(!is_array($targets))
-        {
+        if (!is_array($targets)) {
             $targets = array($targets);
         }
         $this->sendMessageImage($targets, $path, $storeURLmedia);
+    }
+
+    public function sendBroadcastLocation($targets, $long, $lat)
+    {
+        if (!is_array($targets)) {
+            $targets = array($targets);
+        }
+        $this->sendLocation($targets, $long, $lat);
     }
 
     public function sendBroadcastMessage($targets, $message)
@@ -410,10 +416,17 @@ class WhatsProt
         $this->sendBroadcast($targets, $bodyNode, "chat");
     }
 
+    public function sendBroadcastPlace($targets, $long, $lat, $name, $url = null)
+    {
+        if (!is_array($targets)) {
+            $targets = array($targets);
+        }
+        $this->sendPlace($targets, $long, $lat, $name, $url);
+    }
+
     public function sendBroadcastVideo($targets, $path, $storeURLmedia = false)
     {
-        if(!is_array($targets))
-        {
+        if (!is_array($targets)) {
             $targets = array($targets);
         }
         $this->sendMessageVideo($targets, $path, $storeURLmedia);
@@ -675,7 +688,7 @@ class WhatsProt
      * thumbnail of Lat/Long but NO
      * name/url for location.
      * @param $to
-     *   The receipient to send.
+     *   The receipient(s) to send.
      * @param $long
      *   The longitude to send.
      * @param $lat
@@ -690,7 +703,12 @@ class WhatsProt
         $mediaHash['longitude'] = $long;
 
         $mediaNode = new ProtocolNode("media", $mediaHash, null, null);
-        $this->sendMessageNode($to, $mediaNode);
+
+        if (is_array($to)) {
+            $this->sendBroadcast($to, $mediaNode);
+        } else {
+            $this->sendMessageNode($to, $mediaNode);
+        }
     }
 
     /**
@@ -899,7 +917,12 @@ class WhatsProt
         $mediaHash['name'] = $name;
 
         $mediaNode = new ProtocolNode("media", $mediaHash, null, null);
-        $this->sendMessageNode($to, $mediaNode);
+
+        if (is_array($to)) {
+            $this->sendBroadcast($to, $mediaNode);
+        } else {
+            $this->sendMessageNode($to, $mediaNode);
+        }
     }
 
     /**
@@ -1827,12 +1850,9 @@ class WhatsProt
         }
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, null, $icon);
-        if(is_array($to))
-        {
+        if (is_array($to)) {
             $this->sendBroadcast($to, $mediaNode);
-        }
-        else
-        {
+        } else {
             $this->sendMessageNode($to, $mediaNode);
         }
     }
@@ -2054,8 +2074,7 @@ class WhatsProt
         $hash["type"] = "set";
         $node = new ProtocolNode("iq", $hash, array($mediaNode), null);
 
-        if(!is_array($to))
-        {
+        if (!is_array($to)) {
             $to = $this->getJID($to);
         }
         //add to queue
