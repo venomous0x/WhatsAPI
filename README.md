@@ -10,7 +10,7 @@ Interface to WhatsApp Messenger
 - *Methods renamed to give a more consistent feel to the API - all methods are now camelCase watch out for typo's!*
 - *Initial movement towards bringing the code into alignment with PSR-2 (http://www.php-fig.org/psr/2/)*
 - *There is absolutely NO, NONE, NADA, ZIP, 100% FREE of any need to use/enter a MAC address or IMEI in this code. DO NOT TRY!*
-- *New Android token used. Love live the WP7 token? :'/*
+- *New Android token used. Long live the WP7 token???*
 ----------
 
 
