@@ -241,6 +241,15 @@ class WhatsProt
      */
     public function codeRequest($method = 'sms', $countryCode = false, $langCode = false)
     {
+        //validate identity
+        $foo = strlen(urldecode($this->identity));
+        if($foo != 20) {
+            if($this->debug) {
+                echo "Cannot use identity " . $this->identity . " for registration. It doesn't appear to be a valid SHA hash (length = $foo)";
+            }
+            return false;
+        }
+
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The provided phone number is not valid.');
         }
