@@ -279,8 +279,8 @@ class WhatsProt
             'lg' => $langCode,
             'lc' => $countryCode,
             'method' => $method,
-            'mcc' => '204',
-            'mnc' => '008',
+            'mcc' => $phone['mcc'],
+            'mnc' => '001',
             'token' => $token,
             'id' => $this->identity,
         );
@@ -1274,10 +1274,14 @@ class WhatsProt
                     // Return the first appearance.
                     fclose($handle);
 
+                    $mcc = explode("|", $data[2]);
+                    $mcc = $mcc[0];
+
                     $phone = array(
                         'country' => $data[0],
                         'cc' => $data[1],
                         'phone' => substr($this->phoneNumber, strlen($data[1]), strlen($this->phoneNumber)),
+                        'mcc' => $mcc,
                         'ISO3166' => @$data[3],
                         'ISO639' => @$data[4]
                     );
