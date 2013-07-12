@@ -942,11 +942,9 @@ class WhatsProt
      */
     public function sendPong($msgid)
     {
-        $whatsAppServer = static::WHATSAPP_SERVER;
-
         $messageHash = array();
-        $messageHash["to"] = $whatsAppServer;
-        $messageHash["id"] = $msgid;
+        $messageHash["to"]   = static::WHATSAPP_SERVER;
+        $messageHash["id"]   = $msgid;
         $messageHash["type"] = "result";
 
         $messageNode = new ProtocolNode("iq", $messageHash, null, "");
