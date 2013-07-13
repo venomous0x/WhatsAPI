@@ -245,8 +245,8 @@ class WhatsProt
     {
         //validate identity
         $foo = strlen(urldecode($this->identity));
-        if($foo != 20) {
-            if($this->debug) {
+        if ($foo != 20) {
+            if ($this->debug) {
                 echo "Cannot use identity " . $this->identity . " for registration. It doesn't appear to be a valid SHA hash (length = $foo)";
             }
             return false;
@@ -903,7 +903,7 @@ class WhatsProt
     {
         $allowedExtensions = array('3gp', 'caf', 'wav', 'mp3', 'wma', 'ogg', 'aif', 'aac', 'm4a');
         $size = 10 * 1024 * 1024; // Easy way to set maximum file size for this media type.
-        return $this->sendMessageMedia($filepath, $size, $to, 'audio', $allowedExtensions, $storeURLmedia);
+        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'audio', $allowedExtensions, $storeURLmedia);
     }
 
     /**
@@ -942,7 +942,7 @@ class WhatsProt
     {
         $allowedExtensions = array('jpg', 'jpeg', 'gif', 'png');
         $size = 5 * 1024 * 1024; // Easy way to set maximum file size for this media type.
-        return $this->sendMessageMedia($filepath, $size, $to, 'image', $allowedExtensions, $storeURLmedia);
+        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'image', $allowedExtensions, $storeURLmedia);
     }
 
     /**
@@ -981,7 +981,7 @@ class WhatsProt
     {
         $allowedExtensions = array('mp4', 'mov', 'avi');
         $size = 20 * 1024 * 1024; // Easy way to set maximum file size for this media type.
-        return $this->sendMessageMedia($filepath, $size, $to, 'video', $allowedExtensions, $storeURLmedia);
+        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'video', $allowedExtensions, $storeURLmedia);
     }
 
     /**
@@ -1017,8 +1017,8 @@ class WhatsProt
     public function sendPong($msgid)
     {
         $messageHash = array();
-        $messageHash["to"]   = static::WHATSAPP_SERVER;
-        $messageHash["id"]   = $msgid;
+        $messageHash["to"] = static::WHATSAPP_SERVER;
+        $messageHash["id"] = $msgid;
         $messageHash["type"] = "result";
 
         $messageNode = new ProtocolNode("iq", $messageHash, null, "");
@@ -1501,7 +1501,7 @@ class WhatsProt
             //TODO check what max file size whatsapp server accepts.
             if ($this->mediaFileInfo['filesize'] < $maxsizebytes) {
                 //Create temp file in media folder. Media folder must be writable!
-                $this->mediaFileInfo['filepath'] = tempnam(getcwd() . '/'. static::MEDIA_FOLDER, 'WHA');
+                $this->mediaFileInfo['filepath'] = tempnam(getcwd() . '/' . static::MEDIA_FOLDER, 'WHA');
                 $fp = fopen($this->mediaFileInfo['filepath'], 'w');
                 if ($fp) {
                     curl_setopt($curl, CURLOPT_NOBODY, false);
@@ -1849,7 +1849,7 @@ class WhatsProt
 
             //save thumbnail
             $data = $media->data;
-            $fp = @fopen(static::MEDIA_FOLDER."/thumb_" . $filename, "w");
+            $fp = @fopen(static::MEDIA_FOLDER . "/thumb_" . $filename, "w");
             if ($fp) {
                 fwrite($fp, $data);
                 fclose($fp);
@@ -1857,7 +1857,7 @@ class WhatsProt
 
             //download and save original
             $data = file_get_contents($url);
-            $fp = @fopen(static::MEDIA_FOLDER."/" . $filename, "w");
+            $fp = @fopen(static::MEDIA_FOLDER . "/" . $filename, "w");
             if ($fp) {
                 fwrite($fp, $data);
                 fclose($fp);
@@ -1879,9 +1879,9 @@ class WhatsProt
             $type = $pictureNode->getAttribute("type");
             $data = $pictureNode->data;
             if ($type == "preview") {
-                $filename = static::PICTURES_FOLDER."/preview_" . $node->getAttribute("from") . ".jpg";
+                $filename = static::PICTURES_FOLDER . "/preview_" . $node->getAttribute("from") . ".jpg";
             } else {
-                $filename = static::PICTURES_FOLDER."/" . $node->getAttribute("from") . ".jpg";
+                $filename = static::PICTURES_FOLDER . "/" . $node->getAttribute("from") . ".jpg";
             }
             $fp = @fopen($filename, "w");
             if ($fp) {
@@ -2009,6 +2009,37 @@ class WhatsProt
     }
 
     /**
+     * Checks that the media file to send is of allowable filetype and within size limits.
+     *
+     * @param string $filepath The URL/URI to the media file
+     * @param int $maxSize Maximim filesize allowed for media type
+     * @param string $to Recipient ID/number
+     * @param string $type media filetype. 'audio', 'video', 'image'
+     * @param array $allowedExtensions An array of allowable file types for the media file
+     * @param bool $storeURLmedia Keep a copy of the media file
+     * @return bool
+     */
+    protected function sendCheckAndSendMedia($filepath, $maxSize, $to, $type, $allowedExtensions, $storeURLmedia)
+    {
+        if ($this->getMediaFile($filepath, $maxSize) == true) {
+            if (in_array($this->mediaFileInfo['fileextension'], $allowedExtensions)) {
+                $b64hash = base64_encode(hash_file("sha256", $this->mediaFileInfo['filepath'], true));
+                //request upload
+                $this->sendRequestFileUpload($b64hash, $type, $this->mediaFileInfo['filesize'], $this->mediaFileInfo['filepath'], $to);
+                $this->processTempMediaFile($storeURLmedia);
+                return true;
+            } else {
+                //Not allowed file type.
+                $this->processTempMediaFile($storeURLmedia);
+                return false;
+            }
+        } else {
+            //Didn't get media file details.
+            return false;
+        }
+    }
+
+    /**
      * Send a broadcast
      * @param  array $targets Array of numbers to send to
      * @param  object $node
@@ -2107,36 +2138,6 @@ class WhatsProt
         $node = new ProtocolNode("iq", $setHash, array($child), "");
 
         $this->sendNode($node);
-    }
-
-    /**
-     * Checks that the media file to send is allowable filetype and within size limits.
-     *
-     * @param string $filepath The URL/URI to the media file
-     * @param int $maxSize Maximim filesize allowed for media type
-     * @param string $to Recipient ID/number
-     * @param string $type media filetype. 'audio', 'video', 'image'
-     * @param array $allowedExtensions An array of allowable file types for the media file
-     * @param bool $storeURLmedia Keep a copy of the media file
-     * @return bool
-     */
-    protected function sendMessageMedia($filepath, $maxSize, $to, $type, $allowedExtensions, $storeURLmedia){
-        if ($this->getMediaFile($filepath, $maxSize) == true) {
-            if (in_array($this->mediaFileInfo['fileextension'], $allowedExtensions)) {
-                $b64hash = base64_encode(hash_file("sha256", $this->mediaFileInfo['filepath'], true));
-                //request upload
-                $this->sendRequestFileUpload($b64hash, $type, $this->mediaFileInfo['filesize'], $this->mediaFileInfo['filepath'], $to);
-                $this->processTempMediaFile($storeURLmedia);
-                return true;
-            } else {
-                //Not allowed file type.
-                $this->processTempMediaFile($storeURLmedia);
-                return false;
-            }
-        } else {
-            //Didn't get media file details.
-            return false;
-        }
     }
 
     /**
