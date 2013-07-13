@@ -844,20 +844,26 @@ class WhatsProt
     /**
      * Send a location to the user/group.
      *
-     * Receiver will see large sized google map thumbnail of
-     * supplied Lat/Long but NO name/url for location.
+     * If no name is supplied , receiver will see large sized google map
+     * thumbnail of entered Lat/Long but NO name/url for location.
+     *
+     * With name supplied, a combined map thumbnail/name box is displayed
      *
      * @param array|string $to The recipient(s) to send to.
      * @param  float $long    The longitude of the location eg 54.31652
      * @param  float $lat     The latitude if the location eg -6.833496
+     * @param string $name (Optional)  The custom name you would like to give this location.
+     * @param string $url (Optional) A URL to attach to the location.
      */
-    public function sendLocation($to, $long, $lat)
+    public function sendLocation($to, $long, $lat, $name = null, $url = null)
     {
         $mediaHash = array();
         $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
         $mediaHash['type'] = "location";
         $mediaHash['latitude'] = $lat;
         $mediaHash['longitude'] = $long;
+        $mediaHash['name'] = $name;
+        $mediaHash['url'] = $url;
 
         $mediaNode = new ProtocolNode("media", $mediaHash, null, null);
 
@@ -1000,39 +1006,6 @@ class WhatsProt
     {
         $messageNode = new ProtocolNode("presence", array("type" => "unavailable"), null, "");
         $this->sendNode($messageNode);
-    }
-
-    /**
-     * Send a location to the user/group.
-     *
-     * Allows for custom name and URL to be added to the
-     * location by the user.
-     *
-     * @param string $to
-     *   The recipient to send.
-     * @param string $url
-     *   (Optional) A URL to attach to the location.
-     * @param  float $long    The longitude of the location eg 54.31652
-     * @param  float $lat     The latitude if the location eg -6.833496
-     * @param $name  The custom name you would like to give this location.
-     */
-    public function sendPlace($to, $long, $lat, $name, $url = null)
-    {
-        $mediaHash = array();
-        $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
-        $mediaHash['type'] = "location";
-        $mediaHash['url'] = $url;
-        $mediaHash['latitude'] = $lat;
-        $mediaHash['longitude'] = $long;
-        $mediaHash['name'] = $name;
-
-        $mediaNode = new ProtocolNode("media", $mediaHash, null, null);
-
-        if (is_array($to)) {
-            $this->sendBroadcast($to, $mediaNode);
-        } else {
-            $this->sendMessageNode($to, $mediaNode);
-        }
     }
 
     /**
