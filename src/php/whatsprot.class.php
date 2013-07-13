@@ -312,7 +312,7 @@ class WhatsProt
     }
 
     /**
-     * Connect to the WhatsApp network.
+     * Connect (create a socket) to the WhatsApp network.
      */
     public function connect()
     {
@@ -358,7 +358,19 @@ class WhatsProt
     }
 
     /**
-     * Logs us in to the server.
+     * Log into the Whatsapp server. 
+     * 
+     * ###Warning### using this method will generate a new password
+     * from the WhatsApp servers each time.
+     * 
+     * If you know your password and wish to use it without generating
+     * a new password - use the loginWithPassword() method instead.
+     * 
+     * @param  boolean $profileSubscribe 
+     * 
+     * Set this to true if you would like Whatsapp to send a 
+     * notification to your phone when one of your contacts
+     * changes/update their picture.
      */
     public function login($profileSubscribe = false)
     {
@@ -372,6 +384,15 @@ class WhatsProt
         $this->doLogin($profileSubscribe);
     }
 
+    /**
+     * Login to the Whatsapp server with your password
+     * 
+     * If you already know your password you can log into the Whatsapp server
+     * using this method.
+     * 
+     * @param  string  $password         Your whatsapp password. You must already know this!
+     * @param  boolean $profileSubscribe Add a feature
+     */
     public function loginWithPassword($password, $profileSubscribe = false)
     {
         $this->password = $password;
@@ -395,6 +416,18 @@ class WhatsProt
         $this->sendNode($messageNode);
     }
 
+    /**
+     * Send a Broadcast Message with audio.
+     *
+     * The receiptiant MUST have your number (synced) and in their contact list
+     * otherwise the message will not deliver to that person.
+     * 
+     * Approx 20 (unverified) is the maximum number of targets 
+     *  
+     * @param  array  $targets       An array of numbers to send to.
+     * @param  string  $path          URL or local path to the audio file to send
+     * @param  boolean $storeURLmedia Keep a copy of the audio file on your server
+     */
     public function sendBroadcastAudio($targets, $path, $storeURLmedia = false)
     {
         if (!is_array($targets)) {
@@ -403,6 +436,18 @@ class WhatsProt
         $this->sendMessageAudio($targets, $path, $storeURLmedia);
     }
 
+    /**
+     * Send a Broadcast Message with an image.
+     *
+     * The receiptiant MUST have your number (synced) and in their contact list
+     * otherwise the message will not deliver to that person.
+     * 
+     * Approx 20 (unverified) is the maximum number of targets 
+     * 
+     * @param  array  $targets       An array of numbers to send to.
+     * @param  string  $path          URL or local path to the image file to send
+     * @param  boolean $storeURLmedia Keep a copy of the audio file on your server
+     */
     public function sendBroadcastImage($targets, $path, $storeURLmedia = false)
     {
         if (!is_array($targets)) {
@@ -411,6 +456,21 @@ class WhatsProt
         $this->sendMessageImage($targets, $path, $storeURLmedia);
     }
 
+    /**
+     * Send a Broadcast Message with location data.
+     *
+     * The receiptiant MUST have your number (synced) and in their contact list
+     * otherwise the message will not deliver to that person.
+     * 
+     * Receiver will see larger google map thumbnail of Lat/Long but NO
+     * name/url for location.
+     * 
+     * Approx 20 (unverified) is the maximum number of targets 
+     *  
+     * @param  array  $targets       An array of numbers to send to.
+     * @param  float $long    The longitude of the location eg 54.31652
+     * @param  float $lat     The latitude if the location eg -6.833496
+     */
     public function sendBroadcastLocation($targets, $long, $lat)
     {
         if (!is_array($targets)) {
@@ -419,12 +479,34 @@ class WhatsProt
         $this->sendLocation($targets, $long, $lat);
     }
 
+    /**
+     * Send a Broadcast Message
+     *
+     * The receiptiant MUST have your number (synced) and in their contact list
+     * otherwise the message will not deliver to that person.
+     * 
+     * Approx 20 (unverified) is the maximum number of targets 
+     *  
+     * @param  array  $targets       An array of numbers to send to.
+     * @param  string $message Your message
+     */
     public function sendBroadcastMessage($targets, $message)
     {
         $bodyNode = new ProtocolNode("body", null, null, $message);
         $this->sendBroadcast($targets, $bodyNode, "chat");
     }
 
+    /**
+     * Send a Broadcast Message with place data.
+     *
+     * The receiptiant MUST have your number (synced) and in their contact list
+     * otherwise the message will not deliver to that person.
+     * 
+     * Approx 20 (unverified) is the maximum number of targets 
+     *  
+     * @param  string $name    A name to describe the location
+     * @param  string $url     (Optional) A URL to link location to web resource
+     */
     public function sendBroadcastPlace($targets, $long, $lat, $name, $url = null)
     {
         if (!is_array($targets)) {
@@ -433,6 +515,18 @@ class WhatsProt
         $this->sendPlace($targets, $long, $lat, $name, $url);
     }
 
+    /**
+     * Send a Broadcast Message with a video.
+     *
+     * The receiptiant MUST have your number (synced) and in their contact list
+     * otherwise the message will not deliver to that person.
+     * 
+     * Approx 20 (unverified) is the maximum number of targets 
+     *  
+     * @param  array  $targets       An array of numbers to send to.
+     * @param  string  $path          URL or local path to the video file to send
+     * @param  boolean $storeURLmedia Keep a copy of the audio file on your server
+     */
     public function sendBroadcastVideo($targets, $path, $storeURLmedia = false)
     {
         if (!is_array($targets)) {
@@ -441,6 +535,11 @@ class WhatsProt
         $this->sendMessageVideo($targets, $path, $storeURLmedia);
     }
 
+    /**
+     * Clears the "dirty" status on your account
+     * 
+     * @param  array $categories 
+     */
     public function sendClearDirty($categories)
     {
         $catnodes = array();
@@ -457,6 +556,10 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    /**
+     * TODO
+     * 
+     */
     public function sendGetClientConfig()
     {
         $child = new ProtocolNode("config", array("xmlns" => "urn:xmpp:whatsapp:push"), null, null);
@@ -468,11 +571,22 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    /**
+     * Send a request to return a list of groups user is currently participating
+     * in.
+     *
+     * To capture this list you will need to bind the "onGetGroupList" event.
+     */
     public function sendGetGroups()
     {
         $this->sendGetGroupsFiltered("participating");
     }
 
+    /**
+     * Send a request to get information about a specific group
+     * 
+     * @param  string $gjid The specific group id
+     */
     public function sendGetGroupsInfo($gjid)
     {
         $child = new ProtocolNode("query", array("xmlns" => "w:g"), null, null);
@@ -484,11 +598,23 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    /**
+     * Send a request to return a list of groups user has started
+     * in.
+     *
+     * To capture this list you will need to bind the "onGetGroupList" event.
+     */
     public function sendGetGroupsOwning()
     {
         $this->sendGetGroupsFiltered("owning");
     }
 
+    /**
+     * Send a request to return a list of people participating in a specific
+     * group.
+     * 
+     * @param  string $gjid The specific group id
+     */
     public function sendGetGroupsParticipants($gjid)
     {
         $child = new ProtocolNode("list", array(
@@ -502,6 +628,9 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    /**
+     * Send a request to get a list of people you have currently blocked
+     */
     public function sendGetPrivacyBlockedList()
     {
         $child = new ProtocolNode("list", array(
@@ -518,10 +647,10 @@ class WhatsProt
     }
 
     /**
-     * Get profile picture of user
+     * Get profile picture of specified user
      *
-     * @param $number
-     *  Number or JID
+     * @param string $number
+     *  Number or JID of user
      *
      * @param bool $large
      *  Request large picture
@@ -546,10 +675,10 @@ class WhatsProt
     }
 
     /**
-     * Request to retrieve the last online string.
+     * Request to retrieve the last online time of specific user.
      *
-     * @param $to
-     *   The reciepient to get the last seen.
+     * @param string $to
+     *  Number or JID of user
      */
     public function sendGetRequestLastSeen($to)
     {
@@ -569,6 +698,10 @@ class WhatsProt
         $this->eventManager()->fire('onRequestLastSeen', array($this->phoneNumber, $messageHash["id"], $to));
     }
 
+    /**
+     * TODO
+     * Send a request to get the current server properties
+     */
     public function sendGetServerProperties()
     {
         $child = new ProtocolNode("props", array(
@@ -582,6 +715,11 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    /**
+     * Get the current status message of a specific user.
+     * 
+     * @param  string $jid The user JID
+     */
     public function sendGetStatus($jid)
     {
         $parts = explode("@", $jid);
@@ -599,9 +737,9 @@ class WhatsProt
      * Create a group chat.
      *
      * @param string $subject
-     *   The reciepient to send.
+     *   The group Subject
      * @param array $participants
-     *   An array with the participants.
+     *   An array with the participants numbers.
      *
      * @return string
      *   The group ID.
@@ -631,6 +769,11 @@ class WhatsProt
         return $groupId;
     }
 
+    /**
+     * End or delete a group chat
+     * 
+     * @param  string $gjid The group ID
+     */
     public function sendGroupsChatEnd($gjid)
     {
         $gjid = $this->getJID($gjid);
@@ -647,6 +790,11 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    /**
+     * Leave a group chat
+     * 
+     * @param  string $gjids The group ID
+     */
     public function sendGroupsLeave($gjids)
     {
         if (!is_array($gjids)) {
@@ -666,12 +814,12 @@ class WhatsProt
     }
 
     /**
-     * Add participants to a group.
+     * Add participant(s) to a group.
      *
      * @param string $groupId
      *   The group ID.
      * @param array $participants
-     *   An array with the participants.
+     *   An array with the participants numbers to add
      */
     public function sendGroupsParticipantsAdd($groupId, $participants)
     {
@@ -679,12 +827,12 @@ class WhatsProt
     }
 
     /**
-     * Remove participants from a group.
+     * Remove participant(s) from a group.
      *
      * @param string $groupId
      *   The group ID.
      * @param array $participants
-     *   An array with the participants.
+     *   An array with the participants numbers to remove
      */
     public function sendGroupsParticipantsRemove($groupId, $participants)
     {
@@ -693,15 +841,13 @@ class WhatsProt
 
     /**
      * Send a location to the user/group.
-     * Receiver will see larger google map
-     * thumbnail of Lat/Long but NO
-     * name/url for location.
-     * @param $to
-     *   The receipient(s) to send.
-     * @param $long
-     *   The longitude to send.
-     * @param $lat
-     *   The latitude to send.
+     * 
+     * Receiver will see large sized google map thumbnail of 
+     * supplied Lat/Long but NO name/url for location.
+     * 
+     * @param mixed|array|string $to The recipient(s) to send to.
+     * @param  float $long    The longitude of the location eg 54.31652
+     * @param  float $lat     The latitude if the location eg -6.833496
      */
     public function sendLocation($to, $long, $lat)
     {
@@ -724,8 +870,8 @@ class WhatsProt
      * Send a text message to the user/group.
      *
      * @param $to
-     *   The reciepient to send.
-     * @param $txt
+     *   The recipient.
+     * @param string $txt
      *   The text message.
      */
     public function sendMessage($to, $txt)
@@ -736,13 +882,13 @@ class WhatsProt
     }
 
     /**
-     * Send a audio to the user/group.
+     * Send audio to the user/group.     * 
      *
      * @param $to
-     *   The reciepient to send.
-     * @param $filepath
-     *   The url/uri to the 3GP/CAF audio.
-     * @param  bool $storeURLmedia
+     *   The recipient.
+     * @param string $filepath
+     *   The url/uri to the audio file.
+     * @param  bool $storeURLmedia Keep copy of file
      * @return bool
      */
     public function sendMessageAudio($to, $filepath, $storeURLmedia = false)
@@ -769,8 +915,8 @@ class WhatsProt
     /**
      * Send the composing message status. When typing a message.
      *
-     * @param $to
-     *   The reciepient to send.
+     * @param string $to
+     *   The recipient to send status to.
      */
     public function sendMessageComposing($to)
     {
@@ -792,10 +938,10 @@ class WhatsProt
      * Send an image file to group/user
      *
      * @param  string $to
-     *  recepient
+     *  Recipient number
      * @param  string $filepath
-     *  path to local image file
-     * @param  bool $storeURLmedia
+     *   The url/uri to the image file.
+     * @param  bool $storeURLmedia Keep copy of file
      * @return bool
      */
     public function sendMessageImage($to, $filepath, $storeURLmedia = false)
@@ -820,10 +966,10 @@ class WhatsProt
     }
 
     /**
-     * Send the composing message status. When make a pause typing a message.
+     * Send the 'paused composing message' status.
      *
-     * @param $to
-     *   The reciepient to send.
+     * @param string $to
+     *   The recipient number or ID.
      */
     public function sendMessagePaused($to)
     {
@@ -845,10 +991,10 @@ class WhatsProt
      * Send a video to the user/group.
      *
      * @param  string $to
-     *   The reciepient to send.
-     * @param  string $filepath
+     *   The recipient to send.
+     * @param string $filepath
      *   The url/uri to the MP4/MOV video.
-     * @param  bool $storeURLmedia
+     * @param  bool $storeURLmedia Keep a copy of media file.
      * @return bool
      */
     public function sendMessageVideo($to, $filepath, $storeURLmedia = false)
@@ -898,22 +1044,17 @@ class WhatsProt
 
     /**
      * Send a location to the user/group.
-     * Allows for custom name and URL to
-     * location to be set by user.
+     * 
+     * Allows for custom name and URL to be added to the 
+     * location by the user.
      *
-     * @param $to
-     *   The receipient to send.
-     * @param $url
-     *   The google maps place url.
-     * @param $long
-     *   The longitude to send.
-     * @param $lat
-     *   The latitude to send.
-     * @param $name
-     *   The google maps place name.
-     *
-     * @see: https://maps.google.com/maps/place?cid=1421139585205719654
-     * @todo: Add support for only pass as argument the place id.
+     * @param string $to
+     *   The recipient to send.
+     * @param string $url
+     *   (Optional) A URL to attach to the location.
+     * @param  float $long    The longitude of the location eg 54.31652
+     * @param  float $lat     The latitude if the location eg -6.833496
+     * @param $name  The custom name you would like to give this location.
      */
     public function sendPlace($to, $long, $lat, $name, $url = null)
     {
@@ -935,9 +1076,9 @@ class WhatsProt
     }
 
     /**
-     * Send a pong to the whatsapp server.
+     * Send a pong to the whatsapp server. I'm alive!
      *
-     * @param $msgid
+     * @param string $msgid
      *   The id of the message.
      */
     public function sendPong($msgid)
@@ -955,7 +1096,7 @@ class WhatsProt
     /**
      * Send presence status.
      *
-     * @param $type
+     * @param string $type
      *   The presence status.
      */
     public function sendPresence($type = "available")
@@ -971,7 +1112,7 @@ class WhatsProt
     /**
      * Send presence subscription, automatically receive presence updates as long as the socket is open.
      *
-     * @param $to
+     * @param string $to
      *   Phone number.
      */
     public function sendPresenceSubscription($to)
@@ -980,11 +1121,22 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    /**
+     * Set the picture for the group
+     * 
+     * @param  string $gjid The groupID
+     * @param  string $path The URL/URI of the image to use
+     */
     public function sendSetGroupPicture($gjid, $path)
     {
         $this->sendSetPicture($gjid, $path);
     }
 
+    /**
+     * Set the list of numbers you wish to block receiving from.
+     * 
+     * @param array $blockedJids Array of numbers to block messages from.
+     */
     public function sendSetPrivacyBlockedList($blockedJids = array())
     {
         if (!is_array($blockedJids)) {
@@ -1009,11 +1161,21 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    /**
+     * Set your profile picture
+     * 
+     * @param  string $path URL/URI of image
+     */
     public function sendSetProfilePicture($path)
     {
         $this->sendSetPicture($this->phoneNumber, $path);
     }
 
+    /**
+     * Set the recovery token for your account to allow you to
+     * retrieve your password at a later stage.
+     * @param  string $token A user generated token.
+     */
     public function sendSetRecoveryToken($token)
     {
         $child = new ProtocolNode("pin", array("xmlns" => "w:ch:p"), null, $token);
@@ -1026,10 +1188,10 @@ class WhatsProt
     }
 
     /**
-     * Update de user status.
+     * Update the user status.
      *
      * @param string $txt
-     *   The text message status to send.
+     *   The text of the message status to send.
      */
     public function sendStatusUpdate($txt)
     {
@@ -1055,7 +1217,7 @@ class WhatsProt
      * Send a vCard to the user/group.
      *
      * @param $to
-     *   The reciepient to send.
+     *   The recipient to send.
      * @param $name
      *   The contact name.
      * @param $vCard
@@ -1090,8 +1252,8 @@ class WhatsProt
      * @param $file
      *   The uri of the file.
      *
-     * @return string
-     *   Return the remote url.
+     * @return mixed|string|boolean 
+     *   Return the remote url or false on failure.
      */
     public function uploadFile($file)
     {
@@ -1153,7 +1315,8 @@ class WhatsProt
     }
 
     /**
-     * Wait for server to acknowledge *it* has received message.
+     * Wait for Whatsapp server to acknowledge *it* has received message.
+     * @param  string $id The id of the node sent that we are awaiting acknowledgement of.
      */
     public function waitForServer($id)
     {
@@ -1164,6 +1327,11 @@ class WhatsProt
         } while ($this->serverReceivedId !== $id && time() - $time < 5);
     }
 
+    /**
+     * Authenticate with the Whatsapp Server.
+     * TODO
+     * @return 
+     */
     protected function authenticate()
     {
         $key = pbkdf2('sha1', base64_decode($this->password), $this->challengeData, 16, 20, true);
@@ -1227,7 +1395,7 @@ class WhatsProt
     }
 
     /**
-     * Control msg id.
+     * Create a unique msg id.
      *
      * @param  string $prefix
      * @return string
@@ -1244,7 +1412,7 @@ class WhatsProt
     /**
      * Print a message to the debug console.
      *
-     * @param $debugMsg
+     * @param string $debugMsg
      *   The debug message.
      */
     protected function debugPrint($debugMsg)
@@ -1295,6 +1463,14 @@ class WhatsProt
         return false;
     }
 
+    /**
+     * Send the nodes to the Whatsapp server to log in.
+     * 
+     * @param  Bool $profileSubscribe 
+     * Set this to true if you would like Whatsapp to send a 
+     * notification to your phone when one of your contacts
+     * changes/update their picture.
+     */
     protected function doLogin($profileSubscribe)
     {
         $this->writer->resetKey();
@@ -1320,6 +1496,12 @@ class WhatsProt
         $this->sendPresence();
     }
 
+    /**
+     * Create an identity string
+     *     
+     * @param  string $identity A user string
+     * @return string           Correctly formatted identity
+     */
     protected function getIdentity($identity)
     {
         return md5(strrev($identity));
@@ -1342,13 +1524,14 @@ class WhatsProt
                 //to normal user
                 $number .= "@" . static::WHATSAPP_SERVER;
             }
-        }
+        }   
 
         return $number;
     }
 
     /**
      * Retrieves media file and info from either a URL or localpath
+     * 
      * @param $filepath
      * The URL or path to the mediafile you wish to send
      * @param $maxsizebytes
@@ -1431,6 +1614,13 @@ class WhatsProt
         return false;
     }
 
+    /**
+     * Get a decoded JSON response from Whatsapp server
+     *     
+     * @param  string $host  The host URL
+     * @param  array $query A associative array of keys and values to send to server.
+     * @return mixed   NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit
+     */
     protected function getResponse($host, $query)
     {
         // Build the url.
@@ -1456,7 +1646,7 @@ class WhatsProt
         $response = curl_exec($ch);
 
         // Close the connection.
-        curl_close($ch);
+        curl_close($ch);        
 
         return json_decode($response);
     }
@@ -1771,8 +1961,8 @@ class WhatsProt
     /**
      * If the media file was originally from a URL, this function either deletes it
      * or renames it depending on the user option.
-     * @param boolean $storeURLmedia Should the script save and rename any media files saved from
-     * a URL or remove the temporary file?
+     * 
+     * @param bool $storeURLmedia Save or delete the media file from local server
      */
     protected function processTempMediaFile($storeURLmedia)
     {
@@ -1885,6 +2075,11 @@ class WhatsProt
         return $buff;
     }
 
+    /**
+     * Send a broadcast 
+     * @param  array $targets Array of numbers to send to
+     * @param  object $node
+     */
     protected function sendBroadcast($targets, $node)
     {
         if (!is_array($targets)) {
@@ -1930,6 +2125,10 @@ class WhatsProt
         fwrite($this->socket, $data, strlen($data));
     }
 
+    /**
+     * Send the getGroupList request to Whatsapp
+     * @param  string $type Type of list of groups to retrieve. "owning" or "participating"
+     */
     protected function sendGetGroupsFiltered($type)
     {
         $msgID = $this->createMsgId("getgroups");
@@ -1947,14 +2146,14 @@ class WhatsProt
     }
 
     /**
-     * Sent action to participants of a group.
+     * Change participants of a group.
      *
      * @param string $groupId
      *   The group ID.
      * @param array $participants
      *   An array with the participants.
      * @param string $tag
-     *   The tag action.
+     *   The tag action. 'add' or 'remove'
      */
     protected function sendGroupsChangeParticipants($groupId, $participants, $tag)
     {
@@ -1981,7 +2180,7 @@ class WhatsProt
      * Send node to the servers.
      *
      * @param $to
-     *   The reciepient to send.
+     *   The recipient to send.
      * @param $node
      *   The node that contains the message.
      */
@@ -2056,14 +2255,14 @@ class WhatsProt
      *
      * @param $b64hash
      *  Base64 hash of file
-     * @param $type
+     * @param string $type
      *  File type
      * @param $size
      *  File size
-     * @param $filepath
+     * @param string $filepath
      *  Path to image file
-     * @param $to
-     *  Recepient
+     * @param string $to
+     *  Recipient
      */
     protected function sendRequestFileUpload($b64hash, $type, $size, $filepath, $to)
     {
@@ -2096,7 +2295,7 @@ class WhatsProt
      *
      * @param string $jid
      * @param string $filepath
-     *  Path to image file
+     *  URL or localpath to image file
      */
     protected function sendSetPicture($jid, $filepath)
     {
@@ -2133,7 +2332,8 @@ class WhatsProt
      *
      * Emojis should be entered in the message text either as the
      * correct unicode character directly, or if this isn't possible,
-     * by putting a placeholder of ##unicodeNumber## in the message text.
+     * by putting a placeholder of ##unicodeNumber## in the message text. 
+     * Include the surrounding ##
      * eg:
      * ##1f604## this will show the smiling face
      * ##1f1ec_1f1e7## this will show the UK flag.
