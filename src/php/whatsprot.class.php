@@ -2267,7 +2267,6 @@ class WhatsProt
      */
     protected function sendSetPicture($jid, $filepath)
     {
-        $this->getMediaFile($filepath);
         preprocessProfilePicture($filepath);
         $fp = @fopen($filepath, "r");
         if ($fp) {
