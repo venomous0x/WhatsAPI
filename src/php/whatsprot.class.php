@@ -701,7 +701,6 @@ class WhatsProt
     }
 
     /**
-     * TODO
      * Send a request to get the current server properties
      */
     public function sendGetServerProperties()
@@ -1262,8 +1261,9 @@ class WhatsProt
 
     /**
      * Authenticate with the Whatsapp Server.
-     * TODO
-     * @return
+     *
+     * @return String
+     *   Returns binary string
      */
     protected function authenticate()
     {
@@ -1787,6 +1787,14 @@ class WhatsProt
                     $this->serverReceivedId = $node->attributeHash['id'];
                     if ($node->children[0] != null && strcmp($node->children[0]->tag, "query") == 0) {
                         array_push($this->messageQueue, $node);
+                    }
+                    if ($node->children[0] != null && strcmp($node->children[0]->tag, "props") == 0) {
+                        //server properties
+                        $props = array();
+                        foreach($node->children[0]->children as $child) {
+                            $props[$child->getAttribute("name")] = $child->getAttribute("value");
+                        }
+                        $this->eventManager()->fire("onGetServerProperties", array($this->phoneNumber, $node->children[0]->getAttribute("version"), $props));
                     }
                     if ($node->children[0] != null && strcmp($node->children[0]->tag, "picture") == 0) {
                         $this->eventManager()->fire("onProfilePicture", array(
