@@ -12,6 +12,8 @@ class WhatsProt
      */
     const CONNECTED_STATUS = 'connected';                   // Describes the connection status with the WhatsApp server.
     const DISCONNECTED_STATUS = 'disconnected';             // Describes the connection status with the WhatsApp server.
+    const MEDIA_FOLDER = 'media';                           // The relative folder to store received media files
+    const PICTURES_FOLDER = 'pictures';                     // The relative folder to store picture files
     const PORT = 5222;                                      // The port of the WhatsApp server.
     const TIMEOUT_SEC = 2;                                  // The timeout for the connection with the WhatsApp servers.
     const TIMEOUT_USEC = 0;                                 //
@@ -366,7 +368,7 @@ class WhatsProt
      * If you know your password and wish to use it without generating
      * a new password - use the loginWithPassword() method instead.
      * 
-     * @param  boolean $profileSubscribe 
+     * @param  bool $profileSubscribe 
      * 
      * Set this to true if you would like Whatsapp to send a 
      * notification to your phone when one of your contacts
@@ -391,7 +393,7 @@ class WhatsProt
      * using this method.
      * 
      * @param  string  $password         Your whatsapp password. You must already know this!
-     * @param  boolean $profileSubscribe Add a feature
+     * @param  bool $profileSubscribe Add a feature
      */
     public function loginWithPassword($password, $profileSubscribe = false)
     {
@@ -426,7 +428,7 @@ class WhatsProt
      *  
      * @param  array  $targets       An array of numbers to send to.
      * @param  string  $path          URL or local path to the audio file to send
-     * @param  boolean $storeURLmedia Keep a copy of the audio file on your server
+     * @param  bool $storeURLmedia Keep a copy of the audio file on your server
      */
     public function sendBroadcastAudio($targets, $path, $storeURLmedia = false)
     {
@@ -446,7 +448,7 @@ class WhatsProt
      * 
      * @param  array  $targets       An array of numbers to send to.
      * @param  string  $path          URL or local path to the image file to send
-     * @param  boolean $storeURLmedia Keep a copy of the audio file on your server
+     * @param  bool $storeURLmedia Keep a copy of the audio file on your server
      */
     public function sendBroadcastImage($targets, $path, $storeURLmedia = false)
     {
@@ -525,7 +527,7 @@ class WhatsProt
      *  
      * @param  array  $targets       An array of numbers to send to.
      * @param  string  $path          URL or local path to the video file to send
-     * @param  boolean $storeURLmedia Keep a copy of the audio file on your server
+     * @param  bool $storeURLmedia Keep a copy of the audio file on your server
      */
     public function sendBroadcastVideo($targets, $path, $storeURLmedia = false)
     {
@@ -1252,7 +1254,7 @@ class WhatsProt
      * @param $file
      *   The uri of the file.
      *
-     * @return mixed|string|boolean 
+     * @return mixed|string|bool 
      *   Return the remote url or false on failure.
      */
     public function uploadFile($file)
@@ -1466,7 +1468,7 @@ class WhatsProt
     /**
      * Send the nodes to the Whatsapp server to log in.
      * 
-     * @param  Bool $profileSubscribe 
+     * @param  bool $profileSubscribe 
      * Set this to true if you would like Whatsapp to send a 
      * notification to your phone when one of your contacts
      * changes/update their picture.
@@ -1537,7 +1539,7 @@ class WhatsProt
      * @param $maxsizebytes
      * The maximum size in bytes the media file can be. Default 1MB
      *
-     * @return boolean Returns false if file information can not be obtained.
+     * @return bool  false if file information can not be obtained.
      */
     protected function getMediaFile($filepath, $maxsizebytes = 1048576)
     {
@@ -1568,7 +1570,7 @@ class WhatsProt
             //TODO check what max file size whatsapp server accepts.
             if ($this->mediaFileInfo['filesize'] < $maxsizebytes) {
                 //Create temp file in media folder. Media folder must be writable!
-                $this->mediaFileInfo['filepath'] = tempnam(getcwd() . '/media', 'WHA');
+                $this->mediaFileInfo['filepath'] = tempnam(getcwd() . '/'. static::MEDIA_FOLDER, 'WHA');
                 $fp = fopen($this->mediaFileInfo['filepath'], 'w');
                 if ($fp) {
                     curl_setopt($curl, CURLOPT_NOBODY, false);
@@ -1916,7 +1918,7 @@ class WhatsProt
 
             //save thumbnail
             $data = $media->data;
-            $fp = @fopen("media/thumb_" . $filename, "w");
+            $fp = @fopen(static::MEDIA_FOLDER."/thumb_" . $filename, "w");
             if ($fp) {
                 fwrite($fp, $data);
                 fclose($fp);
@@ -1924,7 +1926,7 @@ class WhatsProt
 
             //download and save original
             $data = file_get_contents($url);
-            $fp = @fopen("media/" . $filename, "w");
+            $fp = @fopen(static::MEDIA_FOLDER."/" . $filename, "w");
             if ($fp) {
                 fwrite($fp, $data);
                 fclose($fp);
@@ -1946,9 +1948,9 @@ class WhatsProt
             $type = $pictureNode->getAttribute("type");
             $data = $pictureNode->data;
             if ($type == "preview") {
-                $filename = "pictures/preview_" . $node->getAttribute("from") . ".jpg";
+                $filename = static::PICTURES_FOLDER."/preview_" . $node->getAttribute("from") . ".jpg";
             } else {
-                $filename = "pictures/" . $node->getAttribute("from") . ".jpg";
+                $filename = static::PICTURES_FOLDER."/" . $node->getAttribute("from") . ".jpg";
             }
             $fp = @fopen($filename, "w");
             if ($fp) {
@@ -2299,6 +2301,7 @@ class WhatsProt
      */
     protected function sendSetPicture($jid, $filepath)
     {
+        $this->getMediaFile($filepath);
         preprocessProfilePicture($filepath);
         $fp = @fopen($filepath, "r");
         if ($fp) {

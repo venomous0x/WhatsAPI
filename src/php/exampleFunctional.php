@@ -24,7 +24,7 @@ function onProfilePicture($from, $type, $data)
     } else {
         $filename = $from . ".jpg";
     }
-    $filename = "pictures/" . $filename;
+    $filename = WhatsProt::PICTURES_FOLDER."/" . $filename;
     $fp = @fopen($filename, "w");
     if ($fp) {
         fwrite($fp, $data);
