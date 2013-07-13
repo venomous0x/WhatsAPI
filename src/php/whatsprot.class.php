@@ -360,17 +360,17 @@ class WhatsProt
     }
 
     /**
-     * Log into the Whatsapp server. 
-     * 
+     * Log into the Whatsapp server.
+     *
      * ###Warning### using this method will generate a new password
      * from the WhatsApp servers each time.
-     * 
+     *
      * If you know your password and wish to use it without generating
      * a new password - use the loginWithPassword() method instead.
-     * 
-     * @param  bool $profileSubscribe 
-     * 
-     * Set this to true if you would like Whatsapp to send a 
+     *
+     * @param  bool $profileSubscribe
+     *
+     * Set this to true if you would like Whatsapp to send a
      * notification to your phone when one of your contacts
      * changes/update their picture.
      */
@@ -388,10 +388,10 @@ class WhatsProt
 
     /**
      * Login to the Whatsapp server with your password
-     * 
+     *
      * If you already know your password you can log into the Whatsapp server
      * using this method.
-     * 
+     *
      * @param  string  $password         Your whatsapp password. You must already know this!
      * @param  bool $profileSubscribe Add a feature
      */
@@ -423,9 +423,9 @@ class WhatsProt
      *
      * The receiptiant MUST have your number (synced) and in their contact list
      * otherwise the message will not deliver to that person.
-     * 
-     * Approx 20 (unverified) is the maximum number of targets 
-     *  
+     *
+     * Approx 20 (unverified) is the maximum number of targets
+     *
      * @param  array  $targets       An array of numbers to send to.
      * @param  string  $path          URL or local path to the audio file to send
      * @param  bool $storeURLmedia Keep a copy of the audio file on your server
@@ -443,9 +443,9 @@ class WhatsProt
      *
      * The receiptiant MUST have your number (synced) and in their contact list
      * otherwise the message will not deliver to that person.
-     * 
-     * Approx 20 (unverified) is the maximum number of targets 
-     * 
+     *
+     * Approx 20 (unverified) is the maximum number of targets
+     *
      * @param  array  $targets       An array of numbers to send to.
      * @param  string  $path          URL or local path to the image file to send
      * @param  bool $storeURLmedia Keep a copy of the audio file on your server
@@ -463,12 +463,12 @@ class WhatsProt
      *
      * The receiptiant MUST have your number (synced) and in their contact list
      * otherwise the message will not deliver to that person.
-     * 
+     *
      * Receiver will see larger google map thumbnail of Lat/Long but NO
      * name/url for location.
-     * 
-     * Approx 20 (unverified) is the maximum number of targets 
-     *  
+     *
+     * Approx 20 (unverified) is the maximum number of targets
+     *
      * @param  array  $targets       An array of numbers to send to.
      * @param  float $long    The longitude of the location eg 54.31652
      * @param  float $lat     The latitude if the location eg -6.833496
@@ -486,9 +486,9 @@ class WhatsProt
      *
      * The receiptiant MUST have your number (synced) and in their contact list
      * otherwise the message will not deliver to that person.
-     * 
-     * Approx 20 (unverified) is the maximum number of targets 
-     *  
+     *
+     * Approx 20 (unverified) is the maximum number of targets
+     *
      * @param  array  $targets       An array of numbers to send to.
      * @param  string $message Your message
      */
@@ -503,9 +503,9 @@ class WhatsProt
      *
      * The receiptiant MUST have your number (synced) and in their contact list
      * otherwise the message will not deliver to that person.
-     * 
-     * Approx 20 (unverified) is the maximum number of targets 
-     *  
+     *
+     * Approx 20 (unverified) is the maximum number of targets
+     *
      * @param  string $name    A name to describe the location
      * @param  string $url     (Optional) A URL to link location to web resource
      */
@@ -522,9 +522,9 @@ class WhatsProt
      *
      * The receiptiant MUST have your number (synced) and in their contact list
      * otherwise the message will not deliver to that person.
-     * 
-     * Approx 20 (unverified) is the maximum number of targets 
-     *  
+     *
+     * Approx 20 (unverified) is the maximum number of targets
+     *
      * @param  array  $targets       An array of numbers to send to.
      * @param  string  $path          URL or local path to the video file to send
      * @param  bool $storeURLmedia Keep a copy of the audio file on your server
@@ -539,8 +539,8 @@ class WhatsProt
 
     /**
      * Clears the "dirty" status on your account
-     * 
-     * @param  array $categories 
+     *
+     * @param  array $categories
      */
     public function sendClearDirty($categories)
     {
@@ -560,7 +560,7 @@ class WhatsProt
 
     /**
      * TODO
-     * 
+     *
      */
     public function sendGetClientConfig()
     {
@@ -586,7 +586,7 @@ class WhatsProt
 
     /**
      * Send a request to get information about a specific group
-     * 
+     *
      * @param  string $gjid The specific group id
      */
     public function sendGetGroupsInfo($gjid)
@@ -614,7 +614,7 @@ class WhatsProt
     /**
      * Send a request to return a list of people participating in a specific
      * group.
-     * 
+     *
      * @param  string $gjid The specific group id
      */
     public function sendGetGroupsParticipants($gjid)
@@ -719,7 +719,7 @@ class WhatsProt
 
     /**
      * Get the current status message of a specific user.
-     * 
+     *
      * @param  string $jid The user JID
      */
     public function sendGetStatus($jid)
@@ -773,7 +773,7 @@ class WhatsProt
 
     /**
      * End or delete a group chat
-     * 
+     *
      * @param  string $gjid The group ID
      */
     public function sendGroupsChatEnd($gjid)
@@ -794,7 +794,7 @@ class WhatsProt
 
     /**
      * Leave a group chat
-     * 
+     *
      * @param  string $gjids The group ID
      */
     public function sendGroupsLeave($gjids)
@@ -843,11 +843,11 @@ class WhatsProt
 
     /**
      * Send a location to the user/group.
-     * 
-     * Receiver will see large sized google map thumbnail of 
+     *
+     * Receiver will see large sized google map thumbnail of
      * supplied Lat/Long but NO name/url for location.
-     * 
-     * @param mixed|array|string $to The recipient(s) to send to.
+     *
+     * @param array|string $to The recipient(s) to send to.
      * @param  float $long    The longitude of the location eg 54.31652
      * @param  float $lat     The latitude if the location eg -6.833496
      */
@@ -884,7 +884,7 @@ class WhatsProt
     }
 
     /**
-     * Send audio to the user/group.     * 
+     * Send audio to the user/group.     *
      *
      * @param $to
      *   The recipient.
@@ -895,23 +895,9 @@ class WhatsProt
      */
     public function sendMessageAudio($to, $filepath, $storeURLmedia = false)
     {
-        if ($this->getMediaFile($filepath, 1024 * 1024 * 10) == true) {
-            $allowedExtensions = array('3gp', 'caf', 'wav', 'mp3', 'wma', 'ogg', 'aif', 'aac', 'm4a');
-            if (in_array($this->mediaFileInfo['fileextension'], $allowedExtensions)) {
-                $b64hash = base64_encode(hash_file("sha256", $this->mediaFileInfo['filepath'], true));
-                //request upload
-                $this->sendRequestFileUpload($b64hash, "audio", $this->mediaFileInfo['filesize'], $this->mediaFileInfo['filepath'], $to);
-                $this->processTempMediaFile($storeURLmedia);
-                return true;
-            } else {
-                //Not allowed file type.
-                $this->processTempMediaFile($storeURLmedia);
-                return false;
-            }
-        } else {
-            //Didn't get media file details.
-            return false;
-        }
+        $allowedExtensions = array('3gp', 'caf', 'wav', 'mp3', 'wma', 'ogg', 'aif', 'aac', 'm4a');
+        $size = 10 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        return $this->sendMessageMedia($filepath, $size, $to, 'audio', $allowedExtensions, $storeURLmedia);
     }
 
     /**
@@ -948,23 +934,9 @@ class WhatsProt
      */
     public function sendMessageImage($to, $filepath, $storeURLmedia = false)
     {
-        if ($this->getMediaFile($filepath, 1024 * 1024 * 5) == true) {
-            $allowedExtensions = array('jpg', 'jpeg', 'gif', 'png');
-            if (in_array($this->mediaFileInfo['fileextension'], $allowedExtensions)) {
-                $b64hash = base64_encode(hash_file("sha256", $this->mediaFileInfo['filepath'], true));
-                //request upload
-                $this->sendRequestFileUpload($b64hash, "image", $this->mediaFileInfo['filesize'], $this->mediaFileInfo['filepath'], $to);
-                $this->processTempMediaFile($storeURLmedia);
-                return true;
-            } else {
-                //Not allowed file type.
-                $this->processTempMediaFile($storeURLmedia);
-                return false;
-            }
-        } else {
-            //Didn't get media file details.
-            return false;
-        }
+        $allowedExtensions = array('jpg', 'jpeg', 'gif', 'png');
+        $size = 5 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        return $this->sendMessageMedia($filepath, $size, $to, 'image', $allowedExtensions, $storeURLmedia);
     }
 
     /**
@@ -1001,23 +973,9 @@ class WhatsProt
      */
     public function sendMessageVideo($to, $filepath, $storeURLmedia = false)
     {
-        if ($this->getMediaFile($filepath, 1024 * 1024 * 20) == true) {
-            $allowedExtensions = array('mp4', 'mov', 'avi');
-            if (in_array($this->mediaFileInfo['fileextension'], $allowedExtensions)) {
-                $b64hash = base64_encode(hash_file("sha256", $this->mediaFileInfo['filepath'], true));
-                //request upload
-                $this->sendRequestFileUpload($b64hash, "video", $this->mediaFileInfo['filesize'], $this->mediaFileInfo['filepath'], $to);
-                $this->processTempMediaFile($storeURLmedia);
-                return true;
-            } else {
-                //Not allowed file type.
-                $this->processTempMediaFile($storeURLmedia);
-                return false;
-            }
-        } else {
-            //Didn't get media file details.
-            return false;
-        }
+        $allowedExtensions = array('mp4', 'mov', 'avi');
+        $size = 20 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        return $this->sendMessageMedia($filepath, $size, $to, 'video', $allowedExtensions, $storeURLmedia);
     }
 
     /**
@@ -1046,8 +1004,8 @@ class WhatsProt
 
     /**
      * Send a location to the user/group.
-     * 
-     * Allows for custom name and URL to be added to the 
+     *
+     * Allows for custom name and URL to be added to the
      * location by the user.
      *
      * @param string $to
@@ -1125,7 +1083,7 @@ class WhatsProt
 
     /**
      * Set the picture for the group
-     * 
+     *
      * @param  string $gjid The groupID
      * @param  string $path The URL/URI of the image to use
      */
@@ -1136,7 +1094,7 @@ class WhatsProt
 
     /**
      * Set the list of numbers you wish to block receiving from.
-     * 
+     *
      * @param array $blockedJids Array of numbers to block messages from.
      */
     public function sendSetPrivacyBlockedList($blockedJids = array())
@@ -1165,7 +1123,7 @@ class WhatsProt
 
     /**
      * Set your profile picture
-     * 
+     *
      * @param  string $path URL/URI of image
      */
     public function sendSetProfilePicture($path)
@@ -1254,7 +1212,7 @@ class WhatsProt
      * @param $file
      *   The uri of the file.
      *
-     * @return mixed|string|bool 
+     * @return string|bool
      *   Return the remote url or false on failure.
      */
     public function uploadFile($file)
@@ -1332,7 +1290,7 @@ class WhatsProt
     /**
      * Authenticate with the Whatsapp Server.
      * TODO
-     * @return 
+     * @return
      */
     protected function authenticate()
     {
@@ -1467,9 +1425,9 @@ class WhatsProt
 
     /**
      * Send the nodes to the Whatsapp server to log in.
-     * 
-     * @param  bool $profileSubscribe 
-     * Set this to true if you would like Whatsapp to send a 
+     *
+     * @param  bool $profileSubscribe
+     * Set this to true if you would like Whatsapp to send a
      * notification to your phone when one of your contacts
      * changes/update their picture.
      */
@@ -1500,7 +1458,7 @@ class WhatsProt
 
     /**
      * Create an identity string
-     *     
+     *
      * @param  string $identity A user string
      * @return string           Correctly formatted identity
      */
@@ -1526,14 +1484,14 @@ class WhatsProt
                 //to normal user
                 $number .= "@" . static::WHATSAPP_SERVER;
             }
-        }   
+        }
 
         return $number;
     }
 
     /**
      * Retrieves media file and info from either a URL or localpath
-     * 
+     *
      * @param $filepath
      * The URL or path to the mediafile you wish to send
      * @param $maxsizebytes
@@ -1618,7 +1576,7 @@ class WhatsProt
 
     /**
      * Get a decoded JSON response from Whatsapp server
-     *     
+     *
      * @param  string $host  The host URL
      * @param  array $query A associative array of keys and values to send to server.
      * @return mixed   NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit
@@ -1648,7 +1606,7 @@ class WhatsProt
         $response = curl_exec($ch);
 
         // Close the connection.
-        curl_close($ch);        
+        curl_close($ch);
 
         return json_decode($response);
     }
@@ -1963,7 +1921,7 @@ class WhatsProt
     /**
      * If the media file was originally from a URL, this function either deletes it
      * or renames it depending on the user option.
-     * 
+     *
      * @param bool $storeURLmedia Save or delete the media file from local server
      */
     protected function processTempMediaFile($storeURLmedia)
@@ -2078,7 +2036,7 @@ class WhatsProt
     }
 
     /**
-     * Send a broadcast 
+     * Send a broadcast
      * @param  array $targets Array of numbers to send to
      * @param  object $node
      */
@@ -2176,6 +2134,36 @@ class WhatsProt
         $node = new ProtocolNode("iq", $setHash, array($child), "");
 
         $this->sendNode($node);
+    }
+
+    /**
+     * Checks that the media file to send is allowable filetype and within size limits.
+     *
+     * @param string $filepath The URL/URI to the media file
+     * @param int $maxSize Maximim filesize allowed for media type
+     * @param string $to Recipient ID/number
+     * @param string $type media filetype. 'audio', 'video', 'image'
+     * @param array $allowedExtensions An array of allowable file types for the media file
+     * @param bool $storeURLmedia Keep a copy of the media file
+     * @return bool
+     */
+    protected function sendMessageMedia($filepath, $maxSize, $to, $type, $allowedExtensions, $storeURLmedia){
+        if ($this->getMediaFile($filepath, $maxSize) == true) {
+            if (in_array($this->mediaFileInfo['fileextension'], $allowedExtensions)) {
+                $b64hash = base64_encode(hash_file("sha256", $this->mediaFileInfo['filepath'], true));
+                //request upload
+                $this->sendRequestFileUpload($b64hash, $type, $this->mediaFileInfo['filesize'], $this->mediaFileInfo['filepath'], $to);
+                $this->processTempMediaFile($storeURLmedia);
+                return true;
+            } else {
+                //Not allowed file type.
+                $this->processTempMediaFile($storeURLmedia);
+                return false;
+            }
+        } else {
+            //Didn't get media file details.
+            return false;
+        }
     }
 
     /**
@@ -2335,7 +2323,7 @@ class WhatsProt
      *
      * Emojis should be entered in the message text either as the
      * correct unicode character directly, or if this isn't possible,
-     * by putting a placeholder of ##unicodeNumber## in the message text. 
+     * by putting a placeholder of ##unicodeNumber## in the message text.
      * Include the surrounding ##
      * eg:
      * ##1f604## this will show the smiling face

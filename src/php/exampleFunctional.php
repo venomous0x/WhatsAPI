@@ -51,10 +51,10 @@ $w->sendSetProfilePicture("demo/venom.jpg");
 $w->sendMessageImage($target, "demo/x3.jpg");
 
 //send video
-//$w->sendMessageVideo($target, 'http://example.com/video.mp4');
+//$w->sendMessageVideo($target, 'http://techslides.com/demos/sample-videos/small.mp4');
 
 //send Audio
-//$w->sendMessageAudio($target, 'http://example.com/audio.3gp');
+//$w->sendMessageAudio($target, 'http://www.kozco.com/tech/piano2.wav');
 
 //send Location
 //$w->sendLocation($target, '4.948568', '52.352957');
