@@ -634,7 +634,7 @@ class Whatsapp
                         $this->wa->sendMessageVideo($to, $this->inputs['video']);
                     }
                     if (isset($this->inputs['locationname']) && trim($this->inputs['locationname'] !== '')) {
-                        $this->wa->sendLocation($to, $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
+                        $this->wa->sendMessageLocation($to, $this->inputs['userlong'], $this->inputs['userlat'], $this->inputs['locationname'], null);
                     }
                 } else {
                     exit(json_encode(array(

@@ -464,21 +464,27 @@ class WhatsProt
      * The receiptiant MUST have your number (synced) and in their contact list
      * otherwise the message will not deliver to that person.
      *
-     * Receiver will see larger google map thumbnail of Lat/Long but NO
-     * name/url for location.
+     * If no name is supplied , receiver will see large sized google map
+     * thumbnail of entered Lat/Long but NO name/url for location.
      *
+     * With name supplied, a combined map thumbnail/name box is displayed
+
      * Approx 20 (unverified) is the maximum number of targets
      *
      * @param  array  $targets       An array of numbers to send to.
      * @param  float $long    The longitude of the location eg 54.31652
      * @param  float $lat     The latitude if the location eg -6.833496
+     * @param  string $name    (Optional) A name to describe the location
+     * @param  string $url     (Optional) A URL to link location to web resource
      */
-    public function sendBroadcastLocation($targets, $long, $lat)
+
+
+    public function sendBroadcastLocation($targets, $long, $lat, $name = null, $url = null)
     {
         if (!is_array($targets)) {
             $targets = array($targets);
         }
-        $this->sendLocation($targets, $long, $lat);
+        $this->sendMessageLocation($targets, $long, $lat, $name, $url);
     }
 
     /**
@@ -496,25 +502,6 @@ class WhatsProt
     {
         $bodyNode = new ProtocolNode("body", null, null, $message);
         $this->sendBroadcast($targets, $bodyNode, "chat");
-    }
-
-    /**
-     * Send a Broadcast Message with place data.
-     *
-     * The receiptiant MUST have your number (synced) and in their contact list
-     * otherwise the message will not deliver to that person.
-     *
-     * Approx 20 (unverified) is the maximum number of targets
-     *
-     * @param  string $name    A name to describe the location
-     * @param  string $url     (Optional) A URL to link location to web resource
-     */
-    public function sendBroadcastPlace($targets, $long, $lat, $name, $url = null)
-    {
-        if (!is_array($targets)) {
-            $targets = array($targets);
-        }
-        $this->sendPlace($targets, $long, $lat, $name, $url);
     }
 
     /**
@@ -870,39 +857,6 @@ class WhatsProt
     }
 
     /**
-     * Send a location to the user/group.
-     *
-     * If no name is supplied , receiver will see large sized google map
-     * thumbnail of entered Lat/Long but NO name/url for location.
-     *
-     * With name supplied, a combined map thumbnail/name box is displayed
-     *
-     * @param array|string $to The recipient(s) to send to.
-     * @param  float $long    The longitude of the location eg 54.31652
-     * @param  float $lat     The latitude if the location eg -6.833496
-     * @param string $name (Optional)  The custom name you would like to give this location.
-     * @param string $url (Optional) A URL to attach to the location.
-     */
-    public function sendLocation($to, $long, $lat, $name = null, $url = null)
-    {
-        $mediaHash = array();
-        $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
-        $mediaHash['type'] = "location";
-        $mediaHash['latitude'] = $lat;
-        $mediaHash['longitude'] = $long;
-        $mediaHash['name'] = $name;
-        $mediaHash['url'] = $url;
-
-        $mediaNode = new ProtocolNode("media", $mediaHash, null, null);
-
-        if (is_array($to)) {
-            $this->sendBroadcast($to, $mediaNode);
-        } else {
-            $this->sendMessageNode($to, $mediaNode);
-        }
-    }
-
-    /**
      * Send a text message to the user/group.
      *
      * @param $to
@@ -971,6 +925,39 @@ class WhatsProt
         $allowedExtensions = array('jpg', 'jpeg', 'gif', 'png');
         $size = 5 * 1024 * 1024; // Easy way to set maximum file size for this media type.
         return $this->sendCheckAndSendMedia($filepath, $size, $to, 'image', $allowedExtensions, $storeURLmedia);
+    }
+
+    /**
+     * Send a location to the user/group.
+     *
+     * If no name is supplied , receiver will see large sized google map
+     * thumbnail of entered Lat/Long but NO name/url for location.
+     *
+     * With name supplied, a combined map thumbnail/name box is displayed
+     *
+     * @param array|string $to The recipient(s) to send to.
+     * @param  float $long    The longitude of the location eg 54.31652
+     * @param  float $lat     The latitude if the location eg -6.833496
+     * @param string $name (Optional)  The custom name you would like to give this location.
+     * @param string $url (Optional) A URL to attach to the location.
+     */
+    public function sendMessageLocation($to, $long, $lat, $name = null, $url = null)
+    {
+        $mediaHash = array();
+        $mediaHash['xmlns'] = "urn:xmpp:whatsapp:mms";
+        $mediaHash['type'] = "location";
+        $mediaHash['latitude'] = $lat;
+        $mediaHash['longitude'] = $long;
+        $mediaHash['name'] = $name;
+        $mediaHash['url'] = $url;
+
+        $mediaNode = new ProtocolNode("media", $mediaHash, null, null);
+
+        if (is_array($to)) {
+            $this->sendBroadcast($to, $mediaNode);
+        } else {
+            $this->sendMessageNode($to, $mediaNode);
+        }
     }
 
     /**
