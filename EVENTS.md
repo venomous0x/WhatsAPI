@@ -244,23 +244,30 @@ How to binds a callback to a event
 ==================================
 
 # Events functions declarations
+```php
 function MyFunction_onConnect($phone, $socket) {
     print("$socket\n");
 }
-
+```
 # Require the class.
+```php
 require 'whatsprot.class.php';
-
+```
 # Create a instance of WhastPort.
+```php
 $w = new WhatsProt($userPhone, $userIdentity, $userName, $debug);
-
+```
 # Binds a callback to a event
+```php
 # $w->eventManager()->bind((string) $event, (string) $callback);
 $w->eventManager()->bind('onConnect', 'MyFunction_onConnect');
-
+```
 # Connect to WhatsApp servers.
+```php
 $w->connect();
+```
 # Now Login function sends Nickname and (Available) Presence.
+```php
 $w->login();
-
+```
 [...]
