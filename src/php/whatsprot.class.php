@@ -808,13 +808,9 @@ class WhatsProt
         if (!is_array($gjids)) {
             $gjids = array($this->getJID($gjids));
         }
-        //Convert to a proper group ID.
-        foreach ($gjids as &$id) {
-            $id = $this->getJID($id);
-        }
         $nodes = array();
         foreach ($gjids as $gjid) {
-            $nodes[] = new ProtocolNode("group", array("id" => $gjid), null, null);
+            $nodes[] = new ProtocolNode("group", array("id" => $this->getJID($gjid)), null, null);
         }
         $leave = new ProtocolNode("leave", array("xmlns" => "w:g", 'action'=>'delete'), $nodes, null);
         $hash = array();
