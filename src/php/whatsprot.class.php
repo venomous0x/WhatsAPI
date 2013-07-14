@@ -545,7 +545,6 @@ class WhatsProt
             "to" => "s.whatsapp.net"
                 ), array($clean), null);
         $this->sendNode($node);
-        $this->waitForServer($msgId);
     }
 
     /**
@@ -554,13 +553,15 @@ class WhatsProt
      */
     public function sendGetClientConfig()
     {
-        $child = new ProtocolNode("config", array("xmlns" => "urn:xmpp:whatsapp:push"), null, null);
+        $msgId = $this->createMsgId("sendconfig");
+        $child = new ProtocolNode("config", array("xmlns" => "urn:xmpp:whatsapp:push", "sound" => 'sound'), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->createMsgId("sendconfig"),
-            "type" => "get",
+            "id" => $msgId,
+            "type" => "set",
             "to" => static::WHATSAPP_SERVER
                 ), array($child), null);
         $this->sendNode($node);
+        $this->waitForServer($msgId);
     }
 
     /**
