@@ -41,7 +41,7 @@ class WhatsProt
     protected $incompleteMessage = '';  // A list of bytes for incomplete messages.
     protected $inputKey;                // Instances of the KeyStream class.
     protected $outputKey;               // Instances of the KeyStream class.
-    protected $lastGroupId = false;     // Id to the last group id created.
+    protected $groupId = false;         // Id of the group created.
     protected $lastId = false;          // Id to the last message sent.
     protected $loginStatus;             // Holds the login status.
     protected $mediaFileInfo = array(); // Media File Information
@@ -591,13 +591,16 @@ class WhatsProt
      */
     public function sendGetGroupsInfo($gjid)
     {
+        $msgId = $this->createMsgId("getgroupinfo");
+
         $child = new ProtocolNode("query", array("xmlns" => "w:g"), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->createMsgId("getgroupinfo"),
+            "id" => $msgId,
             "type" => "get",
             "to" => $this->getJID($gjid)
                 ), array($child), null);
         $this->sendNode($node);
+        $this->waitForServer($msgId);
     }
 
     /**
@@ -619,15 +622,19 @@ class WhatsProt
      */
     public function sendGetGroupsParticipants($gjid)
     {
+        $msgId = $this->createMsgId("getparticipants");
+
         $child = new ProtocolNode("list", array(
             "xmlns" => "w:g"
                 ), null, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->createMsgId("getparticipants"),
+            "id" => $msgId,
             "type" => "get",
             "to" => $this->getJID($gjid)
                 ), array($child), null);
         $this->sendNode($node);
+
+        $this->waitForServer($msgId);
     }
 
     /**
@@ -760,8 +767,8 @@ class WhatsProt
         $groupNode = new ProtocolNode("iq", $setHash, array($group), "");
 
         $this->sendNode($groupNode);
-        $this->waitForGroupId();
-        $groupId = $this->lastGroupId;
+        $this->waitForServer($setHash["id"]);
+        $groupId = $this->groupId;
 
         if (count($participants) > 0) {
             $this->sendGroupsParticipantsAdd($groupId, $participants);
@@ -778,40 +785,53 @@ class WhatsProt
     public function sendGroupsChatEnd($gjid)
     {
         $gjid = $this->getJID($gjid);
-        $hash = array();
-        $hash["xmlns"] = "w:g";
-        $hash["action"] = "delete";
-        $child = new ProtocolNode("group", $hash, null, null);
+        $msgID = $this->createMsgId("endgroup");
 
-        $hash = array();
-        $hash["id"] = $this->createMsgId("endgroup");
-        $hash["type"] = "set";
-        $hash["to"] = $gjid;
-        $node = new ProtocolNode("iq", $hash, array($child), null);
-        $this->sendNode($node);
+        $groupData = array();
+        $groupData['id'] = $gjid;
+        $groupNode = new ProtocolNode('group', $groupData, null, null);
+
+        $leaveData = array();
+        $leaveData["xmlns"] = "w:g";
+        $leaveData["action"] = "delete";
+        $leaveNode = new ProtocolNode("leave", $leaveData, array($groupNode), null);
+
+        $iqData = array();
+        $iqData["id"] = $msgID;
+        $iqData["type"] = "set";
+        $iqData["to"] = static::WHATSAPP_GROUP_SERVER;
+        $iqNode = new ProtocolNode("iq", $iqData, array($leaveNode), null);
+
+        $this->sendNode($iqNode);
+        $this->waitForServer($msgID);
     }
 
     /**
      * Leave a group chat
      *
-     * @param  string $gjids The group ID
+     * @param  array $gjids An array of group IDs
      */
     public function sendGroupsLeave($gjids)
     {
         if (!is_array($gjids)) {
-            $gjids = array($gjids);
+            $gjids = array($this->getJID($gjids));
+        }
+        //Convert to a proper group ID.
+        foreach ($gjids as &$id) {
+            $id = $this->getJID($id);
         }
         $nodes = array();
         foreach ($gjids as $gjid) {
             $nodes[] = new ProtocolNode("group", array("id" => $gjid), null, null);
         }
-        $leave = new ProtocolNode("leave", array("xmlns" => "w:g"), $nodes, null);
+        $leave = new ProtocolNode("leave", array("xmlns" => "w:g", 'action'=>'delete'), $nodes, null);
         $hash = array();
         $hash["id"] = $this->createMsgId("leavegroups");
-        $hash["to"] = "g.us";
+        $hash["to"] = static::WHATSAPP_GROUP_SERVER;
         $hash["type"] = "set";
         $node = new ProtocolNode("iq", $hash, array($leave), null);
         $this->sendNode($node);
+        $this->waitForServer($hash["id"]);
     }
 
     /**
@@ -1216,17 +1236,6 @@ class WhatsProt
             $this->eventManager()->fire('onFailedUploadFile', array($this->phoneNumber, basename($file)));
             return false;
         }
-    }
-
-    /**
-     * Wait for group notification.
-     */
-    public function waitForGroupId()
-    {
-        $this->lastGroupId = false;
-        do {
-            $this->pollMessages();
-        } while (!$this->lastGroupId);
     }
 
     /**
@@ -1815,34 +1824,41 @@ class WhatsProt
                     if ($node->children[0] != null && strcmp($node->children[0]->tag, "duplicate") == 0) {
                         $this->processUploadResponse($node);
                     }
-                }
-                if (strcmp($node->tag, "iq") == 0 && strcmp($node->attributeHash['type'], "result") == 0) {
-                    if ($node->children[0] != null && strcmp($node->children[0]->tag, "group") == 0) {
-                        if (isset($node->children[0]->attributeHash['owner'])) {
-                            foreach ($node->children as $group) {
-                                $this->groupList[] = array(
-                                    'group_id' => $group->attributeHash['id'],
-                                    'owner' => $group->attributeHash['owner'],
-                                    'creation' => $group->attributeHash['creation'],
-                                    'subject' => $group->attributeHash['subject'],
-                                    's_t' => $group->attributeHash['s_t'],
-                                    's_o' => $group->attributeHash['s_o'],
-                                );
+                    if (stripos($node->attributeHash['id'], 'group') !== false) {
+                        //There are multiple types of Group reponses. Also a valid group response can have NO children.
+                        //Events fired depend on text in the ID field.
+                        $groupList = array();
+                        if ($node->children[0] != null) {
+                            foreach ($node->children as $child) {
+                                $groupList[] = $child->attributeHash;
                             }
-                            $this->eventManager()->fire('onGetGroupList', array(
-                                $this->phoneNumber,
-                                $this->groupList
-                            ));
-                            $this->serverReceivedId = $node->attributeHash['id'];
-                        } else {
-                            $this->lastGroupId = $node->children[0]->attributeHash['id'];
+                        }
+                        if(stripos($node->attributeHash['id'], 'creategroup') !== false){
+                            $this->groupId = $node->children[0]->attributeHash['id'];
                             $this->eventManager()->fire('onCreateGroupChat', array(
                                 $this->phoneNumber,
-                                $node->children[0]->attributeHash['id']
+                                $this->groupId
                             ));
                         }
-                    } else {
-                        $this->serverReceivedId = $node->attributeHash['id'];
+                        if(stripos($node->attributeHash['id'], 'endgroup') !== false){
+                            $this->groupId = $node->children[0]->children[0]->attributeHash['id'];
+                            $this->eventManager()->fire('onEndGroupChat', array(
+                                $this->phoneNumber,
+                                $this->groupId
+                            ));
+                        }
+                        if(stripos($node->attributeHash['id'], 'getgroups') !== false){
+                            $this->eventManager()->fire('onGetGroupList', array(
+                                $this->phoneNumber,
+                                $groupList
+                            ));
+                        }
+                        if(stripos($node->attributeHash['id'], 'getgroupinfo') !== false){
+                            $this->eventManager()->fire('onGetGroupInfo', array(
+                                $this->phoneNumber,
+                                $groupList
+                            ));
+                        }
                     }
                 }
                 $node = $this->reader->nextTree();
@@ -2156,6 +2172,7 @@ class WhatsProt
         $node = new ProtocolNode("iq", $setHash, array($child), "");
 
         $this->sendNode($node);
+        $this->waitForServer($setHash["id"]);
     }
 
     /**
