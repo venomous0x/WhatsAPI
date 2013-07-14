@@ -697,7 +697,6 @@ class WhatsProt
         $messageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
         $this->sendNode($messageNode);
         $this->waitForServer($messageHash["id"]);
-        $this->eventManager()->fire('onRequestLastSeen', array($this->phoneNumber, $messageHash["id"], $to));
     }
 
     /**
@@ -1796,6 +1795,9 @@ class WhatsProt
                     if ($node->children[0] != null && strcmp($node->children[0]->tag, "query") == 0) {
                         if (stripos($node->children[0]->attributeHash['xmlns'], 'jabber:iq:privacy') !== false) {
                             $this->eventManager()->fire("onGetPrivacyBlockedList", array($this->phoneNumber, $node->children[0]->children[0]->children));
+                        }
+                        if (stripos($node->children[0]->attributeHash['xmlns'], 'jabber:iq:last') !== false) {
+                            $this->eventManager()->fire("onGetRequestLastSeen", array($this->phoneNumber, $node->children[0]->attributeHash['seconds']));
                         }
                         array_push($this->messageQueue, $node);
                     }
