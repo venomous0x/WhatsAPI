@@ -824,6 +824,9 @@ class WhatsProt
      */
     public function sendGroupsParticipantsAdd($groupId, $participants)
     {
+        if(!is_array($participants)) {
+            $participants = array($participants);
+        }
         $this->sendGroupsChangeParticipants($groupId, $participants, 'add');
     }
 
@@ -837,6 +840,9 @@ class WhatsProt
      */
     public function sendGroupsParticipantsRemove($groupId, $participants)
     {
+        if(!is_array($participants)) {
+            $participants = array($participants);
+        }
         $this->sendGroupsChangeParticipants($groupId, $participants, 'remove');
     }
 
