@@ -10,7 +10,7 @@ session_write_close();
 //here because this page has a very long lifetime (1 minute).
 
 $time = $_SESSION["running"];
-function onProfilePicture($from, $type, $data)
+function onGetProfilePicture($from, $type, $data)
 {
     if ($type == "preview") {
         $filename = "../pictures/preview_" . $from . ".jpg";
@@ -41,7 +41,7 @@ function running($time)
         die();
     }
     session_write_close();
-    
+
     return true; //continue running
 }
 
@@ -88,7 +88,7 @@ if ($initial == "true" && $target != null) {
     //request contact picture only on first call
     $w->sendGetProfilePicture($target);
     //finally starting to use the event manager!
-    $w->eventManager()->bind("onProfilePicture", "onProfilePicture");
+    $w->eventManager()->bind("onGetProfilePicture", "onGetProfilePicture");
 }
 $w->eventManager()->bind("onGetImage", "onGetImage");
 //subscribe contact status

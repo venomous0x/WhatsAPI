@@ -17,7 +17,7 @@ $nickname = "**your nickname**";                           // This is the userna
 $target = "**contact's phone number**";                    // Destination telephone number including the country code without '+' or '00'.
 
 //This function only needed to show how eventmanager works.
-function onProfilePicture($from, $type, $data)
+function onGetProfilePicture($from, $type, $data)
 {
     if ($type == "preview") {
         $filename = "preview_" . $from . ".jpg";
@@ -41,7 +41,7 @@ $w->loginWithPassword($password);
 
 //Retrieve large profile picture. Output is in /src/php/pictures/ (you need to bind a function
 //to the event onProfilePicture so the script knows what to do.
-$w->eventManager()->bind("onProfilePicture", "onProfilePicture");
+$w->eventManager()->bind("onGetProfilePicture", "onGetProfilePicture");
 $w->sendGetProfilePicture($target, true);
 
 //update your profile picture

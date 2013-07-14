@@ -328,7 +328,7 @@ class Whatsapp
                         $this->wa = new WhatsProt($this->number, $this->id, $this->nick, false);
                         $this->wa->eventManager()->bind('onGetMessage', array($this, 'processReceivedMessage'));
                         $this->wa->eventManager()->bind('onConnect', array($this, 'connected'));
-                        $this->wa->eventManager()->bind('onGetGroupList', array($this, 'processGroupArray'));
+                        $this->wa->eventManager()->bind('onGetGroups', array($this, 'processGroupArray'));
                     }
                 }
             } catch (Exception $e) {
