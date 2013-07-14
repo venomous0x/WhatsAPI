@@ -1857,6 +1857,13 @@ class WhatsProt
                         }
                     }
                 }
+                if (strcmp($node->tag, "iq") == 0 && strcmp($node->attributeHash['type'], "error") == 0) {
+                    $this->serverReceivedId = $node->attributeHash['id'];
+                            $this->eventManager()->fire('onGetError', array(
+                                $this->phoneNumber,
+                                $node->children[0]
+                            ));
+                }
                 $node = $this->reader->nextTree();
             }
         } catch (IncompleteMessageException $e) {
