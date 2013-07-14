@@ -544,6 +544,8 @@ class WhatsProt
      */
     public function sendClearDirty($categories)
     {
+        $msgId = $this->createMsgId("cleardirty");
+
         $catnodes = array();
         foreach ($categories as $category) {
             $catnode = new ProtocolNode("category", array("name" => $category), null, null);
@@ -551,11 +553,12 @@ class WhatsProt
         }
         $clean = new ProtocolNode("clean", array("xmlns" => "urn:xmpp:whatsapp:dirty"), $catnodes, null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->createMsgId("cleardirty"),
+            "id" => $msgId,
             "type" => "set",
             "to" => "s.whatsapp.net"
                 ), array($clean), null);
         $this->sendNode($node);
+        $this->waitForServer($msgId);
     }
 
     /**
