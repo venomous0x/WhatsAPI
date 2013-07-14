@@ -1794,6 +1794,9 @@ class WhatsProt
                 if (strcmp($node->tag, "iq") == 0 && strcmp($node->attributeHash['type'], "result") == 0) {
                     $this->serverReceivedId = $node->attributeHash['id'];
                     if ($node->children[0] != null && strcmp($node->children[0]->tag, "query") == 0) {
+                        if (stripos($node->children[0]->attributeHash['xmlns'], 'jabber:iq:privacy') !== false) {
+                            $this->eventManager()->fire("onGetPrivacyBlockedList", array($this->phoneNumber, $node->children[0]->children[0]->children));
+                        }
                         array_push($this->messageQueue, $node);
                     }
                     if ($node->children[0] != null && strcmp($node->children[0]->tag, "props") == 0) {
