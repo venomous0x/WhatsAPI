@@ -633,6 +633,7 @@ class WhatsProt
      */
     public function sendGetPrivacyBlockedList()
     {
+        $msgId = $this->createMsgId("getprivacy");
         $child = new ProtocolNode("list", array(
             "name" => "default"
                 ), null, null);
@@ -640,10 +641,11 @@ class WhatsProt
             "xmlns" => "jabber:iq:privacy"
                 ), array($child), null);
         $node = new ProtocolNode("iq", array(
-            "id" => $this->createMsgId("getprivacy"),
+            "id" => $msgId,
             "type" => "get"
                 ), array($child2), null);
         $this->sendNode($node);
+        $this->waitForServer($msgId);
     }
 
     /**
