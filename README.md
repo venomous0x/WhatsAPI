@@ -4,7 +4,14 @@ Interface to WhatsApp Messenger
 
 ----------
 
-####Note July 10th, 2013####
+### Note July 14th, 2013
+*Events renamed:*
+- *A large number of events have been renamed in the event handling system to better match the recent method names.*
+- *All event names and parameters have been listed in the EVENTS.md file*
+
+----------
+
+### Note July 10th, 2013
 *Another massive overhaul in the code:*
 - *MAJOR RENAMING OF MOST METHODS!! Old legacy code will break, we are sorry but it is necessary to provide a cleaner interface. Please check the new code.*
 - *Methods renamed to give a more consistent feel to the API - all methods are now camelCase watch out for typo's!*
@@ -15,7 +22,7 @@ Interface to WhatsApp Messenger
 ----------
 
 
-####Note June 18th, 2013####
+### Note June 18th, 2013
 
 *Big overhaul in the code. Big thanks to:*
 - *[Ali Hubail](https://github.com/hubail) and*
