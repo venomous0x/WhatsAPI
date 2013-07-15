@@ -253,7 +253,7 @@ function MyFunction_onConnect($phone, $socket) {
 ```php
 require 'whatsprot.class.php';
 ```
-# Create a instance of WhastPort.
+# Create an instance of WhastPort.
 ```php
 $w = new WhatsProt($userPhone, $userIdentity, $userName, $debug);
 ```
