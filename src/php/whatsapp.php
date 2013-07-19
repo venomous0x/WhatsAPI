@@ -244,7 +244,7 @@ class GoogleContacts implements Contacts
             foreach ($gd->phoneNumber as $p) {
                 if ($p->attributes()->rel == "http://schemas.google.com/g/2005#mobile") {
                     $n = trim(preg_replace("/[\D+]*/", "", $p));
-                    if (substr((string) $n, 0, 1) !== '0' && strlen($n) == 12) {
+                    if (substr((string) $n, 0, 1) !== '0' && strlen($n) > 10) {
                         $data[] = array('name' => "$name ($n)", 'id' => $n);
                     }
                 }
