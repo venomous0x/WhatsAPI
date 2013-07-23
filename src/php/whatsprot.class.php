@@ -1285,15 +1285,25 @@ class WhatsProt
      * @return ProtocolNode
      *   Return itself.
      */
-    protected function createAuthNode()
+    protected function createAuthNode($challengeData = null)
     {
         $authHash = array();
         $authHash["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
         $authHash["mechanism"] = "WAUTH-1";
         $authHash["user"] = $this->phoneNumber;
-        $node = new ProtocolNode("auth", $authHash, null, "");
+        $data = "";
+        if($challengeData != null)
+        {
+            $data = $this->createAuthBlob($challengeData);
+        }
+        $node = new ProtocolNode("auth", $authHash, null, $data);
 
         return $node;
+    }
+
+    protected function createAuthBlob($challengeData)
+    {
+        
     }
 
     /**
