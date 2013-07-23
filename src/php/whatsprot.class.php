@@ -25,7 +25,7 @@ class WhatsProt
     const WHATSAPP_SERVER = 's.whatsapp.net';               // The hostname used to login/send messages.
     const WHATSAPP_UPLOAD_HOST = 'https://mms.whatsapp.net/client/iphone/upload.php'; // The upload host.
     const WHATSAPP_DEVICE = 'WP7';                      // The device name.
-    const WHATSAPP_VER = '2.9.4';                        // The WhatsApp version.
+    const WHATSAPP_VER = '2.10.523';                        // The WhatsApp version.
     const WHATSAPP_TOKEN = 'Od52pFozHNWF9XbTN5lrqDtnsiZGL2G3l9yw1GiQ21a31a2d9dbdc9a8ce324ef2df918064fd26e30a'; // Token used in request/registration code.
     const WHATSAPP_USER_AGENT = 'WhatsApp/2.9.4 WP7/7.10.8858 Device/HTC-HTC-H0002';  // User agent used in request/registration code.
 
@@ -1325,6 +1325,7 @@ class WhatsProt
         if ($profileSubscribe) {
             $nodes[] = new ProtocolNode("w:profile:picture", array("type" => "all"), null, '');
         }
+        $nodes[] = new ProtocolNode("status", null, null, "");
         $parent = new ProtocolNode("stream:features", null, $nodes, "");
 
         return $parent;
