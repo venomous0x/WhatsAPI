@@ -27,7 +27,7 @@ class WhatsProt
     const WHATSAPP_DEVICE = 'WP7';                      // The device name.
     const WHATSAPP_VER = '2.10.523';                        // The WhatsApp version.
     const WHATSAPP_TOKEN = 'Od52pFozHNWF9XbTN5lrqDtnsiZGL2G3l9yw1GiQ21a31a2d9dbdc9a8ce324ef2df918064fd26e30a'; // Token used in request/registration code.
-    const WHATSAPP_USER_AGENT = 'WhatsApp/2.9.4 WP7/7.10.8858 Device/HTC-HTC-H0002';  // User agent used in request/registration code.
+    const WHATSAPP_USER_AGENT = 'WhatsApp/2.10.523 WP7/7.10.8858 Device/HTC-HTC-H0002';  // User agent used in request/registration code.
 
     /**
      * Property declarations.
@@ -398,6 +398,10 @@ class WhatsProt
     public function loginWithPassword($password, $profileSubscribe = false)
     {
         $this->password = $password;
+        $challengeData = @file_get_contents("nextChallenge.dat");
+        if($challengeData) {
+            $this->challengeData = $challengeData;
+        }
         $this->doLogin($profileSubscribe);
     }
 
@@ -1291,19 +1295,25 @@ class WhatsProt
         $authHash["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
         $authHash["mechanism"] = "WAUTH-1";
         $authHash["user"] = $this->phoneNumber;
-        $data = "";
-        if($challengeData != null)
-        {
-            $data = $this->createAuthBlob($challengeData);
-        }
+        $data = $this->createAuthBlob();
         $node = new ProtocolNode("auth", $authHash, null, $data);
 
         return $node;
     }
 
-    protected function createAuthBlob($challengeData)
+    protected function createAuthBlob()
     {
-        
+        if($this->challengeData) {
+            $key = pbkdf2('sha1', base64_decode($this->password), $this->challengeData, 16, 20, true);
+            $this->inputKey = new KeyStream($key);
+            $this->outputKey = new KeyStream($key);
+            $this->reader->setKey($this->inputKey);
+            //$this->writer->setKey($this->outputKey);
+            $phone = $this->dissectPhone();
+            $array = $this->phoneNumber . $this->challengeData . time() . static::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"], 3, "0", STR_PAD_LEFT) . "001";
+            $this->challengeData = null;
+            return $this->outputKey->encode($array, 0, strlen($array), false);
+        }
     }
 
     /**
@@ -1435,10 +1445,13 @@ class WhatsProt
         $this->sendNode($auth);
 
         $this->processInboundData($this->readData());
-        $data = $this->createAuthResponseNode();
-        $this->sendNode($data);
-        $this->reader->setKey($this->inputKey);
-        $this->writer->setKey($this->outputKey);
+
+        if($this->loginStatus != static::CONNECTED_STATUS) {
+            $data = $this->createAuthResponseNode();
+            $this->sendNode($data);
+            $this->reader->setKey($this->inputKey);
+            $this->writer->setKey($this->outputKey);
+        }
         $cnt = 0;
         do {
             $this->processInboundData($this->readData());
@@ -1629,6 +1642,9 @@ class WhatsProt
                     $this->processChallenge($node);
                 } elseif (strcmp($node->tag, "success") == 0) {
                     $this->loginStatus = static::CONNECTED_STATUS;
+                    $challengeData = $node->data;
+                    file_put_contents("nextChallenge.dat", $challengeData);
+                    $this->writer->setKey($this->outputKey);
                 }
                 if (strcmp($node->tag, "message") == 0) {
                     array_push($this->messageQueue, $node);
