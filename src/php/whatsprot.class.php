@@ -551,6 +551,20 @@ class WhatsProt
         $this->sendNode($node);
     }
 
+    public function sendClientConfig()
+    {
+        $phone = $this->dissectPhone();
+
+        $attr = array();
+        $attr["xmlns"] = "urn:xmpp:whatsapp:push";
+        $attr["platform"] = "none";
+        $attr["lc"] = $phone["ISO3166"];
+        $attr["lg"] = $phone["ISO639"];
+        $child = new ProtocolNode("config", $attr, null, "");
+        $node = new ProtocolNode("iq", array("id" => $this->createMsgId("config"), "type" => "set", "to" => static::WHATSAPP_SERVER), array($child), null);
+        $this->sendNode($node);
+    }
+
     /**
      * TODO
      *
