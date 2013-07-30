@@ -4,10 +4,29 @@ Interface to WhatsApp Messenger
 
 ----------
 
+### Note July 30th, 2013
+*New policy:*
+
+*I no longer provide support to users who are trying to send bulk messages using this API (i.e. a large amount of messages and not the built-in bulk message functionality).*
+*Sending advertisments on WhatsApp goes directly against their EULA and I have no way of determining whether the user is trying to send spam, advertising or sending mass messages to "opt-in users".*
+*And I also don't want to waste the little spare time that I have on trying to figure out ways to fuck up this beautiful ad-free platform called WhatsApp by enabling people to send spam.*
+*Everyone is free to use this API but there will be no more issue reports about being blocked after sending messages to semi-random users.*
+
+*In the famous words of Heath Ledger as the Joker (taken completely out of context by me):*
+
+**It's not about the money, it's about sending a message.**
+
+*I hope that this was a bit more civil than the former "FUCK SPAMMER IF YOU ARE ONE GO FUCK YOURSELF" :)*
+
+*\- [shirioko](https://github.com/shirioko)*
+
+----------
+
 ### Note July 14th, 2013
 *Events renamed:*
 - *A large number of events have been renamed in the event handling system to better match the recent method names.*
 - *All event names and parameters have been listed in the EVENTS.md file*
+
 
 ----------
 
