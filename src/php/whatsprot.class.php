@@ -297,7 +297,20 @@ class WhatsProt
             print_r($response);
         }
 
-        if ($response->status != 'sent') {
+        if ($response->status == 'ok') {
+            $this->eventManager()->fire('onCodeRegister', array(
+                $this->phoneNumber,
+                $response->login,
+                $response->pw,
+                $response->type,
+                $response->expiration,
+                $response->kind,
+                $response->price,
+                $response->cost,
+                $response->currency,
+                $response->price_expiration
+            ));
+        } else if ($response->status != 'sent') {
             if (isset($response->reason) && $response->reason == "too_recent") {
                 $this->eventManager()->fire('onCodeRequestFailedTooRecent', array($this->phoneNumber, $method, $response->reason, $response->retry_after));
                 $minutes = round($response->retry_after / 60);
