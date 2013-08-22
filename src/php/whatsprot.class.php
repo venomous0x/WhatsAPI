@@ -78,9 +78,9 @@ class WhatsProt
         $this->reader = new BinTreeNodeReader($dict);
         $this->debug = $debug;
         $this->phoneNumber = $number;
-        if (strlen($identity) < 32) {
-            //compute md5 identity hash
-            $this->identity = $this->getIdentity($identity);
+        if (!$this->checkIdentity($identity)) {
+            //compute sha identity hash
+            $this->identity = $this->buildIdentity($identity);
         } else {
             //use provided identity hash
             $this->identity = $identity;
@@ -243,15 +243,6 @@ class WhatsProt
      */
     public function codeRequest($method = 'sms', $countryCode = false, $langCode = false)
     {
-        //validate identity
-        $foo = strlen(urldecode($this->identity));
-        if ($foo != 20) {
-            if ($this->debug) {
-                echo "Cannot use identity " . $this->identity . " for registration. It doesn't appear to be a valid SHA hash (length = $foo)";
-            }
-            return false;
-        }
-
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The provided phone number is not valid.');
         }
@@ -1493,9 +1484,14 @@ class WhatsProt
      * @param  string $identity A user string
      * @return string           Correctly formatted identity
      */
-    protected function getIdentity($identity)
+    protected function buildIdentity($identity)
     {
-        return md5(strrev($identity));
+        return strtolower(urlencode(sha1($identity, true)));
+    }
+
+    protected function checkIdentity($identity)
+    {
+        return (strlen(urldecode($identity)) == 20);
     }
 
     /**
