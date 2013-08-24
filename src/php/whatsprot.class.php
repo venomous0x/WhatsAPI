@@ -1649,6 +1649,19 @@ class WhatsProt
         $this->challengeData = $node->data;
     }
 
+    protected function sendReceiptAck($to, $id)
+    {
+        $child = new ProtocolNode("ack", array(
+            "xmlns" => "urn:xmpp:receipts"
+        ), array(), null);
+        $node = new ProtocolNode("message", array(
+            "id" => $id,
+            "to" => $to,
+            "type" => "chat"
+        ), array($child), null);
+        $this->sendNode($node);
+    }
+
     /**
      * Process inbound data.
      *
@@ -1673,8 +1686,17 @@ class WhatsProt
                     array_push($this->messageQueue, $node);
 
                     //do not send received confirmation if sender is yourself
-                    if (strpos($node->attributeHash['from'], $this->phoneNumber . '@' . static::WHATSAPP_SERVER) === false) {
+                    if (strpos($node->attributeHash['from'], $this->phoneNumber . '@' . static::WHATSAPP_SERVER) === false
+                        &&
+                        $node->hasChild("request")
+                    ) {
                         $this->sendMessageReceived($node);
+                    }
+
+                    if($node->hasChild("received"))
+                    {
+                        //send ack
+                        $this->sendReceiptAck($node->getAttribute("from"), $node->getAttribute("id"));
                     }
 
                     if ($node->hasChild('x') && $this->lastId == $node->getAttribute('id')) {
