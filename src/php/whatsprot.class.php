@@ -1649,19 +1649,6 @@ class WhatsProt
         $this->challengeData = $node->data;
     }
 
-    protected function sendReceiptAck($to, $id)
-    {
-        $child = new ProtocolNode("ack", array(
-            "xmlns" => "urn:xmpp:receipts"
-        ), array(), null);
-        $node = new ProtocolNode("message", array(
-            "id" => $id,
-            "to" => $to,
-            "type" => "chat"
-        ), array($child), null);
-        $this->sendNode($node);
-    }
-
     /**
      * Process inbound data.
      *
@@ -1688,15 +1675,13 @@ class WhatsProt
                     //do not send received confirmation if sender is yourself
                     if (strpos($node->attributeHash['from'], $this->phoneNumber . '@' . static::WHATSAPP_SERVER) === false
                         &&
-                        $node->hasChild("request")
+                        (
+                            $node->hasChild("request")
+                            ||
+                            $node->hasChild("received")
+                        )
                     ) {
                         $this->sendMessageReceived($node);
-                    }
-
-                    if($node->hasChild("received"))
-                    {
-                        //send ack
-                        $this->sendReceiptAck($node->getAttribute("from"), $node->getAttribute("id"));
                     }
 
                     if ($node->hasChild('x') && $this->lastId == $node->getAttribute('id')) {
@@ -2303,7 +2288,14 @@ class WhatsProt
         if ($requestNode != null || $receivedNode != null) {
             $receivedHash = array();
             $receivedHash["xmlns"] = "urn:xmpp:receipts";
-            $receivedNode = new ProtocolNode("received", $receivedHash, null, "");
+
+            $response = "received";
+            if($receivedNode != null)
+            {
+                $response = "ack";
+            }
+
+            $receivedNode = new ProtocolNode($response, $receivedHash, null, "");
 
             $messageHash = array();
             $messageHash["to"] = $msg->getAttribute("from");
