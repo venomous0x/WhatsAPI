@@ -1684,6 +1684,17 @@ class WhatsProt
                         $this->sendMessageReceived($node);
                     }
 
+                    // check if it is a response to a status request
+                    if (strcmp(explode('@', $node->attributeHash['from'])[1], "s.us") == 0 && $node->getChild('body') != null) {
+                         $this->eventManager()->fire('onGetStatus', array(
+                             $this->phoneNumber,
+                             $node->attributeHash['from'],
+                             $node->attributeHash['type'],
+                             $node->attributeHash['id'],
+                             $node->attributeHash['t'],
+                             $node->children[1]->data
+                         ));
+                    }
                     if ($node->hasChild('x') && $this->lastId == $node->getAttribute('id')) {
                         $this->sendNextMessage();
                     }
