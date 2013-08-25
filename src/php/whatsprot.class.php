@@ -323,6 +323,14 @@ class WhatsProt
     public function connect()
     {
         $Socket = fsockopen(static::WHATSAPP_HOST, static::PORT);
+        if ($Socket !== false) {
+            stream_set_timeout($Socket, static::TIMEOUT_SEC, static::TIMEOUT_USEC);
+            $this->socket = $Socket;
+            $this->eventManager()->fire('onConnect', array($this->phoneNumber, $this->socket));
+        } else {
+           echo "Firing onConnectError\n";
+            $this->eventManager()->fire('onConnectError', array($this->phoneNumber, $this->socket));
+        }
         stream_set_timeout($Socket, static::TIMEOUT_SEC, static::TIMEOUT_USEC);
         $this->socket = $Socket;
         $this->eventManager()->fire('onConnect', array($this->phoneNumber, $this->socket));
@@ -2098,17 +2106,19 @@ class WhatsProt
      */
     protected function readData()
     {
+        if ($this->socket == null) {
+            return '';
+        }
         $buff = '';
         $ret = @fread($this->socket, 1024);
         if ($ret) {
             $buff = $this->incompleteMessage . $ret;
             $this->incompleteMessage = '';
-        } else {
-            //fclose($this->_socket);
-            //$error = "Read error, closing socket...";
-            //$this->eventManager()->fire('onClose', array($this->_phoneNumber, $error));
-            //Don't close socket since it could be a timeout
-            //TODO: Check connection status on error
+        } else if (feof($this->socket)) {
+            $error = "socket EOF, closing socket...";
+            fclose($this->socket);
+            $this->eventManager()->fire('onClose', array($this->phoneNumber, $error));
+            $this->socket = null;
         }
 
         return $buff;
