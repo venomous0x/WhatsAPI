@@ -331,9 +331,6 @@ class WhatsProt
            echo "Firing onConnectError\n";
             $this->eventManager()->fire('onConnectError', array($this->phoneNumber, $this->socket));
         }
-        stream_set_timeout($Socket, static::TIMEOUT_SEC, static::TIMEOUT_USEC);
-        $this->socket = $Socket;
-        $this->eventManager()->fire('onConnect', array($this->phoneNumber, $this->socket));
     }
 
     /**
@@ -2106,9 +2103,6 @@ class WhatsProt
      */
     protected function readData()
     {
-        if ($this->socket == null) {
-            return '';
-        }
         $buff = '';
         $ret = @fread($this->socket, 1024);
         if ($ret) {
@@ -2118,7 +2112,6 @@ class WhatsProt
             $error = "socket EOF, closing socket...";
             fclose($this->socket);
             $this->eventManager()->fire('onClose', array($this->phoneNumber, $error));
-            $this->socket = null;
         }
 
         return $buff;
