@@ -1692,7 +1692,8 @@ class WhatsProt
                     }
 
                     // check if it is a response to a status request
-                    if (strcmp(explode('@', $node->getAttribute('from')), "s.us") == 0 && $node->getChild('body') != null) {
+                    $foo = explode('@', $node->getAttribute('from'));
+                    if (is_array($foo) && count($foo) > 1 && strcmp($foo[1], "s.us") == 0 && $node->getChild('body') != null) {
                          $this->eventManager()->fire('onGetStatus', array(
                              $this->phoneNumber,
                              $node->getAttribute('from'),
