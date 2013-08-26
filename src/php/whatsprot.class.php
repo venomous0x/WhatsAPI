@@ -116,6 +116,8 @@ class WhatsProt
      *   - cost: Decimal amount of account.
      *   - currency: Currency price of account.
      *   - price_expiration: Price expiration in UNIX TimeStamp.
+     *
+     * @throws Exception
      */
     public function checkCredentials()
     {
@@ -177,6 +179,8 @@ class WhatsProt
      *   - cost: Decimal amount of account.
      *   - currency: Currency price of account.
      *   - price_expiration: Price expiration in UNIX TimeStamp.
+     *
+     * @throws Exception
      */
     public function codeRegister($code)
     {
@@ -227,7 +231,7 @@ class WhatsProt
      *
      * @param string $method
      *   Accepts only 'sms' or 'voice' as a value.
-     * @param string $countryCody
+     * @param string $countryCode
      *   ISO Country Code, 2 Digit.
      * @param string $langCode
      *   ISO 639-1 Language Code: two-letter codes.
@@ -240,23 +244,25 @@ class WhatsProt
      *   - reason: Reason of the status (e.g. too_recent/missing_param/bad_param).
      *   - param: The missing_param/bad_param.
      *   - retry_after: Waiting time before requesting a new code.
+     *
+     * @throws Exception
      */
-    public function codeRequest($method = 'sms', $countryCode = false, $langCode = false)
+    public function codeRequest($method = 'sms', $countryCode = null, $langCode = null)
     {
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The provided phone number is not valid.');
         }
 
-        if ($countryCode === false && $phone['ISO3166'] != '') {
+        if ($countryCode == null && $phone['ISO3166'] != '') {
             $countryCode = $phone['ISO3166'];
         }
-        if ($countryCode === false) {
+        if ($countryCode == null) {
             $countryCode = 'US';
         }
-        if ($langCode === false && $phone['ISO639'] != '') {
+        if ($langCode == null && $phone['ISO639'] != '') {
             $langCode = $phone['ISO639'];
         }
-        if ($langCode === false) {
+        if ($langCode == null) {
             $langCode = 'en';
         }
 
@@ -357,7 +363,7 @@ class WhatsProt
     /**
      * Drain the message queue for application processing.
      *
-     * @return array
+     * @return ProtocolNode[]
      *   Return the message queue list.
      */
     public function getMessages()
@@ -574,10 +580,6 @@ class WhatsProt
         $this->sendNode($node);
     }
 
-    /**
-     * TODO
-     *
-     */
     public function sendGetClientConfig()
     {
         $msgId = $this->createMsgId("sendconfig");
@@ -1264,14 +1266,13 @@ class WhatsProt
             $msgs = $this->getMessages();
             foreach ($msgs as $m) {
                 // Process inbound messages.
-                if ($m->tag == "message") {
-                    if ($m->getChild('received') != null && !isset($m->_attributeHas['retry'])) {
+                if ($m->getTag() == "message") {
+                    if ($m->getChild('received') != null && $m->getAttribute('retry') != null) {
                         $received = true;
-                    } elseif ($m->getChild('received') != null && isset($m->_attributeHas['retry'])) {
+                    } elseif ($m->getChild('received') != null && $m->getAttribute('retry') != null) {
                         throw new Exception('There was a problem trying to send the message, please retry.');
                     }
                 }
-                //print($m->NodeString("") . "\n");
             }
         } while (!$received);
     }
@@ -1312,7 +1313,7 @@ class WhatsProt
      * @return ProtocolNode
      *   Return itself.
      */
-    protected function createAuthNode($challengeData = null)
+    protected function createAuthNode()
     {
         $authHash = array();
         $authHash["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
@@ -1337,6 +1338,7 @@ class WhatsProt
             $this->challengeData = null;
             return $this->outputKey->encode($array, 0, strlen($array), false);
         }
+        return null;
     }
 
     /**
@@ -1357,6 +1359,7 @@ class WhatsProt
 
     /**
      * Add stream features.
+     * @param bool $profileSubscribe
      *
      * @return ProtocolNode
      *   Return itself.
@@ -1502,8 +1505,9 @@ class WhatsProt
     /**
      * Process number/jid and turn it into a JID if necessary
      *
-     * @param $number
+     * @param string $number
      *  Number to process
+     * @return string
      */
     protected function getJID($number)
     {
@@ -1581,8 +1585,6 @@ class WhatsProt
                 curl_close($curl);
                 return false;
             }
-            //Close connection to test file headers.
-            curl_close($curl);
         } else if (file_exists($filepath)) {
             //Local file
             $this->mediaFileInfo['filesize'] = filesize($filepath);
@@ -1611,7 +1613,7 @@ class WhatsProt
      *
      * @param  string $host  The host URL
      * @param  array $query A associative array of keys and values to send to server.
-     * @return mixed   NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit
+     * @return object   NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit
      */
     protected function getResponse($host, $query)
     {
@@ -1666,19 +1668,19 @@ class WhatsProt
             $node = $this->reader->nextTree($data);
             while ($node != null) {
                 $this->debugPrint($node->nodeString("rx  ") . "\n");
-                if (strcmp($node->tag, "challenge") == 0) {
+                if ($node->getTag() == "challenge") {
                     $this->processChallenge($node);
-                } elseif (strcmp($node->tag, "success") == 0) {
+                } elseif ($node->getTag() == "success") {
                     $this->loginStatus = static::CONNECTED_STATUS;
-                    $challengeData = $node->data;
+                    $challengeData = $node->getData();
                     file_put_contents("nextChallenge.dat", $challengeData);
                     $this->writer->setKey($this->outputKey);
                 }
-                if (strcmp($node->tag, "message") == 0) {
+                if ($node->getTag() == "message") {
                     array_push($this->messageQueue, $node);
 
                     //do not send received confirmation if sender is yourself
-                    if (strpos($node->attributeHash['from'], $this->phoneNumber . '@' . static::WHATSAPP_SERVER) === false
+                    if (strpos($node->getAttribute('from'), $this->phoneNumber . '@' . static::WHATSAPP_SERVER) === false
                         &&
                         (
                             $node->hasChild("request")
@@ -1690,14 +1692,14 @@ class WhatsProt
                     }
 
                     // check if it is a response to a status request
-                    if (strcmp(explode('@', $node->attributeHash['from'])[1], "s.us") == 0 && $node->getChild('body') != null) {
+                    if (strcmp(explode('@', $node->getAttribute('from'))[1], "s.us") == 0 && $node->getChild('body') != null) {
                          $this->eventManager()->fire('onGetStatus', array(
                              $this->phoneNumber,
-                             $node->attributeHash['from'],
-                             $node->attributeHash['type'],
-                             $node->attributeHash['id'],
-                             $node->attributeHash['t'],
-                             $node->children[1]->data
+                             $node->getAttribute('from'),
+                             $node->getAttribute('type'),
+                             $node->getAttribute('id'),
+                             $node->getAttribute('t'),
+                             $node->getChild("body")->getData()
                          ));
                     }
                     if ($node->hasChild('x') && $this->lastId == $node->getAttribute('id')) {
@@ -1709,221 +1711,274 @@ class WhatsProt
                     if ($node->getChild('composing') != null) {
                         $this->eventManager()->fire('onMessageComposing', array(
                             $this->phoneNumber,
-                            $node->attributeHash['from'], $node->attributeHash['id'], $node->attributeHash['type'], $node->attributeHash['t']
+                            $node->getAttribute('from'),
+                            $node->getAttribute('id'),
+                            $node->getAttribute('type'),
+                            $node->getAttribute('t')
                         ));
                     }
                     if ($node->getChild('paused') != null) {
                         $this->eventManager()->fire('onMessagePaused', array(
                             $this->phoneNumber,
-                            $node->attributeHash['from'],
-                            $node->attributeHash['type'],
-                            $node->attributeHash['id'],
-                            $node->attributeHash['t']
+                            $node->getAttribute('from'),
+                            $node->getAttribute('type'),
+                            $node->getAttribute('id'),
+                            $node->getAttribute('t')
                         ));
                     }
-                    if ($node->getChild('notify') != null && $node->children[0]->getAttribute('name') != '' && $node->getChild('body') != null) {
+                    if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != '' && $node->getChild('body') != null) {
                         $this->eventManager()->fire('onGetMessage', array(
                             $this->phoneNumber,
-                            $node->attributeHash['from'], $node->attributeHash['id'], $node->attributeHash['type'], $node->attributeHash['t'],
-                            $node->children[0]->getAttribute('name'),
-                            $node->children[2]->data
+                            $node->getAttribute('from'),
+                            $node->getAttribute('id'),
+                            $node->getAttribute('type'),
+                            $node->getAttribute('t'),
+                            $node->getChild(0)->getAttribute('name'),
+                            $node->getChild(2)->getData()
                         ));
                     }
-                    if ($node->getChild('notify') != null && $node->children[0]->getAttribute('name') != '' && $node->getChild('media') != null) {
-                        if ($node->children[2]->getAttribute('type') == 'image') {
+                    if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != null && $node->getChild('media') != null) {
+                        if ($node->getChild(2)->getAttribute('type') == 'image') {
                             $this->eventManager()->fire('onGetImage', array(
                                 $this->phoneNumber,
-                                $node->attributeHash['from'], $node->attributeHash['id'], $node->attributeHash['type'], $node->attributeHash['t'],
-                                $node->children[0]->getAttribute('name'),
-                                $node->children[2]->getAttribute('size'),
-                                $node->children[2]->getAttribute('url'),
-                                $node->children[2]->getAttribute('file'),
-                                $node->children[2]->getAttribute('mimetype'),
-                                $node->children[2]->getAttribute('filehash'),
-                                $node->children[2]->getAttribute('width'),
-                                $node->children[2]->getAttribute('height'),
-                                $node->children[2]->data
+                                $node->getAttribute('from'),
+                                $node->getAttribute('id'),
+                                $node->getAttribute('type'),
+                                $node->getAttribute('t'),
+                                $node->getChild(0)->getAttribute('name'),
+                                $node->getChild(2)->getAttribute('size'),
+                                $node->getChild(2)->getAttribute('url'),
+                                $node->getChild(2)->getAttribute('file'),
+                                $node->getChild(2)->getAttribute('mimetype'),
+                                $node->getChild(2)->getAttribute('filehash'),
+                                $node->getChild(2)->getAttribute('width'),
+                                $node->getChild(2)->getAttribute('height'),
+                                $node->getChild(2)->getData()
                             ));
-                        } elseif ($node->children[2]->getAttribute('type') == 'video') {
+                        } elseif ($node->getChild(2)->getAttribute('type') == 'video') {
                             $this->eventManager()->fire('onGetVideo', array(
                                 $this->phoneNumber,
-                                $node->attributeHash['from'], $node->attributeHash['id'], $node->attributeHash['type'], $node->attributeHash['t'],
-                                $node->children[0]->getAttribute('name'),
-                                $node->children[2]->getAttribute('url'),
-                                $node->children[2]->getAttribute('file'),
-                                $node->children[2]->getAttribute('size'),
-                                $node->children[2]->getAttribute('mimetype'),
-                                $node->children[2]->getAttribute('filehash'),
-                                $node->children[2]->getAttribute('duration'),
-                                $node->children[2]->getAttribute('vcodec'),
-                                $node->children[2]->getAttribute('acodec'),
-                                $node->children[2]->data
+                                $node->getAttribute('from'),
+                                $node->getAttribute('id'),
+                                $node->getAttribute('type'),
+                                $node->getAttribute('t'),
+                                $node->getChild(0)->getAttribute('name'),
+                                $node->getChild(2)->getAttribute('url'),
+                                $node->getChild(2)->getAttribute('file'),
+                                $node->getChild(2)->getAttribute('size'),
+                                $node->getChild(2)->getAttribute('mimetype'),
+                                $node->getChild(2)->getAttribute('filehash'),
+                                $node->getChild(2)->getAttribute('duration'),
+                                $node->getChild(2)->getAttribute('vcodec'),
+                                $node->getChild(2)->getAttribute('acodec'),
+                                $node->getChild(2)->getData()
                             ));
-                        } elseif ($node->children[2]->getAttribute('type') == 'audio') {
+                        } elseif ($node->getChild(2)->getAttribute('type') == 'audio') {
                             $this->eventManager()->fire('onGetAudio', array(
                                 $this->phoneNumber,
-                                $node->attributeHash['from'], $node->attributeHash['id'], $node->attributeHash['type'], $node->attributeHash['t'],
-                                $node->children[0]->getAttribute('name'),
-                                $node->children[2]->getAttribute('size'),
-                                $node->children[2]->getAttribute('url'),
-                                $node->children[2]->getAttribute('file'),
-                                $node->children[2]->getAttribute('mimetype'),
-                                $node->children[2]->getAttribute('filehash'),
-                                $node->children[2]->getAttribute('duration'),
-                                $node->children[2]->getAttribute('acodec'),
+                                $node->getAttribute('from'),
+                                $node->getAttribute('id'),
+                                $node->getAttribute('type'),
+                                $node->getAttribute('t'),
+                                $node->getChild(0)->getAttribute('name'),
+                                $node->getChild(2)->getAttribute('size'),
+                                $node->getChild(2)->getAttribute('url'),
+                                $node->getChild(2)->getAttribute('file'),
+                                $node->getChild(2)->getAttribute('mimetype'),
+                                $node->getChild(2)->getAttribute('filehash'),
+                                $node->getChild(2)->getAttribute('duration'),
+                                $node->getChild(2)->getAttribute('acodec'),
                             ));
-                        } elseif ($node->children[2]->getAttribute('type') == 'vcard') {
+                        } elseif ($node->getChild(2)->getAttribute('type') == 'vcard') {
                             $this->eventManager()->fire('onGetvCard', array(
                                 $this->phoneNumber,
-                                $node->attributeHash['from'], $node->attributeHash['id'], $node->attributeHash['type'], $node->attributeHash['t'],
-                                $node->children[0]->getAttribute('name'),
-                                $node->children[2]->children[0]->getAttribute('name'),
-                                $node->children[2]->children[0]->data
+                                $node->getAttribute('from'),
+                                $node->getAttribute('id'),
+                                $node->getAttribute('type'),
+                                $node->getAttribute('t'),
+                                $node->getChild(0)->getAttribute('name'),
+                                $node->getChild(2)->getChild(0)->getAttribute('name'),
+                                $node->getChild(2)->getChild(0)->getData()
                             ));
-                        } elseif ($node->children[2]->getAttribute('type') == 'location') {
-                            if (isset($node->children[2]->attributeHash['url'])) {
-                                $url = $node->children[2]->getAttribute('url');
-                            } else {
-                                $url = null;
-                            }
-                            if (isset($node->children[2]->attributeHash['name'])) {
-                                $name = $node->children[2]->getAttribute('name');
-                            } else {
-                                $name = null;
-                            }
+                        } elseif ($node->getChild(2)->getAttribute('type') == 'location') {
+                            $url = $node->getChild(2)->getAttribute('url');
+                            $name = $node->getChild(2)->getAttribute('name');
+
                             $this->eventManager()->fire('onGetLocation', array(
                                 $this->phoneNumber,
-                                $node->attributeHash['from'], $node->attributeHash['id'], $node->attributeHash['type'], $node->attributeHash['t'],
-                                $node->children[0]->getAttribute('name'),
+                                $node->getAttribute('from'),
+                                $node->getAttribute('id'),
+                                $node->getAttribute('type'),
+                                $node->getAttribute('t'),
+                                $node->getChild(0)->getAttribute('name'),
                                 $name,
-                                $node->children[2]->getAttribute('longitude'),
-                                $node->children[2]->getAttribute('latitude'),
+                                $node->getChild(2)->getAttribute('longitude'),
+                                $node->getChild(2)->getAttribute('latitude'),
                                 $url,
-                                $node->children[2]->data
+                                $node->getChild(2)->getData()
                             ));
                         }
                     }
                     if ($node->getChild('x') != null) {
-                        $this->serverReceivedId = $node->attributeHash['id'];
+                        $this->serverReceivedId = $node->getAttribute('id');
                         $this->eventManager()->fire('onMessageReceivedServer', array(
                             $this->phoneNumber,
-                            $node->attributeHash['from'], $node->attributeHash['id'], $node->attributeHash['type'], $node->attributeHash['t']
+                            $node->getAttribute('from'),
+                            $node->getAttribute('id'),
+                            $node->getAttribute('type'),
+                            $node->getAttribute('t')
                         ));
                     }
                     if ($node->getChild('received') != null) {
                         $this->eventManager()->fire('onMessageReceivedClient', array(
                             $this->phoneNumber,
-                            $node->attributeHash['from'], $node->attributeHash['id'], $node->attributeHash['type'], $node->attributeHash['t']
+                            $node->getAttribute('from'),
+                            $node->getAttribute('id'),
+                            $node->getAttribute('type'),
+                            $node->getAttribute('t')
                         ));
                     }
-                    if (strcmp($node->attributeHash['type'], "subject") == 0) {
+                    if ($node->getAttribute('type') == "subject") {
                         print_r($node);
                         $this->eventManager()->fire('onGetGroupsSubject', array(
                             $this->phoneNumber,
-                            reset(explode('@', $node->attributeHash['from'])), $node->attributeHash['t'], reset(explode('@', $node->attributeHash['author'])),
-                            $node->children[0]->getAttribute('name'),
-                            $node->children[2]->data,
+                            reset(explode('@', $node->getAttribute('from'))),
+                            $node->getAttribute('t'),
+                            reset(explode('@',$node->getAttribute('author'))),
+                            $node->getChild(0)->getAttribute('name'),
+                            $node->getChild(2)->getData()
                         ));
                     }
                 }
-                if ($node->tag == "presence" && $node->getAttribute("status") == "dirty") {
+                if ($node->getTag() == "presence" && $node->getAttribute("status") == "dirty") {
                     //clear dirty
                     $categories = array();
-                    if (count($node->children) > 0)
-                        foreach ($node->children as $child) {
-                            if ($child->tag == "category") {
+                    if (count($node->getChildren()) > 0)
+                        foreach ($node->getChildren() as $child) {
+                            if ($child->getTag() == "category") {
                                 $categories[] = $child->getAttribute("name");
                             }
                         }
                     $this->sendClearDirty($categories);
                 }
-                if (strcmp($node->tag, "presence") == 0 && strncmp($node->attributeHash['from'], $this->phoneNumber, strlen($this->phoneNumber)) != 0 && strpos($node->attributeHash['from'], "-") == false && isset($node->attributeHash['type'])) {
+                if (strcmp($node->getTag(), "presence") == 0
+                    && strncmp($node->getAttribute('from'), $this->phoneNumber, strlen($this->phoneNumber)) != 0
+                    && strpos($node->getAttribute('from'), "-") == false
+                    && $node->getAttribute('type') != null) {
                     $this->eventManager()->fire('onPresence', array(
                         $this->phoneNumber,
-                        $node->attributeHash['from'], $node->attributeHash['type']
+                        $node->getAttribute('from'),
+                        $node->getAttribute('type')
                     ));
                 }
-                if (strcmp($node->tag, "presence") == 0 && strncmp($node->attributeHash['from'], $this->phoneNumber, strlen($this->phoneNumber)) != 0 && strpos($node->attributeHash['from'], "-") !== false && isset($node->attributeHash['type'])) {
-                    $groupId = reset(explode('@', $node->attributeHash['from']));
-                    if (isset($node->attributeHash['add'])) {
+                if ($node->getTag() == "presence"
+                    && strncmp($node->getAttribute('from'), $this->phoneNumber, strlen($this->phoneNumber)) != 0
+                    && strpos($node->getAttribute('from'), "-") !== false
+                    && $node->getAttribute('type') != null) {
+                    $groupId = reset(explode('@', $node->getAttribute('from')));
+                    if ($node->getAttribute('add') != null) {
                         $this->eventManager()->fire('onGroupsParticipantsAdd', array(
                             $this->phoneNumber,
-                            $groupId, reset(explode('@', $node->attributeHash['add']))
+                            $groupId, reset(explode('@', $node->getAttribute('add')))
                         ));
-                    } elseif (isset($node->attributeHash['remove'])) {
+                    } elseif ($node->getAttribute('remove') != null) {
                         $this->eventManager()->fire('onGroupsParticipantsRemove', array(
                             $this->phoneNumber,
-                            $groupId, reset(explode('@', $node->attributeHash['remove'])), reset(explode('@', $node->attributeHash['author']))
+                            $groupId,
+                            reset(explode('@', $node->getAttribute('remove'))),
+                            reset(explode('@', $node->getAttribute('author')))
                         ));
                     }
                 }
-                if (strcmp($node->tag, "iq") == 0 && strcmp($node->attributeHash['type'], "get") == 0 && strcmp($node->children[0]->tag, "ping") == 0) {
-                    $this->eventManager()->fire('onPing', array($this->phoneNumber, $node->attributeHash['id']));
-                    $this->sendPong($node->attributeHash['id']);
+                if ($node->getTag() == "iq"
+                    && $node->getAttribute('type') == "get"
+                    && $node->getChild(0)->getTag() == "ping") {
+                    $this->eventManager()->fire('onPing', array(
+                            $this->phoneNumber,
+                            $node->getAttribute('id')
+                        )
+                    );
+                    $this->sendPong($node->getAttribute('id'));
                 }
-                if (strcmp($node->tag, "iq") == 0 && strcmp($node->attributeHash['type'], "result") == 0) {
-                    $this->serverReceivedId = $node->attributeHash['id'];
-                    if ($node->children[0] != null && strcmp($node->children[0]->tag, "query") == 0) {
-                        if (stripos($node->children[0]->attributeHash['xmlns'], 'jabber:iq:privacy') !== false) {
-                            $this->eventManager()->fire("onGetPrivacyBlockedList", array($this->phoneNumber, $node->children[0]->children[0]->children));
+                if ($node->getTag() == "iq"
+                    && $node->getAttribute('type') == "result") {
+                    $this->serverReceivedId = $node->getAttribute('id');
+                    if ($node->getChild(0) != null &&
+                        $node->getChild(0)->getTag() == "query") {
+                        if ($node->getChild(0)->getAttribute('xmlns') == 'jabber:iq:privacy') {
+                            $this->eventManager()->fire("onGetPrivacyBlockedList", array(
+                                    $this->phoneNumber,
+                                    $node->getChild(0)->getChild(0)->getChildren()
+                                )
+                            );
                         }
-                        if (stripos($node->children[0]->attributeHash['xmlns'], 'jabber:iq:last') !== false) {
-                            $this->eventManager()->fire("onGetRequestLastSeen", array($this->phoneNumber, $node->attributeHash['id'], $node->children[0]->attributeHash['seconds']));
+                        if ($node->getChild(0)->getAttribute('xmlns') == 'jabber:iq:last') {
+                            $this->eventManager()->fire("onGetRequestLastSeen", array(
+                                    $this->phoneNumber,
+                                    $node->getAttribute('id'),
+                                    $node->getChild(0)->getAttribute('seconds')
+                                )
+                            );
                         }
                         array_push($this->messageQueue, $node);
                     }
-                    if ($node->children[0] != null && strcmp($node->children[0]->tag, "props") == 0) {
+                    if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "props") {
                         //server properties
                         $props = array();
-                        foreach($node->children[0]->children as $child) {
+                        foreach($node->getChild(0)->getChildren() as $child) {
                             $props[$child->getAttribute("name")] = $child->getAttribute("value");
                         }
-                        $this->eventManager()->fire("onGetServerProperties", array($this->phoneNumber, $node->children[0]->getAttribute("version"), $props));
+                        $this->eventManager()->fire("onGetServerProperties", array(
+                                $this->phoneNumber,
+                                $node->getChild(0)->getAttribute("version"),
+                                $props
+                            )
+                        );
                     }
-                    if ($node->children[0] != null && strcmp($node->children[0]->tag, "picture") == 0) {
+                    if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "picture") {
                         $this->eventManager()->fire("onGetProfilePicture", array(
                             $this->phoneNumber,
                             $node->getAttribute("from"),
                             $node->getChild("picture")->getAttribute("type"),
-                            $node->getChild("picture")->data
+                            $node->getChild("picture")->getData()
                         ));
                     }
-                    if ($node->children[0] != null && strcmp($node->children[0]->tag, "media") == 0) {
+                    if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "media") {
                         $this->processUploadResponse($node);
                     }
-                    if ($node->children[0] != null && strcmp($node->children[0]->tag, "duplicate") == 0) {
+                    if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "duplicate") {
                         $this->processUploadResponse($node);
                     }
-                    if (stripos($node->attributeHash['id'], 'group') !== false) {
+                    if ($node->getAttribute('id') == 'group') {
                         //There are multiple types of Group reponses. Also a valid group response can have NO children.
                         //Events fired depend on text in the ID field.
                         $groupList = array();
-                        if ($node->children[0] != null) {
-                            foreach ($node->children as $child) {
-                                $groupList[] = $child->attributeHash;
+                        if ($node->getChild(0) != null) {
+                            foreach ($node->getChildren() as $child) {
+                                $groupList[] = $child->getAttributes();
                             }
                         }
-                        if(stripos($node->attributeHash['id'], 'creategroup') !== false){
-                            $this->groupId = $node->children[0]->attributeHash['id'];
+                        if($node->getAttribute('id') == 'creategroup'){
+                            $this->groupId = $node->getChild(0)->getAttribute('id');
                             $this->eventManager()->fire('onGroupsChatCreate', array(
                                 $this->phoneNumber,
                                 $this->groupId
                             ));
                         }
-                        if(stripos($node->attributeHash['id'], 'endgroup') !== false){
-                            $this->groupId = $node->children[0]->children[0]->attributeHash['id'];
+                        if($node->getAttribute('id') == 'endgroup'){
+                            $this->groupId = $node->getChild(0)->getChild(0)->getAttribute('id');
                             $this->eventManager()->fire('onGroupsChatEnd', array(
                                 $this->phoneNumber,
                                 $this->groupId
                             ));
                         }
-                        if(stripos($node->attributeHash['id'], 'getgroups') !== false){
+                        if($node->getAttribute('id') == 'getgroups'){
                             $this->eventManager()->fire('onGetGroups', array(
                                 $this->phoneNumber,
                                 $groupList
                             ));
                         }
-                        if(stripos($node->attributeHash['id'], 'getgroupinfo') !== false){
+                        if($node->getAttribute('id') == 'getgroupinfo'){
                             $this->eventManager()->fire('onGetGroupsInfo', array(
                                 $this->phoneNumber,
                                 $groupList
@@ -1931,11 +1986,11 @@ class WhatsProt
                         }
                     }
                 }
-                if (strcmp($node->tag, "iq") == 0 && strcmp($node->attributeHash['type'], "error") == 0) {
-                    $this->serverReceivedId = $node->attributeHash['id'];
+                if ($node->getTag() == "iq" && $node->getAttribute('type') == "error") {
+                    $this->serverReceivedId = $node->getAttribute('id');
                             $this->eventManager()->fire('onGetError', array(
                                 $this->phoneNumber,
-                                $node->children[0]
+                                $node->getChild(0)
                             ));
                 }
                 $node = $this->reader->nextTree();
@@ -1948,7 +2003,7 @@ class WhatsProt
     /**
      * Process and save media image
      *
-     * @param $node
+     * @param ProtocolNode $node
      * ProtocolNode containing media
      */
     protected function processMediaImage($node)
@@ -1959,7 +2014,7 @@ class WhatsProt
             $url = $media->getAttribute("url");
 
             //save thumbnail
-            $data = $media->data;
+            $data = $media->getData();
             $fp = @fopen(static::MEDIA_FOLDER . "/thumb_" . $filename, "w");
             if ($fp) {
                 fwrite($fp, $data);
@@ -1979,7 +2034,7 @@ class WhatsProt
     /**
      * Processes received picture node
      *
-     * @param $node
+     * @param ProtocolNode $node
      *  ProtocolNode containing the picture
      */
     protected function processProfilePicture($node)
@@ -1988,7 +2043,7 @@ class WhatsProt
 
         if ($pictureNode != null) {
             $type = $pictureNode->getAttribute("type");
-            $data = $pictureNode->data;
+            $data = $pictureNode->getData();
             if ($type == "preview") {
                 $filename = static::PICTURES_FOLDER . "/preview_" . $node->getAttribute("from") . ".jpg";
             } else {
@@ -2026,8 +2081,9 @@ class WhatsProt
     /**
      * Process media upload response
      *
-     * @param $node
+     * @param ProtocolNode $node
      *  Message node
+     * @return bool
      */
     protected function processUploadResponse($node)
     {
@@ -2035,7 +2091,7 @@ class WhatsProt
         $messageNode = @$this->mediaQueue[$id];
         if ($messageNode == null) {
             //message not found, can't send!
-            return;
+            return false;
         }
 
         $duplicate = $node->getChild("duplicate");
@@ -2043,11 +2099,11 @@ class WhatsProt
             //file already on whatsapp servers
             $url = $duplicate->getAttribute("url");
             $filesize = $duplicate->getAttribute("size");
-            $mimetype = $duplicate->getAttribute("mimetype");
-            $filehash = $duplicate->getAttribute("filehash");
+//            $mimetype = $duplicate->getAttribute("mimetype");
+//            $filehash = $duplicate->getAttribute("filehash");
             $filetype = $duplicate->getAttribute("type");
-            $width = $duplicate->getAttribute("width");
-            $height = $duplicate->getAttribute("height");
+//            $width = $duplicate->getAttribute("width");
+//            $height = $duplicate->getAttribute("height");
             $filename = array_pop(explode("/", $url));
         } else {
             //upload new file
@@ -2060,11 +2116,11 @@ class WhatsProt
 
             $url = $json->url;
             $filesize = $json->size;
-            $mimetype = $json->mimetype;
-            $filehash = $json->filehash;
+//            $mimetype = $json->mimetype;
+//            $filehash = $json->filehash;
             $filetype = $json->type;
-            $width = $json->width;
-            $height = $json->height;
+//            $width = $json->width;
+//            $height = $json->height;
             $filename = $json->name;
         }
 
@@ -2096,6 +2152,7 @@ class WhatsProt
         } else {
             $this->sendMessageNode($to, $mediaNode);
         }
+        return true;
     }
 
     /**
@@ -2192,6 +2249,7 @@ class WhatsProt
 
     /**
      * Send data to the whatsapp server.
+     * @param string $data
      */
     protected function sendData($data)
     {
@@ -2292,7 +2350,7 @@ class WhatsProt
     /**
      * Tell the server we received the message.
      *
-     * @param $msg
+     * @param ProtocolNode $msg
      *   The ProtocolTreeNode that contains the message.
      */
     protected function sendMessageReceived($msg)
@@ -2324,6 +2382,7 @@ class WhatsProt
 
     /**
      * Send node to the WhatsApp server.
+     * @param ProtocolNode $node
      */
     protected function sendNode($node)
     {
