@@ -25,10 +25,34 @@ class IncompleteMessageException extends CustomException
 
 class ProtocolNode
 {
-    public $tag;
-    public $attributeHash;
-    public $children;
-    public $data;
+    private $tag;
+    private $attributeHash;
+    private $children;
+    private $data;
+
+    /**
+     * @return string
+     */
+    public function getTag()
+    {
+        return $this->tag;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAttributes()
+    {
+        return $this->attributeHash;
+    }
+
+    /**
+     * @return ProtocolNode[]
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
 
     public function __construct($tag, $attributeHash, $children, $data)
     {
@@ -38,6 +62,10 @@ class ProtocolNode
         $this->data = $data;
     }
 
+    /**
+     * @param string $indent
+     * @return string
+     */
     public function nodeString($indent = "")
     {
         $ret = "\n" . $indent . "<" . $this->tag;
@@ -65,6 +93,10 @@ class ProtocolNode
         return $ret;
     }
 
+    /**
+     * @param $attribute
+     * @return string
+     */
     public function getAttribute($attribute)
     {
         $ret = "";
@@ -75,10 +107,26 @@ class ProtocolNode
         return $ret;
     }
 
+    //get children supports string tag or int index
+    /**
+     * @param $tag
+     * @return ProtocolNode
+     */
     public function getChild($tag)
     {
         $ret = null;
         if ($this->children) {
+            if(is_int($tag))
+            {
+                if(isset($this->children[$tag]))
+                {
+                    return $this->children[$tag];
+                }
+                else
+                {
+                    return null;
+                }
+            }
             foreach ($this->children as $child) {
                 if (strcmp($child->tag, $tag) == 0) {
                     return $child;
@@ -93,11 +141,18 @@ class ProtocolNode
         return null;
     }
 
+    /**
+     * @param $tag
+     * @return bool
+     */
     public function hasChild($tag)
     {
         return $this->getChild($tag) == null ? false : true;
     }
 
+    /**
+     * @param int $offset
+     */
     public function refreshTimes($offset = 0)
     {
         if (isset($this->attributeHash['id'])) {
