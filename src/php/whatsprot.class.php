@@ -1648,12 +1648,13 @@ class WhatsProt
     /**
      * Process the challenge.
      *
-     * @param $node
+     *
+     * @param ProtocolNode $node
      *   The node that contains the challenge.
      */
     protected function processChallenge($node)
     {
-        $this->challengeData = $node->data;
+        $this->challengeData = $node->getData();
     }
 
     /**
@@ -2162,14 +2163,18 @@ class WhatsProt
     protected function readData()
     {
         $buff = '';
-        $ret = @fread($this->socket, 1024);
-        if ($ret) {
-            $buff = $this->incompleteMessage . $ret;
-            $this->incompleteMessage = '';
-        } else if (feof($this->socket)) {
-            $error = "socket EOF, closing socket...";
-            fclose($this->socket);
-            $this->eventManager()->fire('onClose', array($this->phoneNumber, $error));
+        if($this->socket != null)
+        {
+            $ret = @fread($this->socket, 1024);
+            if ($ret) {
+                $buff = $this->incompleteMessage . $ret;
+                $this->incompleteMessage = '';
+            } else if (@feof($this->socket)) {
+                $error = "socket EOF, closing socket...";
+                fclose($this->socket);
+                $this->socket = null;
+                $this->eventManager()->fire('onClose', array($this->phoneNumber, $error));
+            }
         }
 
         return $buff;
@@ -2254,7 +2259,10 @@ class WhatsProt
      */
     protected function sendData($data)
     {
-        fwrite($this->socket, $data, strlen($data));
+        if($this->socket != null)
+        {
+            fwrite($this->socket, $data, strlen($data));
+        }
     }
 
     /**
