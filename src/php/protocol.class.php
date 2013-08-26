@@ -457,6 +457,10 @@ class BinTreeNodeWriter
         return $ret;
     }
 
+    /**
+     * @param ProtocolNode $node
+     * @return string
+     */
     public function write($node)
     {
         if ($node == null) {
@@ -468,27 +472,30 @@ class BinTreeNodeWriter
         return $this->flushBuffer();
     }
 
+    /**
+     * @param ProtocolNode $node
+     */
     protected function writeInternal($node)
     {
         $len = 1;
-        if ($node->attributeHash != null) {
-            $len += count($node->attributeHash) * 2;
+        if ($node->getAttributes() != null) {
+            $len += count($node->getAttributes()) * 2;
         }
-        if (count($node->children) > 0) {
+        if (count($node->getChildren()) > 0) {
             $len += 1;
         }
-        if (strlen($node->data) > 0) {
+        if (strlen($node->getData()) > 0) {
             $len += 1;
         }
         $this->writeListStart($len);
-        $this->writeString($node->tag);
-        $this->writeAttributes($node->attributeHash);
-        if (strlen($node->data) > 0) {
-            $this->writeBytes($node->data);
+        $this->writeString($node->getTag());
+        $this->writeAttributes($node->getAttributes());
+        if (strlen($node->getData()) > 0) {
+            $this->writeBytes($node->getData());
         }
-        if ($node->children) {
-            $this->writeListStart(count($node->children));
-            foreach ($node->children as $child) {
+        if ($node->getChildren()) {
+            $this->writeListStart(count($node->getChildren()));
+            foreach ($node->getChildren() as $child) {
                 $this->writeInternal($child);
             }
         }
