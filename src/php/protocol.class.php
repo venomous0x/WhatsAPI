@@ -33,6 +33,14 @@ class ProtocolNode
     /**
      * @return string
      */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @return string
+     */
     public function getTag()
     {
         return $this->tag;
