@@ -1428,6 +1428,13 @@ class WhatsProt
                     $mcc = explode("|", $data[2]);
                     $mcc = $mcc[0];
 
+                    //hook:
+                    //fix country code for North America
+                    if(substr($data[1], 0, 1) == "1")
+                    {
+                        $data[1] = "1";
+                    }
+
                     $phone = array(
                         'country' => $data[0],
                         'cc' => $data[1],
