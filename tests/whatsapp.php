@@ -13,6 +13,7 @@ function fgets_u($pStdn)
     } elseif ($num_changed_streams > 0) {
         return trim(fgets($pStdn, 1024));
     }
+    return null;
 }
 
 $nickname = "WhatsAPI Test";
@@ -66,11 +67,11 @@ if ($_SERVER['argv'][1] == "-i") {
                     break;
                 case "/lastseen":
                     echo "[] Request last seen $dst: ";
-                    $wa->RequestLastSeen($dst);
+                    $wa->sendGetRequestLastSeen($dst);
                     break;
                 default:
                     echo "[] Send message to $dst: $line\n";
-                    $wa->Message($dst , $line);
+                    $wa->sendMessage($dst , $line);
                     break;
             }
         }
@@ -96,10 +97,10 @@ if ($_SERVER['argv'][1] == "-set") {
 }
 
 echo "\n[] Request last seen $dst: ";
-$wa->RequestLastSeen($dst);
+$wa->sendGetRequestLastSeen($dst);
 
 echo "\n[] Send message to $dst: $msg\n";
-$wa->Message($dst , $msg);
+$wa->sendMessage($dst , $msg);
 echo "\n";
 
 ?>
