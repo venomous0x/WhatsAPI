@@ -40,15 +40,15 @@ for ($i=3; $i<$argc; $i++) {
 echo "[] Logging in as '$nickname' ($sender)\n";
 $wa = new WhatsProt($sender, $imei, $nickname, TRUE);
 
-$wa->Connect();
-$wa->LoginWithPassword($password);
+$wa->connect();
+$wa->loginWithPassword($password);
 
 if ($_SERVER['argv'][1] == "-i") {
     echo "\n[] Interactive conversation with $dst:\n";
     stream_set_timeout(STDIN,1);
     while (TRUE) {
-        $wa->PollMessages();
-        $buff = $wa->GetMessages();
+        $wa->pollMessages();
+        $buff = $wa->getMessages();
         if (!empty($buff)) {
             print_r($buff);
         }
@@ -82,8 +82,8 @@ if ($_SERVER['argv'][1] == "-i") {
 if ($_SERVER['argv'][1] == "-l") {
     echo "\n[] Listen mode:\n";
     while (TRUE) {
-        $wa->PollMessages();
-        $data = $wa->GetMessages();
+        $wa->pollMessages();
+        $data = $wa->getMessages();
         if(!empty($data)) print_r($data);
         sleep(1);
     }
