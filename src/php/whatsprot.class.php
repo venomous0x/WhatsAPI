@@ -1185,7 +1185,7 @@ class WhatsProt
         $this->sendNode($messageNode);
         $this->eventManager()->fire('onSendStatusUpdate', array($this->phoneNumber, $txt));
         //listen for response
-        $this->pollMessages();
+        $this->waitForServer($messageHash["id"]);
     }
 
     /**
