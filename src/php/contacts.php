@@ -156,7 +156,7 @@ class WhatsAppContactSync
         if (isset($result["message"]) && $result["message"] == "next token" && isset($result["nonce"])) {
             //success
             $url = "https://sro.whatsapp.net/v2/sync/q";
-            $postfields = "ut=all&t=c";
+            $postfields = "ut=wa&t=c";
             foreach ($this->contacts as $contact) {
                 if (!stristr($contact, "+")) {
                     //automatically add leading plus sign
