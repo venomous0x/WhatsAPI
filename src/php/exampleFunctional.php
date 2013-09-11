@@ -17,12 +17,12 @@ $nickname = "**your nickname**";                           // This is the userna
 $target = "**contact's phone number**";                    // Destination telephone number including the country code without '+' or '00'.
 
 //This function only needed to show how eventmanager works.
-function onGetProfilePicture($from, $type, $data)
+function onGetProfilePicture($from, $target, $type, $data)
 {
     if ($type == "preview") {
-        $filename = "preview_" . $from . ".jpg";
+        $filename = "preview_" . $target . ".jpg";
     } else {
-        $filename = $from . ".jpg";
+        $filename = $target . ".jpg";
     }
     $filename = WhatsProt::PICTURES_FOLDER."/" . $filename;
     $fp = @fopen($filename, "w");
