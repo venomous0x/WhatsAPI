@@ -10,12 +10,12 @@ session_write_close();
 //here because this page has a very long lifetime (1 minute).
 
 $time = $_SESSION["running"];
-function onGetProfilePicture($from, $type, $data)
+function onGetProfilePicture($from, $target, $type, $data)
 {
     if ($type == "preview") {
-        $filename = "../pictures/preview_" . $from . ".jpg";
+        $filename = "../pictures/preview_" . $target . ".jpg";
     } else {
-        $filename = "../pictures/" . $from . ".jpg";
+        $filename = "../pictures/" . $target . ".jpg";
     }
     $fp = @fopen($filename, "w");
     if ($fp) {
