@@ -280,7 +280,7 @@ class WhatsProt
             'method' => $method,
             'mcc' => $phone['mcc'],
             'mnc' => '001',
-            'token' => $token,
+            'token' => urlencode($token),
             'id' => $this->identity,
         );
 
