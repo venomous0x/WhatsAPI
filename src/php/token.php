@@ -1,6 +1,18 @@
 <?php
 require_once 'func.php';
 
+if ( !function_exists( 'hex2bin' ) ) {
+    function hex2bin( $str ) {
+        $sbin = "";
+        $len = strlen( $str );
+        for ( $i = 0; $i < $len; $i += 2 ) {
+            $sbin .= pack( "H*", substr( $str, $i, 2 ) );
+        }
+
+        return $sbin;
+    }
+}
+
 function generateRequestToken($country, $phone) {
 	$waString = "53160F52030A44C28310C282C29AC28DC28C463A2169295741";
 	$noMediaHash = "0001A9339CEF0E7172AEC99E99F0044DCC3F90F58C45C0A85BDEAB054DA9A61B4438258D5614A9F105FA";
