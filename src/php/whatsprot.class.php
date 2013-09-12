@@ -26,8 +26,8 @@ class WhatsProt
     const WHATSAPP_SERVER = 's.whatsapp.net';               // The hostname used to login/send messages.
     const WHATSAPP_UPLOAD_HOST = 'https://mms.whatsapp.net/client/iphone/upload.php'; // The upload host.
     const WHATSAPP_DEVICE = 'Android';                      // The device name.
-    const WHATSAPP_VER = 'WhatsApp/2.11.23';                // The WhatsApp version.
-    const WHATSAPP_USER_AGENT = 'WhatsApp/2.11.23 Android/4.3 Device/GalaxyS3';//'WhatsApp/2.10.523 WP7/7.10.8858 Device/HTC-HTC-H0002';  // User agent used in request/registration code.
+    const WHATSAPP_VER = 'WhatsApp/2.11.69';                // The WhatsApp version.
+    const WHATSAPP_USER_AGENT = 'WhatsApp/2.11.69 Android/4.3 Device/GalaxyS3';// User agent used in request/registration code.
 
     /**
      * Property declarations.
