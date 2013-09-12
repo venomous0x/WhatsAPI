@@ -50,9 +50,7 @@ function generateRequestToken($country, $phone) {
 		$ipad[$i] = $ipad[$i] ^ $key2[$i];
 	}
 
-	$pack = 'H'.strlen(hash("sha1", 'lalala'));
-
-	$output = hash("sha1", $opad.pack($pack, hash("sha1", $ipad.$data)), true);
-
+	$output = hash("sha1", $opad . hash("sha1", $ipad . $data, true), true);
+    
 	return base64_encode($output);
 }
