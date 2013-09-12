@@ -95,12 +95,15 @@ class ProcessNode
         $this->target = $target;
     }
 
+    /**
+     * @param ProtocolNode $node
+     */
     public function process($node)
     {
         // Example of process function, you have to guess a number (psss it's 5)
         // If you guess it right you get a gift
         $text = $node->getChild('body');
-        $text = $text->data;
+        $text = $text->getData();
         if ($text && ($text == "5" || trim($text) == "5")) {
             $iconfile = "../../tests/Gift.jpgb64";
             $fp = fopen($iconfile, "r");
