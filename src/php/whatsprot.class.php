@@ -1756,6 +1756,8 @@ class WhatsProt
                                 $node->getAttribute('id'),
                                 $node->getAttribute('t')
                             ));
+                        }
+                    }
                     
                     if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != null && $node->getChild('media') != null) {
                         if ($node->getChild(2)->getAttribute('type') == 'image') {
