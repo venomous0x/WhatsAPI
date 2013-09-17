@@ -1746,6 +1746,19 @@ class WhatsProt
                             $node->getChild(2)->getData()
                         ));
                     }
+                    
+                    
+                    if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != null && $node->getChild('notification') != null) {
+                        if ($node->getChild(2)->getAttribute('type') == 'picture') {
+                            $this->eventManager()->fire('onProfilePictureChanged', array(
+                                $this->phoneNumber,
+                                $node->getAttribute('from'),
+                                $node->getAttribute('id'),
+                                $node->getAttribute('t')
+                            ));
+                        }
+                    }
+                    
                     if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != null && $node->getChild('media') != null) {
                         if ($node->getChild(2)->getAttribute('type') == 'image') {
                             $this->eventManager()->fire('onGetImage', array(
