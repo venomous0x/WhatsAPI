@@ -2007,12 +2007,10 @@ class WhatsProt
                             ));
                         }
                         if($node->getAttribute('id') == 'getgroupparticipants'){
-
-	                    	$groupId = reset(explode('@', $node->getAttribute('from')));
-
+	                    $groupId = reset(explode('@', $node->getAttribute('from')));
                             $this->eventManager()->fire('onGetGroupParticipants', array(
                                 $this->phoneNumber,
-		                        $groupId,
+		                $groupId,
                                 $groupList
                             ));
                         }
