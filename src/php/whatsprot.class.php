@@ -642,7 +642,7 @@ class WhatsProt
      */
     public function sendGetGroupsParticipants($gjid)
     {
-        $msgId = $this->createMsgId("getparticipants");
+        $msgId = $this->createMsgId("getgroupparticipants");
 
         $child = new ProtocolNode("list", array(
             "xmlns" => "w:g"
@@ -2006,6 +2006,17 @@ class WhatsProt
                                 $groupList
                             ));
                         }
+                        if($node->getAttribute('id') == 'getgroupparticipants'){
+
+	                    	$groupId = reset(explode('@', $node->getAttribute('from')));
+
+                            $this->eventManager()->fire('onGetGroupParticipants', array(
+                                $this->phoneNumber,
+		                        $groupId,
+                                $groupList
+                            ));
+                        }
+                        
                     }
                 }
                 if ($node->getTag() == "iq" && $node->getAttribute('type') == "error") {
