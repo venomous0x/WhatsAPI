@@ -15,7 +15,7 @@ class WhatsProt
     const DISCONNECTED_STATUS = 'disconnected';             // Describes the connection status with the WhatsApp server.
     const MEDIA_FOLDER = 'media';                           // The relative folder to store received media files
     const PICTURES_FOLDER = 'pictures';                     // The relative folder to store picture files
-    const PORT = 5222;                                      // The port of the WhatsApp server.
+    const PORT = 443;                                      // The port of the WhatsApp server.
     const TIMEOUT_SEC = 2;                                  // The timeout for the connection with the WhatsApp servers.
     const TIMEOUT_USEC = 0;                                 //
     const WHATSAPP_CHECK_HOST = 'v.whatsapp.net/v2/exist';  // The check credentials host.
