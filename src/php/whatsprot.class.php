@@ -1364,7 +1364,7 @@ class WhatsProt
      * @return ProtocolNode
      *   Return itself.
      */
-    protected function createFeaturesNode($profileSubscribe)
+    protected function createFeaturesNode($profileSubscribe = false)
     {
         $nodes = array();
         $nodes[] = new ProtocolNode("receipt_acks", null, null, "");
@@ -1465,7 +1465,7 @@ class WhatsProt
      * notification to your phone when one of your contacts
      * changes/update their picture.
      */
-    protected function doLogin($profileSubscribe)
+    protected function doLogin($profileSubscribe = false)
     {
         $this->writer->resetKey();
         $this->reader->resetKey();
@@ -1683,6 +1683,12 @@ class WhatsProt
                     $challengeData = $node->getData();
                     file_put_contents("nextChallenge.dat", $challengeData);
                     $this->writer->setKey($this->outputKey);
+                } elseif($node->getTag() == "failure")
+                {
+                    $this->eventManager()->fire("onLoginFailed", array(
+                            $this->phoneNumber,
+                            $node->getChild(0)->getTag()
+                        ));
                 }
                 if ($node->getTag() == "message") {
                     array_push($this->messageQueue, $node);
