@@ -2122,6 +2122,14 @@ class WhatsProt
         $messageNode = @$this->mediaQueue[$id];
         if ($messageNode == null) {
             //message not found, can't send!
+            $this->eventManager()->fire("onMediaUploadFailed", array(
+                    $this->phoneNumber,
+                    $id,
+                    $node,
+                    $messageNode,
+                    "Message node not found in queue"
+                )
+            );
             return false;
         }
 
@@ -2142,6 +2150,14 @@ class WhatsProt
 
             if (!$json) {
                 //failed upload
+                $this->eventManager()->fire("onMediaUploadFailed", array(
+                        $this->phoneNumber,
+                        $id,
+                        $node,
+                        $messageNode,
+                        "Failed to push file to server"
+                    )
+                );
                 return false;
             }
 
@@ -2183,6 +2199,16 @@ class WhatsProt
         } else {
             $this->sendMessageNode($to, $mediaNode);
         }
+        $this->eventManager()->fire("onMediaMessageSent", array(
+                $this->phoneNumber,
+                $to,
+                $id,
+                $filetype,
+                $url,
+                $filename,
+                $filesize,
+                $icon
+            ));
         return true;
     }
 
