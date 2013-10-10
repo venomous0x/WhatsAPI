@@ -15,7 +15,7 @@ class WhatsProt
     const DISCONNECTED_STATUS = 'disconnected';             // Describes the connection status with the WhatsApp server.
     const MEDIA_FOLDER = 'media';                           // The relative folder to store received media files
     const PICTURES_FOLDER = 'pictures';                     // The relative folder to store picture files
-    const PORT = 5222;                                      // The port of the WhatsApp server.
+    const PORT = 443;                                      // The port of the WhatsApp server.
     const TIMEOUT_SEC = 2;                                  // The timeout for the connection with the WhatsApp servers.
     const TIMEOUT_USEC = 0;                                 //
     const WHATSAPP_CHECK_HOST = 'v.whatsapp.net/v2/exist';  // The check credentials host.
@@ -1364,7 +1364,7 @@ class WhatsProt
      * @return ProtocolNode
      *   Return itself.
      */
-    protected function createFeaturesNode($profileSubscribe)
+    protected function createFeaturesNode($profileSubscribe = false)
     {
         $nodes = array();
         $nodes[] = new ProtocolNode("receipt_acks", null, null, "");
@@ -1465,7 +1465,7 @@ class WhatsProt
      * notification to your phone when one of your contacts
      * changes/update their picture.
      */
-    protected function doLogin($profileSubscribe)
+    protected function doLogin($profileSubscribe = false)
     {
         $this->writer->resetKey();
         $this->reader->resetKey();
@@ -1683,6 +1683,12 @@ class WhatsProt
                     $challengeData = $node->getData();
                     file_put_contents("nextChallenge.dat", $challengeData);
                     $this->writer->setKey($this->outputKey);
+                } elseif($node->getTag() == "failure")
+                {
+                    $this->eventManager()->fire("onLoginFailed", array(
+                            $this->phoneNumber,
+                            $node->getChild(0)->getTag()
+                        ));
                 }
                 if ($node->getTag() == "message") {
                     array_push($this->messageQueue, $node);
@@ -1937,6 +1943,7 @@ class WhatsProt
                         if ($node->getChild(0)->getAttribute('xmlns') == 'jabber:iq:last') {
                             $this->eventManager()->fire("onGetRequestLastSeen", array(
                                     $this->phoneNumber,
+                                    $node->getAttribute('from'),
                                     $node->getAttribute('id'),
                                     $node->getChild(0)->getAttribute('seconds')
                                 )
@@ -2122,6 +2129,14 @@ class WhatsProt
         $messageNode = @$this->mediaQueue[$id];
         if ($messageNode == null) {
             //message not found, can't send!
+            $this->eventManager()->fire("onMediaUploadFailed", array(
+                    $this->phoneNumber,
+                    $id,
+                    $node,
+                    $messageNode,
+                    "Message node not found in queue"
+                )
+            );
             return false;
         }
 
@@ -2142,6 +2157,14 @@ class WhatsProt
 
             if (!$json) {
                 //failed upload
+                $this->eventManager()->fire("onMediaUploadFailed", array(
+                        $this->phoneNumber,
+                        $id,
+                        $node,
+                        $messageNode,
+                        "Failed to push file to server"
+                    )
+                );
                 return false;
             }
 
@@ -2183,6 +2206,16 @@ class WhatsProt
         } else {
             $this->sendMessageNode($to, $mediaNode);
         }
+        $this->eventManager()->fire("onMediaMessageSent", array(
+                $this->phoneNumber,
+                $to,
+                $id,
+                $filetype,
+                $url,
+                $filename,
+                $filesize,
+                $icon
+            ));
         return true;
     }
 
@@ -2280,6 +2313,12 @@ class WhatsProt
         } else {
             $this->outQueue[] = $messageNode;
         }
+        $this->eventManager()->fire("onSendMessage",array(
+                $this->phoneNumber,
+                $targets,
+                $messageHash["id"],
+                $node
+            ));
     }
 
     /**
@@ -2383,6 +2422,12 @@ class WhatsProt
         } else {
             $this->outQueue[] = $messageNode;
         }
+        $this->eventManager()->fire("onSendMessage", array(
+                $this->phoneNumber,
+                $this->getJID($to),
+                $messageHash["id"],
+                $node
+            ));
     }
 
     /**
