@@ -2312,6 +2312,12 @@ class WhatsProt
         } else {
             $this->outQueue[] = $messageNode;
         }
+        $this->eventManager()->fire("onSendMessage",array(
+                $this->phoneNumber,
+                $targets,
+                $messageHash["id"],
+                $node
+            ));
     }
 
     /**
