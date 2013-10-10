@@ -1943,6 +1943,7 @@ class WhatsProt
                         if ($node->getChild(0)->getAttribute('xmlns') == 'jabber:iq:last') {
                             $this->eventManager()->fire("onGetRequestLastSeen", array(
                                     $this->phoneNumber,
+                                    $node->getAttribute('from'),
                                     $node->getAttribute('id'),
                                     $node->getChild(0)->getAttribute('seconds')
                                 )
