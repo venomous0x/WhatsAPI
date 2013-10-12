@@ -119,7 +119,7 @@ while (running($time)) {
         $inbound = $_SESSION["inbound"];
         $_SESSION["inbound"] = array(); //lock
         foreach ($messages as $message) {
-            $data = @$message->getChild("body")->data;
+            $data = @$message->getChild("body")->getData();
             if ($data != null && $data != '') {
                 $inbound[] = $data;
             }
