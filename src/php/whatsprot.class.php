@@ -2004,13 +2004,13 @@ class WhatsProt
                                 $node->getAttribute('t')
                             ));
                         } else if ($node->getChild('notification')->hasChild('delete')) {
-							$this->eventManager()->fire('onProfilePictureDeleted', array(
+                            $this->eventManager()->fire('onProfilePictureDeleted', array(
                                 $this->phoneNumber,
                                 $node->getAttribute('from'),
                                 $node->getAttribute('id'),
                                 $node->getAttribute('t')
                             ));
-						}
+                        }
                     }
                     if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "media") {
                         $this->processUploadResponse($node);
