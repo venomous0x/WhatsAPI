@@ -48,17 +48,17 @@ $w = new WhatsProt($username, $identity, $nickname, $debug);
 $w->codeRequest('sms');
 
 
-// You must wait until you receive a code from Whatsapp, either to your phone via a sms
+// You must wait until you receive a code from WhatsApp, either to your phone via sms
 // or phonecall depending on what you selected above.
 
 // The function below will only work once you know your code!
 
 
 /**
- * Second register account on WhatsApp using the provided code with $w->requestCode();.
+ * Second register account on WhatsApp using the provided code with $w->codeRequest();.
  *
  * @param integer $code
- *   Numeric code value provided on requestCode().
+ *   Numeric code value provided on codeRequest().
  *
  * @return object
  *   An object with server response.
@@ -66,12 +66,12 @@ $w->codeRequest('sms');
  *   - login: Phone number with country code.
  *   - pw: Account password.
  *   - type: Type of account.
- *   - expiration: Expiration date in UNIX TimeStamp.
+ *   - expiration: Expiration date in UNIX Timestamp.
  *   - kind: Kind of account.
- *   - price: Formated price of account.
+ *   - price: Formatted price of account.
  *   - cost: Decimal amount of account.
  *   - currency: Currency price of account.
- *   - price_expiration: Price expiration in UNIX TimeStamp.
+ *   - price_expiration: Price expiration in UNIX Timestamp.
  */
 $w->codeRegister('123456');
 
