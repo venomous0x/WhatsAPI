@@ -68,7 +68,7 @@ No tengo ninguno. Generalmente ire investigando por cuenta propia y desarrolland
 
 - **¿Se ejecutará a través de Internet?**
 
-Hemos probado una versión ligeramente modificada en la parte superior de Tornado Web Server y funcionó de maravilla, sin embargo, la construcción de un cliente de chat es un poco complicado, invito a que probeis vosotros a hacerlo.
+Puedes probar WhatsAppea.me un servicio online que te permite hablar con tus contactos de WhatsApp WATools ([http://whatsappea.me](https://www.whatsappea.me)) 
 
 - **¿Puedo recibir chats?**
 
@@ -98,8 +98,8 @@ MIT - refer to the source code for the extra line.
 Actualmente desarrollo yo solo, pero sería genial que la gente participase y aportase su granito de arena :)
 
 
-# Venomous
+# WATools
 
-Team of Bahraini Developers.
+Herramienta online que te permite ver la imagen de perfil, estado y última conexión de una persona, así como mandar mensajes y archivos de manera anónima.
 
-Ahmed Moh'd ([fb.com/ahmed.mhd](https://www.facebook.com/ahmed.mhd)) and Ali Hubail ([@hubail](https://twitter.com/hubail)) contributed to this release.
+WATools ([http://watools.es](https://www.watools.es)) 
