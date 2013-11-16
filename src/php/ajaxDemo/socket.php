@@ -80,6 +80,10 @@ $target = @$_POST["target"];
 $username = "************";
 $password = "******************************";
 $w = new WhatsProt($username, 0, "WhatsApi AJAX Demo", true);
+
+$w->eventManager()->bind("onGetImage", "onGetImage");
+$w->eventManager()->bind("onGetProfilePicture", "onGetProfilePicture");
+
 $w->connect();
 $w->loginWithPassword($password);
 
@@ -87,12 +91,10 @@ $initial = @$_POST["initial"];
 if ($initial == "true" && $target != null) {
     //request contact picture only on first call
     $w->sendGetProfilePicture($target);
-    //finally starting to use the event manager!
-    $w->eventManager()->bind("onGetProfilePicture", "onGetProfilePicture");
 }
-$w->eventManager()->bind("onGetImage", "onGetImage");
+
 //subscribe contact status
-//$w->SendPresenceSubscription($target);
+$w->SendPresenceSubscription($target);
 //TODO: presense handling (online/offline/typing/last seen)
 
 while (running($time)) {
@@ -119,7 +121,7 @@ while (running($time)) {
         $inbound = $_SESSION["inbound"];
         $_SESSION["inbound"] = array(); //lock
         foreach ($messages as $message) {
-            $data = @$message->getChild("body")->data;
+            $data = @$message->getChild("body")->getData();
             if ($data != null && $data != '') {
                 $inbound[] = $data;
             }

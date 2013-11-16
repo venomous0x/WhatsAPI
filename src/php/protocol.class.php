@@ -29,6 +29,28 @@ class ProtocolNode
     private $attributeHash;
     private $children;
     private $data;
+    private static $cli = null;
+
+    /**
+     * check if call is from command line
+     * @return bool
+     */
+    private static function isCli()
+    {
+        if(self::$cli === null)
+        {
+            //initial setter
+            if(php_sapi_name() == "cli")
+            {
+                self::$cli = true;
+            }
+            else
+            {
+                self::$cli = false;
+            }
+        }
+        return self::$cli;
+    }
 
     /**
      * @return string
@@ -72,31 +94,58 @@ class ProtocolNode
 
     /**
      * @param string $indent
+     * @param bool $isChild
      * @return string
      */
-    public function nodeString($indent = "")
+    public function nodeString($indent = "", $isChild = false)
     {
-        $ret = "\n" . $indent . "<" . $this->tag;
+        //formatters
+        $lt = "<";
+        $gt = ">";
+        $nl = "\n";
+        if(!self::isCli())
+        {
+            $lt = "&lt;";
+            $gt = "&gt;";
+            $nl = "<br />";
+            $indent = str_replace(" ", "&nbsp;", $indent);
+        }
+
+        $ret = $indent . $lt . $this->tag;
         if ($this->attributeHash != null) {
             foreach ($this->attributeHash as $key => $value) {
                 $ret .= " " . $key . "=\"" . $value . "\"";
             }
         }
-        $ret .= ">";
+        $ret .= $gt;
         if (strlen($this->data) > 0) {
             if (strlen($this->data) <= 1024) {
+                //message
                 $ret .= $this->data;
             } else {
-                $ret .= " " . strlen($this->data) . " byte data ";
+                //raw data
+                $ret .= " " . strlen($this->data) . " byte data";
             }
         }
         if ($this->children) {
+            $ret .= $nl;
+            $foo = array();
             foreach ($this->children as $child) {
-                $ret .= $child->nodeString($indent . "  ");
+                $foo[] = $child->nodeString($indent . "  ", true);
             }
-            $ret .= "\n" . $indent;
+            $ret .= implode($nl, $foo);
+            $ret .= $nl . $indent;
         }
-        $ret .= "</" . $this->tag . ">";
+        $ret .=  $lt . "/" . $this->tag . $gt;
+
+        if(!$isChild)
+        {
+            $ret .= $nl;
+            if(!self::isCli())
+            {
+                $ret .= $nl;
+            }
+        }
 
         return $ret;
     }

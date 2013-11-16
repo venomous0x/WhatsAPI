@@ -3,9 +3,6 @@ set_time_limit(10);
 require_once 'whatsprot.class.php';
 require_once 'contacts.php';
 
-
-echo "<textarea cols='170' rows='50'>";
-
 // phone number, deviceIdentity, and name.
 $options = getopt("d::", array("debug::"));
 $debug = (array_key_exists("debug", $options) || array_key_exists("d", $options)) ? true : false;

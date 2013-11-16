@@ -52,7 +52,7 @@ class WhatsAppContactSync
     {
         //get HTTP headers
         $headers = array(
-            "User-Agent: WhatsApp/2.4.7 S40Version/14.26 Device/Nokia302",
+            "User-Agent: WhatsApp/2.11.69 Android/4.3 Device/GalaxyS3",
             "Accept: text/json",
             "Content-Type: application/x-www-form-urlencoded",
             "Authorization: " . $this->generateAuth($nonce),

@@ -15,7 +15,7 @@ class WhatsProt
     const DISCONNECTED_STATUS = 'disconnected';             // Describes the connection status with the WhatsApp server.
     const MEDIA_FOLDER = 'media';                           // The relative folder to store received media files
     const PICTURES_FOLDER = 'pictures';                     // The relative folder to store picture files
-    const PORT = 5222;                                      // The port of the WhatsApp server.
+    const PORT = 443;                                      // The port of the WhatsApp server.
     const TIMEOUT_SEC = 2;                                  // The timeout for the connection with the WhatsApp servers.
     const TIMEOUT_USEC = 0;                                 //
     const WHATSAPP_CHECK_HOST = 'v.whatsapp.net/v2/exist';  // The check credentials host.
@@ -26,8 +26,8 @@ class WhatsProt
     const WHATSAPP_SERVER = 's.whatsapp.net';               // The hostname used to login/send messages.
     const WHATSAPP_UPLOAD_HOST = 'https://mms.whatsapp.net/client/iphone/upload.php'; // The upload host.
     const WHATSAPP_DEVICE = 'Android';                      // The device name.
-    const WHATSAPP_VER = '2.11.69';                // The WhatsApp version.
-    const WHATSAPP_USER_AGENT = 'WhatsApp/2.11.69 Android/4.3 Device/GalaxyS3';// User agent used in request/registration code.
+    const WHATSAPP_VER = '2.11.113';                // The WhatsApp version.
+    const WHATSAPP_USER_AGENT = 'WhatsApp/2.11.113 Android/4.3 Device/GalaxyS3';// User agent used in request/registration code.
 
     /**
      * Property declarations.
@@ -642,7 +642,7 @@ class WhatsProt
      */
     public function sendGetGroupsParticipants($gjid)
     {
-        $msgId = $this->createMsgId("getparticipants");
+        $msgId = $this->createMsgId("getgroupparticipants");
 
         $child = new ProtocolNode("list", array(
             "xmlns" => "w:g"
@@ -1364,7 +1364,7 @@ class WhatsProt
      * @return ProtocolNode
      *   Return itself.
      */
-    protected function createFeaturesNode($profileSubscribe)
+    protected function createFeaturesNode($profileSubscribe = false)
     {
         $nodes = array();
         $nodes[] = new ProtocolNode("receipt_acks", null, null, "");
@@ -1419,7 +1419,7 @@ class WhatsProt
      */
     protected function dissectPhone()
     {
-        if (($handle = fopen('countries.csv', 'rb')) !== false) {
+        if (($handle = fopen(dirname(__FILE__).'/countries.csv', 'rb')) !== false) {
             while (($data = fgetcsv($handle, 1000)) !== false) {
                 if (strpos($this->phoneNumber, $data[1]) === 0) {
                     // Return the first appearance.
@@ -1465,7 +1465,7 @@ class WhatsProt
      * notification to your phone when one of your contacts
      * changes/update their picture.
      */
-    protected function doLogin($profileSubscribe)
+    protected function doLogin($profileSubscribe = false)
     {
         $this->writer->resetKey();
         $this->reader->resetKey();
@@ -1683,6 +1683,12 @@ class WhatsProt
                     $challengeData = $node->getData();
                     file_put_contents("nextChallenge.dat", $challengeData);
                     $this->writer->setKey($this->outputKey);
+                } elseif($node->getTag() == "failure")
+                {
+                    $this->eventManager()->fire("onLoginFailed", array(
+                            $this->phoneNumber,
+                            $node->getChild(0)->getTag()
+                        ));
                 }
                 if ($node->getTag() == "message") {
                     array_push($this->messageQueue, $node);
@@ -1745,6 +1751,23 @@ class WhatsProt
                             $node->getChild(0)->getAttribute('name'),
                             $node->getChild(2)->getData()
                         ));
+                    }
+                    if ($node->hasChild('notification') && $node->getChild('notification')->getAttribute('type') == 'picture') {
+                        if ($node->getChild('notification')->hasChild('set')) {
+                            $this->eventManager()->fire('onProfilePictureChanged', array(
+                                $this->phoneNumber,
+                                $node->getAttribute('from'),
+                                $node->getAttribute('id'),
+                                $node->getAttribute('t')
+                            ));
+                        } else if ($node->getChild('notification')->hasChild('delete')) {
+                            $this->eventManager()->fire('onProfilePictureDeleted', array(
+                                $this->phoneNumber,
+                                $node->getAttribute('from'),
+                                $node->getAttribute('id'),
+                                $node->getAttribute('t')
+                            ));
+                        }
                     }
                     if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != null && $node->getChild('media') != null) {
                         if ($node->getChild(2)->getAttribute('type') == 'image') {
@@ -1924,6 +1947,7 @@ class WhatsProt
                         if ($node->getChild(0)->getAttribute('xmlns') == 'jabber:iq:last') {
                             $this->eventManager()->fire("onGetRequestLastSeen", array(
                                     $this->phoneNumber,
+                                    $node->getAttribute('from'),
                                     $node->getAttribute('id'),
                                     $node->getChild(0)->getAttribute('seconds')
                                 )
@@ -1993,6 +2017,15 @@ class WhatsProt
                                 $groupList
                             ));
                         }
+                        if($node->getAttribute('id') == 'getgroupparticipants'){
+	                    $groupId = reset(explode('@', $node->getAttribute('from')));
+                            $this->eventManager()->fire('onGetGroupParticipants', array(
+                                $this->phoneNumber,
+		                $groupId,
+                                $groupList
+                            ));
+                        }
+                        
                     }
                 }
                 if ($node->getTag() == "iq" && $node->getAttribute('type') == "error") {
@@ -2100,6 +2133,14 @@ class WhatsProt
         $messageNode = @$this->mediaQueue[$id];
         if ($messageNode == null) {
             //message not found, can't send!
+            $this->eventManager()->fire("onMediaUploadFailed", array(
+                    $this->phoneNumber,
+                    $id,
+                    $node,
+                    $messageNode,
+                    "Message node not found in queue"
+                )
+            );
             return false;
         }
 
@@ -2120,6 +2161,14 @@ class WhatsProt
 
             if (!$json) {
                 //failed upload
+                $this->eventManager()->fire("onMediaUploadFailed", array(
+                        $this->phoneNumber,
+                        $id,
+                        $node,
+                        $messageNode,
+                        "Failed to push file to server"
+                    )
+                );
                 return false;
             }
 
@@ -2161,6 +2210,16 @@ class WhatsProt
         } else {
             $this->sendMessageNode($to, $mediaNode);
         }
+        $this->eventManager()->fire("onMediaMessageSent", array(
+                $this->phoneNumber,
+                $to,
+                $id,
+                $filetype,
+                $url,
+                $filename,
+                $filesize,
+                $icon
+            ));
         return true;
     }
 
@@ -2258,6 +2317,12 @@ class WhatsProt
         } else {
             $this->outQueue[] = $messageNode;
         }
+        $this->eventManager()->fire("onSendMessage",array(
+                $this->phoneNumber,
+                $targets,
+                $messageHash["id"],
+                $node
+            ));
     }
 
     /**
@@ -2361,6 +2426,12 @@ class WhatsProt
         } else {
             $this->outQueue[] = $messageNode;
         }
+        $this->eventManager()->fire("onSendMessage", array(
+                $this->phoneNumber,
+                $this->getJID($to),
+                $messageHash["id"],
+                $node
+            ));
     }
 
     /**
