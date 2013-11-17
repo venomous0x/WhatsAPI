@@ -7,7 +7,7 @@ Ejemplos y proyectos Open Source en español por [@_mgp25](http://twitter.com/_m
 ----------
 
 
-### Note June 18th, 2013
+### Nota Junio 18, 2013
 
 *Especial agradecimiento a:*
 - *[Ali Hubail](https://github.com/hubail) y*
@@ -83,14 +83,14 @@ Está funcionando, ¿no?
 Registre un número usando WhatsAPI o WART (WhatsApp Registration Tool) (creada por [Shirioko] (https://github.com/shirioko))
 
 
-# NOTES
+# NOTA
 
 - El PoC es extensible para contener todas las características y funciones que cualquier usuario dispondría con su versión en el móvil, al igual que los oficiales, en realidad podría ser aún mejor.
 - Durante las dos semanas de análisis de los mecanismos de servicio, nos topamos con serios fallos en el diseño y seguridad (que arreglaron algunos de ellos desde 2011). Para una empresa con tal base de usuarios masiva, esperábamos mejores prácticas de ingeniería y seguridad.
 
-# License
+# Licencia
 
-MIT - refer to the source code for the extra line.
+MIT
 
 
 # mgp25
