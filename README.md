@@ -4,6 +4,8 @@ Interfaz de WhatsApp Messenger
 
 Ejemplos y proyectos Open Source en español por [@_mgp25](http://twitter.com/_mgp25)
 
+**Antes de preguntar, echad un ojo a la [wiki](https://github.com/mgp25/WhatsAPI-Spanish/wiki)**
+
 ----------
 
 
