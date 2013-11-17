@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-require '../src/php/whatsprot.class.php';
+require '../src/php/whatsprot.class.php'; // Ruta a whatsprot.class.php
 
 function fgets_u($pStdn)
 {
@@ -16,18 +16,22 @@ function fgets_u($pStdn)
     return null;
 }
 
-$nickname = "WhatsAPI Test";
-$sender = 	""; // Mobile number with country code (but without + or 00)
-$imei = 	""; // MAC Address for iOS IMEI for other platform (Android/etc)
-$password =     ""; // Password you received from WhatsApp
+
+$nickname = "WhatsAPI Test"; // Nick de usuario
+$sender = 	""; // numero de telefono con el codigo de pais ej: 34123456789
+$imei = 	""; // Direccion MAC para iOS / IMEI para otras plataformas [NOTA]: NO es necesario
+$password =     ""; // Tu contraseña obtenida con WART o WhatsAPI
+$debug = TRUE; // Para ver el modo debug, FALSE, lo desactiva.
 
 if ($argc < 2) {
-    echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>] [-set <status>]\n";
-    echo "\tphone: full number including country code, without '+' or '00'\n";
-    echo "\t-s: send message\n";
-    echo "\t-l: listen for new messages\n";
-    echo "\t-i: interactive conversation with <phone>\n";
-    echo "\t-set: Set Status to <status>\n";
+    echo "USO: ".$_SERVER['argv'][0]." [-l] [-s <telefono> <mensaje>] [-i <telefono>] [-set <estado>] [-music <telefono> <url>] [-photo <ruta de la imagen>]\n";
+    echo "\ttelefono: Numero de telefono con codigo de pais ej: 34123456789\n";
+    echo "\t-s: Envia mensaje\n";
+    echo "\t-l: Se mantiene a la escucha de mensajes que te envian\n";
+    echo "\t-i: conversacion interactiva con <telefono>\n";
+    echo "\t-set: Cambia to estado a <estado>\n";
+    echo "\t-music: Envia un fichero de musica a alguien\n";
+	echo "\t-photo: Cambia tu foto de perfil\n";
     exit(1);
 }
 
@@ -37,14 +41,14 @@ for ($i=3; $i<$argc; $i++) {
     $msg .= $_SERVER['argv'][$i]." ";
 }
 
-echo "[] Logging in as '$nickname' ($sender)\n";
-$wa = new WhatsProt($sender, $imei, $nickname, TRUE);
+echo "[] Iniciando sesion como '$nickname' ($sender)\n";
+$wa = new WhatsProt($sender, $imei, $nickname, $debug);
 
-$wa->connect();
-$wa->loginWithPassword($password);
+$wa->connect(); // Nos conectamos a la red de WhatsApp
+$wa->loginWithPassword($password); // Iniciamos sesion con nuestra contraseña
 
 if ($_SERVER['argv'][1] == "-i") {
-    echo "\n[] Interactive conversation with $dst:\n";
+    echo "\n[] Conversacion interactiva con $dst:\n";
     stream_set_timeout(STDIN,1);
     while (TRUE) {
         $wa->pollMessages();
@@ -60,17 +64,22 @@ if ($_SERVER['argv'][1] == "-i") {
             } else {
                 $command = $line;
             }
+            $contact = $_SERVER['argv'][2];
             switch ($command) {
                 case "/query":
                     $dst = trim(strstr($line, ' ', FALSE));
-                    echo "[] Interactive conversation with $dst:\n";
+                    echo "[] Conversacion interactiva con $contact:\n";
                     break;
                 case "/lastseen":
-                    echo "[] Request last seen $dst: ";
+                    echo "[] Ultima vez en linea de $contact: ";
                     $wa->sendGetRequestLastSeen($dst);
                     break;
+                case "/status":
+                	echo "[] El estado de $contact es: ";
+                	$wa->sendGetStatus($contact);
+                	break;
                 default:
-                    echo "[] Send message to $dst: $line\n";
+                    echo "[] Enviar mensaje a $dst: $line\n";
                     $wa->sendMessage($dst , $line);
                     break;
             }
@@ -80,7 +89,7 @@ if ($_SERVER['argv'][1] == "-i") {
 }
 
 if ($_SERVER['argv'][1] == "-l") {
-    echo "\n[] Listen mode:\n";
+    echo "\n[] Modo escucha:\n";
     while (TRUE) {
         $wa->pollMessages();
         $data = $wa->getMessages();
@@ -91,15 +100,30 @@ if ($_SERVER['argv'][1] == "-l") {
 }
 
 if ($_SERVER['argv'][1] == "-set") {
-    echo "\n[] Setting status:\n";
+    echo "\n[] Cambiando estado:\n";
     $wa->sendStatusUpdate($_SERVER['argv'][2]);
     exit(0);
 }
 
-echo "\n[] Request last seen $dst: ";
+if ($_SERVER['argv'][1] == "-music") {
+	$music = $_SERVER['argv'][3];
+    echo "\n[] Enviando archivo de musica: $music\n";
+    $wa->sendMessageAudio($dst, $music);
+    exit(0);
+}
+
+if ($_SERVER['argv'][1] == "-photo") {
+	$path = $_SERVER['argv'][3];
+    echo "\n[] Cambiando foto de perfil...\n";
+    $wa->sendSetProfilePicture($path);
+    exit(0);
+}
+
+
+echo "\n[] Ultima vez en linea de $dst: ";
 $wa->sendGetRequestLastSeen($dst);
 
-echo "\n[] Send message to $dst: $msg\n";
+echo "\n[] Enviar mensaje a $dst: $msg\n";
 $wa->sendMessage($dst , $msg);
 echo "\n";
 
