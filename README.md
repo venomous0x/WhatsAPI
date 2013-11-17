@@ -58,27 +58,27 @@ https://github.com/shirioko/WhatsAPI/wiki/WhatsApi-events
 # FAQ
 
 
-- **¿Qué pasa con los caracteres hexadecimales flotantes en todo el código?**
+**¿Qué pasa con los caracteres hexadecimales flotantes en todo el código?**
 
 Mayormente caracteres / comandos o datos con formato de control de propiedad de WhatsApp acuerdo a las especificaciones de su servidor, el almacenamiento en los diccionarios predefinidos dentro de los clientes.
 
-- **¿Cuál es su plan de desarrollo futuro?**
+**¿Cuál es su plan de desarrollo futuro?**
 
 No tengo ninguno. Generalmente ire investigando por cuenta propia y desarrollando aquello que me parezca más interesante.
 
-- **¿Se ejecutará a través de Internet?**
+**¿Se ejecutará a través de Internet?**
 
 Puedes probar WhatsAppea.me un servicio online que te permite hablar con tus contactos de WhatsApp - [http://whatsappea.me](https://www.whatsappea.me) 
 
-- **¿Puedo recibir chats?**
+**¿Puedo recibir chats?**
 
 De hecho, utilizando el mismo mecanismo de enchufe-receptor. Pero hay que analizar los datos entrantes. Funciones de análisis no se incluyen en esta versión, tal vez en la próxima?
 
-- **Creo que el código es desordenado.**
+**Creo que el código es desordenado.**
 
 Está funcionando, ¿no?
 
-- **¿Cómo puedo obtener mi contraseña?**
+**¿Cómo puedo obtener mi contraseña?**
 
 Registre un número usando WhatsAPI o WART (WhatsApp Registration Tool) (creada por [Shirioko] (https://github.com/shirioko))
 
