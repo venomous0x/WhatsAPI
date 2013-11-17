@@ -68,7 +68,7 @@ No tengo ninguno. Generalmente ire investigando por cuenta propia y desarrolland
 
 - **¿Se ejecutará a través de Internet?**
 
-Puedes probar WhatsAppea.me un servicio online que te permite hablar con tus contactos de WhatsApp WATools ([http://whatsappea.me](https://www.whatsappea.me)) 
+Puedes probar WhatsAppea.me un servicio online que te permite hablar con tus contactos de WhatsApp - [http://whatsappea.me](https://www.whatsappea.me) 
 
 - **¿Puedo recibir chats?**
 
@@ -102,4 +102,4 @@ Actualmente desarrollo yo solo, pero sería genial que la gente participase y ap
 
 Herramienta online que te permite ver la imagen de perfil, estado y última conexión de una persona, así como mandar mensajes y archivos de manera anónima.
 
-WATools ([http://watools.es](https://www.watools.es)) 
+WATools [http://watools.es](https://www.watools.es)
