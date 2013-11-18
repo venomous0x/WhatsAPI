@@ -2,7 +2,8 @@
 
 Interfaz de WhatsApp Messenger
 
-Proyecto original de [venomous0x WhatsAPI](https://github.com/venomous0x/WhatsAPI)
+**Proyecto original de [venomous0x WhatsAPI](https://github.com/venomous0x/WhatsAPI)**
+**[shirioko](https://github.com/shirioko)**
 
 Soporte en español de WhatsAPI
 
