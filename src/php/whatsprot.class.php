@@ -1419,7 +1419,7 @@ class WhatsProt
      */
     protected function dissectPhone()
     {
-        if (($handle = fopen(dirname(__FILE__).'/countries.csv', 'rb')) !== false) {
+        if (($handle = fopen('countries.csv', 'rb')) !== false) {
             while (($data = fgetcsv($handle, 1000)) !== false) {
                 if (strpos($this->phoneNumber, $data[1]) === 0) {
                     // Return the first appearance.
@@ -1742,15 +1742,34 @@ class WhatsProt
                         ));
                     }
                     if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != '' && $node->getChild('body') != null) {
-                        $this->eventManager()->fire('onGetMessage', array(
-                            $this->phoneNumber,
-                            $node->getAttribute('from'),
-                            $node->getAttribute('id'),
-                            $node->getAttribute('type'),
-                            $node->getAttribute('t'),
-                            $node->getChild(0)->getAttribute('name'),
-                            $node->getChild(2)->getData()
-                        ));
+                        $author = $node->getAttribute("author");
+                        if($author == "")
+                        {
+                            //private chat message
+                            $this->eventManager()->fire('onGetMessage', array(
+                                $this->phoneNumber,
+                                $node->getAttribute('from'),
+                                $node->getAttribute('id'),
+                                $node->getAttribute('type'),
+                                $node->getAttribute('t'),
+                                $node->getChild("notify")->getAttribute('name'),
+                                $node->getChild("body")->getData()
+                            ));
+                        }
+                        else
+                        {
+                            //group chat message
+                            $this->eventManager()->fire('onGetGroupMessage', array(
+                                $this->phoneNumber,
+                                $node->getAttribute('from'),
+                                $author,
+                                $node->getAttribute('id'),
+                                $node->getAttribute('type'),
+                                $node->getAttribute('t'),
+                                $node->getChild("notify")->getAttribute('name'),
+                                $node->getChild("body")->getData()
+                            ));
+                        }
                     }
                     if ($node->hasChild('notification') && $node->getChild('notification')->getAttribute('type') == 'picture') {
                         if ($node->getChild('notification')->hasChild('set')) {
