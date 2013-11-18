@@ -1419,7 +1419,7 @@ class WhatsProt
      */
     protected function dissectPhone()
     {
-        if (($handle = fopen('countries.csv', 'rb')) !== false) {
+        if (($handle = fopen(dirname(__FILE__).'/countries.csv', 'rb')) !== false) {
             while (($data = fgetcsv($handle, 1000)) !== false) {
                 if (strpos($this->phoneNumber, $data[1]) === 0) {
                     // Return the first appearance.

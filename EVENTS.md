@@ -139,6 +139,7 @@ Available events and arguments
   - thumbnail: The base64_encoded image.
 - onGetRequestLastSeen:
   - phone: The user phone number including the country code.
+  - from: The sender JID.
   - msgid: The message id.
   - sec: The number of seconds since the user went offline.
 - onGetServerProperties:
