@@ -147,6 +147,15 @@ Available events and arguments
   - time: The unix time when send message notification.
   - name: The sender name.
   - message: The message.
+- onGetGroupMessage:
+  - phone: The user phone number including the country code.
+  - from: The group JID.
+  - author: The sender JID.
+  - msgid: The message id.
+  - type: The message type.
+  - time: The unix time when send message notification.
+  - name: The sender name.
+  - message: The message.
 - onGetPrivacyBlockedList:
   - phone: The user phone number including the country code.
   - data: Array of data nodes containing numbers you have blocked.
