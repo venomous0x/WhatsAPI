@@ -2001,7 +2001,7 @@ class WhatsProt
                     if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "duplicate") {
                         $this->processUploadResponse($node);
                     }
-                    if ($node->getAttribute('id') == 'group') {
+                    if ($node->nodeIdContains("group")) {
                         //There are multiple types of Group reponses. Also a valid group response can have NO children.
                         //Events fired depend on text in the ID field.
                         $groupList = array();
@@ -2010,41 +2010,41 @@ class WhatsProt
                                 $groupList[] = $child->getAttributes();
                             }
                         }
-                        if($node->getAttribute('id') == 'creategroup'){
+                        if($node->nodeIdContains('creategroup')){
                             $this->groupId = $node->getChild(0)->getAttribute('id');
                             $this->eventManager()->fire('onGroupsChatCreate', array(
                                 $this->phoneNumber,
                                 $this->groupId
                             ));
                         }
-                        if($node->getAttribute('id') == 'endgroup'){
+                        if($node->nodeIdContains('endgroup')){
                             $this->groupId = $node->getChild(0)->getChild(0)->getAttribute('id');
                             $this->eventManager()->fire('onGroupsChatEnd', array(
                                 $this->phoneNumber,
                                 $this->groupId
                             ));
                         }
-                        if($node->getAttribute('id') == 'getgroups'){
+                        if($node->nodeIdContains('getgroups')){
                             $this->eventManager()->fire('onGetGroups', array(
                                 $this->phoneNumber,
                                 $groupList
                             ));
                         }
-                        if($node->getAttribute('id') == 'getgroupinfo'){
+                        if($node->nodeIdContains('getgroupinfo')){
                             $this->eventManager()->fire('onGetGroupsInfo', array(
                                 $this->phoneNumber,
                                 $groupList
                             ));
                         }
-                        if($node->getAttribute('id') == 'getgroupparticipants'){
-	                    $groupId = reset(explode('@', $node->getAttribute('from')));
+                        if($node->nodeIdContains('getgroupparticipants')){
+                            $groupId = reset(explode('@', $node->getAttribute('from')));
                             $this->eventManager()->fire('onGetGroupParticipants', array(
                                 $this->phoneNumber,
-		                $groupId,
+                                $groupId,
                                 $groupList
                             ));
                         }
-                        
+
                     }
                 }
                 if ($node->getTag() == "iq" && $node->getAttribute('type') == "error") {
