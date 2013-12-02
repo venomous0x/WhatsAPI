@@ -2559,12 +2559,14 @@ class WhatsProt
                 $thumb = new ProtocolNode("picture", array("type" => "preview"), null, $icon);
 
                 $hash = array();
-                $hash["id"] = $this->createMsgId("setphoto");
+                $nodeID = $this->createMsgId("setphoto");
+                $hash["id"] = $nodeID;
                 $hash["to"] = $this->getJID($jid);
                 $hash["type"] = "set";
                 $node = new ProtocolNode("iq", $hash, array($picture, $thumb), null);
 
                 $this->sendNode($node);
+                $this->waitForServer($nodeID);
             }
         }
     }
