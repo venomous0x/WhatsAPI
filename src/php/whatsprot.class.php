@@ -1891,11 +1891,13 @@ class WhatsProt
                     }
                     if ($node->getAttribute('type') == "subject") {
                         print_r($node);
+                        $reset_from = explode('@', $node->getAttribute('from'));
+                        $reset_author = explode('@',$node->getAttribute('author'));
                         $this->eventManager()->fire('onGetGroupsSubject', array(
                             $this->phoneNumber,
-                            reset(explode('@', $node->getAttribute('from'))),
+                            reset($reset_from),
                             $node->getAttribute('t'),
-                            reset(explode('@',$node->getAttribute('author'))),
+                            reset($reset_author),
                             $node->getChild(0)->getAttribute('name'),
                             $node->getChild(2)->getData()
                         ));
@@ -2173,7 +2175,8 @@ class WhatsProt
             $filetype = $duplicate->getAttribute("type");
 //            $width = $duplicate->getAttribute("width");
 //            $height = $duplicate->getAttribute("height");
-            $filename = array_pop(explode("/", $url));
+            $exploded = explode("/", $url);  
+            $filename = array_pop($exploded);
         } else {
             //upload new file
             $json = WhatsMediaUploader::pushFile($node, $messageNode, $this->mediaFileInfo, $this->phoneNumber);
