@@ -1,4 +1,6 @@
 <?php
+require_once 'WhatsAppEventHandler.php';
+
 /**
  * @file
  * Event class to fire WhatsApp related events.
@@ -38,6 +40,72 @@ class WhatsAppEvent
         }
     }
 
+    /**
+     * bindAll
+     * 
+     * Binds all the whatsapp events.
+     *
+     * @param a WhatsAppEventHandler
+    */
+    function bindAll(WhatsAppEventHandler $wh)
+    {
+        $events = array(
+            "onClose",
+            "onCodeRegister",
+            "onCodeRegisterFailed",
+            "onCodeRequest",
+            "onCodeRequestFailed",
+            "onCodeRequestFailedTooRecent",
+            "onConnect",
+            "onCredentialsBad",
+            "onCredentialsGood",
+            "onDisconnect",
+            "onDissectPhone",
+            "onDissectPhoneFailed",
+            "onGetAudio",
+            "onGetError",
+            "onGetGroups",
+            "onGetGroupsInfo",
+            "onGetGroupsSubject",
+            "onGetImage",
+            "onGetLocation",
+            "onGetMessage",
+            "onGetGroupMessage",
+            "onGetPrivacyBlockedList",
+            "onGetProfilePicture",
+            "onGetRequestLastSeen",
+            "onGetServerProperties",
+            "onGetvCard",
+            "onGetVideo",
+            "onGroupsChatCreate",
+            "onGroupsChatEnd",
+            "onGroupsParticipantsAdd",
+            "onGroupsParticipantsRemove",
+            "onLogin",
+            "onMessageComposing",
+            "onMessagePaused",
+            "onMessageReceivedClient",
+            "onMessageReceivedServer",
+            "onPing",
+            "onPresence",
+            "onSendMessageReceived",
+            "onSendPong",
+            "onSendPresence",
+            "onSendStatusUpdate",
+            "onUploadFile",
+            "onUploadFileFailed"
+        );
+
+        foreach( $events as $event ) {
+            if( method_exists($wh,$event) ) {
+                $this->bind($event,array($wh, $event));
+            } else {
+                // This should never happen:
+                throw new Exception("Cannot find needed method: " . $event );
+            }
+        }
+    }
+    
     /**
      * Binds a callback to a event.
      *
