@@ -890,12 +890,15 @@ class WhatsProt
      *   The recipient.
      * @param string $txt
      *   The text message.
+     * @param $id
+     *
+     * @return string
      */
-    public function sendMessage($to, $txt)
+    public function sendMessage($to, $txt, $id = null)
     {
         $txt = $this->parseMessageForEmojis($txt);
         $bodyNode = new ProtocolNode("body", null, null, $txt);
-        $this->sendMessageNode($to, $bodyNode);
+        return $this->sendMessageNode($to, $bodyNode, $id);
     }
 
     /**
@@ -2416,7 +2419,7 @@ class WhatsProt
      * @param $node
      *   The node that contains the message.
      */
-    protected function sendMessageNode($to, $node)
+    protected function sendMessageNode($to, $node, $id = null)
     {
         $serverNode = new ProtocolNode("server", null, null, "");
         $xHash = array();
@@ -2433,7 +2436,7 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = $this->getJID($to);
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->createMsgId("message");
+        $messageHash["id"] = ($id == null?$this->createMsgId("message"):$id);
         $messageHash["t"] = time();
 
         $messageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
@@ -2451,6 +2454,7 @@ class WhatsProt
                 $messageHash["id"],
                 $node
             ));
+        return $messageHash["id"];
     }
 
     /**
