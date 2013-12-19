@@ -747,6 +747,7 @@ class WhatsProt
     /**
      * Get the current status message of a specific user.
      *
+     * @deprecated Use ContactSyncV2 to get status
      * @param  string $jid The user JID
      */
     public function sendGetStatus($jid)
