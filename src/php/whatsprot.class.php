@@ -548,7 +548,7 @@ class WhatsProt
      *
      * @param  array $categories
      */
-    public function sendClearDirty($categories)
+    protected function sendClearDirty($categories)
     {
         $msgId = $this->createMsgId("cleardirty");
 
