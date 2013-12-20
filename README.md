@@ -16,8 +16,6 @@ Interface to WhatsApp Messenger
 
 **It's not about the money, it's about sending a message.**
 
-*I hope that this was a bit more civil than the former "FUCK SPAMMER IF YOU ARE ONE GO FUCK YOURSELF" :)*
-
 *\- [shirioko](https://github.com/shirioko)*
 
 ----------

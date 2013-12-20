@@ -102,5 +102,3 @@ $wa->sendGetRequestLastSeen($dst);
 echo "\n[] Send message to $dst: $msg\n";
 $wa->sendMessage($dst , $msg);
 echo "\n";
-
-?>
