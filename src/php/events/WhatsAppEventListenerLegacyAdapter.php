@@ -1,13 +1,9 @@
 <?php
 require_once 'WhatsAppEventListenerProxy.php';
 
-/*
+/**
  * Implements the old legacy events.
  */
-
-/**
- * 
-*/
 class WhatsAppEventListenerLegacyAdapter extends WhatsAppEventListenerProxy {
     /**
      *
