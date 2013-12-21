@@ -5,7 +5,7 @@
  */
 
 
-interface WhatsAppEventHandler {   
+interface WhatsAppEventListener {   
     function onClose( 
         $phone, // The user phone number including the country code.
         $error  // The error message. 
@@ -56,7 +56,12 @@ interface WhatsAppEventHandler {
         $socket // The resource socket id.
     );
 
-    function onCredentialsBad(
+   function onConnectError(
+        $phone, // The user phone number including the country code.
+        $socket // The resource socket id.
+    );
+
+   function onCredentialsBad(
         $phone, // The user phone number including the country code.
         $status, // Account status.
         $reason // The reason.
@@ -185,15 +190,24 @@ interface WhatsAppEventHandler {
         $name, // The sender name.
         $message // The message.
     );
-
+    
+    function onGetGroupParticipants(
+        $phone,
+        $groupId,
+        $groupList            
+    );
+    
     function onGetPrivacyBlockedList(
         $phone, // The user phone number including the country code.
+        $children
+        /*
         $data, // Array of data nodes containing numbers you have blocked.
         $onGetProfilePicture, //
         $phone, // The user phone number including the country code.
         $from, // The sender JID.
         $type, // The type of picture (image/preview).
         $thumbnail // The base64_encoded image.
+        */
     );
 
     function onGetProfilePicture(
@@ -215,7 +229,16 @@ interface WhatsAppEventHandler {
         $version, // The version number on the server.
         $properties // Array of server properties.
     );
-
+    
+    function onGetStatus(
+        $phone,
+        $from,
+        $type,
+        $id,
+        $t,
+        $status
+    );
+    
     function onGetvCard(
         $phone, // The user phone number including the country code.
         $from, // The sender JID.
@@ -271,7 +294,31 @@ interface WhatsAppEventHandler {
     function onLogin(
         $phone // The user phone number including the country code.
     );
+    
+    function onLoginFailed(
+        $phone, // The user phone number including the country code.
+        $tag
+    );
 
+    function onMediaMessageSent(
+        $phone, // The user phone number including the country code.
+        $to,
+        $id,
+        $filetype,
+        $url,
+        $filename,
+        $filesize,
+        $icon        
+    );
+    
+    function onMediaUploadFailed(
+        $phone, // The user phone number including the country code.
+        $id,
+        $node,  
+        $messageNode,
+        $reason
+    );
+   
     function onMessageComposing(
         $phone, // The user phone number including the country code.
         $from, // The sender JID.
@@ -313,6 +360,27 @@ interface WhatsAppEventHandler {
         $phone, // The user phone number including the country code.
         $from, // The sender JID.
         $type // The presence type.
+    );
+
+    function onProfilePictureChanged(
+        $phone, 
+        $from,
+        $id,
+        $t            
+    );
+
+    function onProfilePictureDeleted(
+        $phone, 
+        $from,
+        $id,
+        $t            
+    );
+    
+    function onSendMessage(
+        $phone, // The user phone number including the country code.
+        $targets,
+        $id,
+        $node 
     );
 
     function onSendMessageReceived(
