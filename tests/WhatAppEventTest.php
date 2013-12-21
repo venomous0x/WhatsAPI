@@ -65,6 +65,15 @@ $actual = $listener->getAndResetCapture();
 // Assert expected result:
 $expected = array(
     //First event raised:
+    array(
+        'onSendMessageReceived',
+        array(
+            0 => '$username',
+            // 1 = This is the current time.
+            2 => '441234123456'
+        )
+    ),
+    //Second event raised:
     array( 
         // Event name:
         'onGetMessage',
@@ -80,9 +89,13 @@ $expected = array(
         )
     )
 );
+$old_expected = array($expected[1]);
+
+unset($actual[0][1][1]); // Remove the time.
+
 // Analyze the results:
 if( $expected === $actual 
-    && $expected === $old_function_called ) {
+    && $old_expected === $old_function_called ) {
     print( "Test Passed.\n");
 } else {
     print( "Test Failed!!!!!\n" );
@@ -102,8 +115,8 @@ $w->eventManager()->fire('onGetMessage', array(
 ) );
 // Analyze the results:
 $actual = $listener->getAndResetCapture();
-if( $expected === $actual 
-    && $expected === $old_function_called ) {
+if( $old_expected === $actual 
+    && $old_expected === $old_function_called ) {
     print( "Test Passed.\n");
 } else {
     print( "Test Failed!!!!!\n" );
@@ -138,6 +151,15 @@ $actual = $listener->getAndResetCapture();
 // Assert expected result:
 $expected = array(
     //First event raised:
+    array(
+        'onSendMessageReceived',
+        array(
+            0 => '$username',
+            // 1 = This is the current time.
+            2 => '441234123456-1234567890@g.us'
+        )
+    ),    
+    // Second event raised:
     array( 
         // Event name:
         'onGetGroupMessage',
@@ -154,6 +176,7 @@ $expected = array(
         )
     )
 );
+unset($actual[0][1][1]); // Remove the time.
 
 if( $expected === $actual ) {
     print( "Test Passed.\n");

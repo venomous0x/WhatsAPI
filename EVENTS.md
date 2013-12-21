@@ -2,7 +2,6 @@ Available events and arguments
 ==============================
 See events/WhatsAppEventListener.php.
 
-
 How to bind a callback to an event
 ==================================
 

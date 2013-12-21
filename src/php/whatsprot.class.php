@@ -26,8 +26,8 @@ class WhatsProt
     const WHATSAPP_SERVER = 's.whatsapp.net';               // The hostname used to login/send messages.
     const WHATSAPP_UPLOAD_HOST = 'https://mms.whatsapp.net/client/iphone/upload.php'; // The upload host.
     const WHATSAPP_DEVICE = 'Android';                      // The device name.
-    const WHATSAPP_VER = '2.11.139';                // The WhatsApp version.
-    const WHATSAPP_USER_AGENT = 'WhatsApp/2.11.139 Android/4.3 Device/GalaxyS3';// User agent used in request/registration code.
+    const WHATSAPP_VER = '2.11.149';                // The WhatsApp version.
+    const WHATSAPP_USER_AGENT = 'WhatsApp/2.11.149 Android/4.3 Device/GalaxyS3';// User agent used in request/registration code.
 
     /**
      * Property declarations.
@@ -580,7 +580,7 @@ class WhatsProt
      *
      * @param  array $categories
      */
-    public function sendClearDirty($categories)
+    protected function sendClearDirty($categories)
     {
         $msgId = $this->createMsgId("cleardirty");
 
@@ -779,6 +779,7 @@ class WhatsProt
     /**
      * Get the current status message of a specific user.
      *
+     * @deprecated Use ContactSyncV2 to get status
      * @param  string $jid The user JID
      */
     public function sendGetStatus($jid)
@@ -922,12 +923,15 @@ class WhatsProt
      *   The recipient.
      * @param string $txt
      *   The text message.
+     * @param $id
+     *
+     * @return string
      */
-    public function sendMessage($to, $txt)
+    public function sendMessage($to, $txt, $id = null)
     {
         $txt = $this->parseMessageForEmojis($txt);
         $bodyNode = new ProtocolNode("body", null, null, $txt);
-        $this->sendMessageNode($to, $bodyNode);
+        return $this->sendMessageNode($to, $bodyNode, $id);
     }
 
     /**
@@ -2492,7 +2496,7 @@ class WhatsProt
      * @param $node
      *   The node that contains the message.
      */
-    protected function sendMessageNode($to, $node)
+    protected function sendMessageNode($to, $node, $id = null)
     {
         $serverNode = new ProtocolNode("server", null, null, "");
         $xHash = array();
@@ -2509,7 +2513,7 @@ class WhatsProt
         $messageHash = array();
         $messageHash["to"] = $this->getJID($to);
         $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->createMsgId("message");
+        $messageHash["id"] = ($id == null?$this->createMsgId("message"):$id);
         $messageHash["t"] = time();
 
         $messageNode = new ProtocolNode("message", $messageHash, array($xNode, $notnode, $reqnode, $node), "");
@@ -2527,6 +2531,7 @@ class WhatsProt
             $messageHash["id"],
             $node
         );
+        return $messageHash["id"];
     }
 
     /**
