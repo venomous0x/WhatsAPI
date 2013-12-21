@@ -55,7 +55,7 @@ class WhatsProt
     protected $phoneNumber;             // The user phone number including the country code without '+' or '00'.
     protected $reader;                  // An instance of the BinaryTreeNodeReader class.
     protected $serverReceivedId;        // Confirm that the *server* has received your command.
-    public $socket;                  // A socket to connect to the WhatsApp network.
+    protected $socket;                  // A socket to connect to the WhatsApp network.
     protected $writer;                  // An instance of the BinaryTreeNodeWriter class.
 
     /**
@@ -357,7 +357,7 @@ class WhatsProt
             );
         } else {
             if ($this->debug) {
-                echo "Firing onConnectError\n";
+                print_r("Firing onConnectError\n");
             }            
             $this->eventManager()->fireConnectError(
                $this->phoneNumber, 
@@ -426,7 +426,7 @@ class WhatsProt
         $this->accountInfo = (array) $this->checkCredentials();
         if ($this->accountInfo['status'] == 'ok') {
             if ($this->debug) {
-                echo "New password received: " . $this->accountInfo['pw'] . "\r\n";
+                print_r("New password received: " . $this->accountInfo['pw'] . "\n");
             }
             $this->password = $this->accountInfo['pw'];
         }
@@ -1541,8 +1541,6 @@ class WhatsProt
         if($this->loginStatus != static::CONNECTED_STATUS) {
             $data = $this->createAuthResponseNode();
             $this->sendNode($data);
-
-            file_put_contents('inputKey', serialize($this->inputKey));
             $this->reader->setKey($this->inputKey);
             $this->writer->setKey($this->outputKey);
         }
@@ -1735,8 +1733,6 @@ class WhatsProt
      */
     protected function processInboundData($data)
     {
-        file_put_contents('messageTest', $data, FILE_APPEND);
-            
         try {
             $node = $this->reader->nextTree($data);
             if( $node != null ) {
@@ -2230,13 +2226,12 @@ class WhatsProt
         $messageNode = @$this->mediaQueue[$id];
         if ($messageNode == null) {
             //message not found, can't send!
-            $this->eventManager()->fire ("onMediaUploadFailed", array(
-                    $this->phoneNumber,
-                    $id,
-                    $node,
-                    $messageNode,
-                    "Message node not found in queue"
-                )
+            $this->eventManager()->fireMediaUploadFailed(
+                $this->phoneNumber,
+                $id,
+                $node,
+                $messageNode,
+                "Message node not found in queue"
             );
             return false;
         }

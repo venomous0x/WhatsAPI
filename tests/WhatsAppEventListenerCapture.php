@@ -1,16 +1,9 @@
 <?php
 require_once '../src/php/events/WhatsAppEventListenerProxy.php';
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of WhatsAppEventListenerCapture
- *
- * @author daniel
+ * Records all calls to the WhatsAppEventListener so they can be analyzed 
+ *  and asserted by the testing framework.
  */
 class WhatsAppEventListenerCapture extends WhatsAppEventListenerProxy {
     private $capture = array();
