@@ -36,7 +36,7 @@ $oldFunction = function(
 };
 $w->eventManager()->bind('onGetMessage', $oldFunction );
 
-print( 'Test #1: onGetMessage\n' );
+print( "Test #1: onGetMessage\n" );
 /*
 rx  <message from="441234123456@s.whatsapp.net" id="1234567890-123" type="chat" t="1234567890">
 rx    <notify xmlns="urn:xmpp:whatsapp" name="First LastName"></notify>
@@ -80,15 +80,38 @@ $expected = array(
         )
     )
 );
-
+// Analyze the results:
 if( $expected === $actual 
     && $expected === $old_function_called ) {
     print( "Test Passed.\n");
 } else {
     print( "Test Failed!!!!!\n" );
 }
+$old_function_called = array();
 
-print( 'Test #2: onGetGroupMessage\n' );
+
+print( "Test #2: Legacy Fire\n" );
+$w->eventManager()->fire('onGetMessage', array(        
+    '$username',
+    '441234123456',
+    '1234567890-123',
+    'chat',
+    '1234567890',
+    'First LastName',
+    'TestMessage'
+) );
+// Analyze the results:
+$actual = $listener->getAndResetCapture();
+if( $expected === $actual 
+    && $expected === $old_function_called ) {
+    print( "Test Passed.\n");
+} else {
+    print( "Test Failed!!!!!\n" );
+}
+$old_function_called = array();
+    
+
+print( "Test #3: onGetGroupMessage\n" );
 /*
 rx  <message from="441234123456-1234567890@g.us" id="1234567890-123" type="chat" t="1234567890" author="11231231234@s.whatsapp.net">
 rx    <notify xmlns="urn:xmpp:whatsapp" name="Fun Guy"></notify>
@@ -137,5 +160,6 @@ if( $expected === $actual ) {
 } else {
     print( "Test Failed!!!!!\n" );
 }
-
+     
+        
 ?>

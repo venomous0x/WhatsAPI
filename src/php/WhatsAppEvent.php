@@ -86,7 +86,7 @@ class WhatsAppEvent
     {
         // For backwards compatibility only.
         foreach( self::$event_listeners as $event_listener ) {
-            call_r_func_array(array($event_listener, $event), $arguments);
+            call_user_func_array(array($event_listener, $event), $arguments);
         }
     }
   
@@ -430,8 +430,8 @@ class WhatsAppEvent
         $type,
         $thumbnail
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $type, $thumbnail) { 
+            $listener->onGetProfilePicture($phone, $from, $type, $thumbnail);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -442,8 +442,8 @@ class WhatsAppEvent
         $msgid,
         $sec
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $msgid, $sec) {
+            $listener->onGetRequestLastSeen($phone, $from, $msgid, $sec);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -453,8 +453,8 @@ class WhatsAppEvent
         $version,
         $properties
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $version, $properties) { 
+            $listener->onGetServerProperties($phone, $version, $properties);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -467,8 +467,8 @@ class WhatsAppEvent
         $t,
         $status
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $type, $id, $t, $status) {  
+            $listener->onGetStatus($phone, $from, $type, $id, $t, $status);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -483,8 +483,8 @@ class WhatsAppEvent
         $contact,
         $vcard
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $msgid, $type, $time, $name, $contact, $vcard){ 
+            $listener->onGetvCard($phone, $from, $msgid, $type, $time, $name, $contact, $vcard);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -506,8 +506,8 @@ class WhatsAppEvent
         $acodec,
         $thumbnail
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $msgid, $type, $time, $name, $url, $file, $size, $mimetype, $filehash, $duration, $vcodec, $acodec, $thumbnail){  
+            $listener->onGetVideo($phone, $from, $msgid, $type, $time, $name, $url, $file, $size, $mimetype, $filehash, $duration, $vcodec, $acodec, $thumbnail);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -516,8 +516,8 @@ class WhatsAppEvent
         $phone,
         $gId
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $gId) {  
+            $listener->onGroupsChatCreate($phone, $gId);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -526,8 +526,8 @@ class WhatsAppEvent
         $phone,
         $gId
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $gId) {  
+            $listener->onGroupsChatEnd($phone, $gId);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -537,8 +537,8 @@ class WhatsAppEvent
         $groupId,
         $participant
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $groupId, $participant) { 
+            $listener->onGroupsParticipantsAdd($phone, $groupId, $participant);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -549,8 +549,8 @@ class WhatsAppEvent
         $participant,
         $author
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $groupId, $participant, $author) { 
+            $listener->onGroupsParticipantsRemove($phone, $groupId, $participant, $author);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -558,8 +558,8 @@ class WhatsAppEvent
     function fireLogin(
         $phone
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone) { 
+            $listener->onLogin($phone);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -568,8 +568,8 @@ class WhatsAppEvent
         $phone,
         $tag
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $tag) { 
+            $listener->onLoginFailed($phone, $tag);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -581,8 +581,8 @@ class WhatsAppEvent
         $type,
         $time
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $msgid, $type, $time) { 
+            $listener->onMessageComposing($phone, $from, $msgid, $type, $time);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -597,8 +597,8 @@ class WhatsAppEvent
         $filesize,
         $icon        
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $to, $id, $filetype, $url, $filename, $filesize, $icon) { 
+            $listener->onMediaMessageSent($phone, $to, $id, $filetype, $url, $filename, $filesize, $icon);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -610,21 +610,21 @@ class WhatsAppEvent
         $messageNode,
         $reason
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $id, $node, $messageNode, $reason) { 
+            $listener->onMediaUploadFailed($phone, $id, $node, $messageNode, $reason);
         };
         $this->fireCallback($callbackEvent);          
     }
        
-    function fireMessagePad(
+    function fireMessagePaused(
         $phone,
         $from,
         $msgid,
         $type,
         $time
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $msgid, $type, $time) { 
+            $listener->onMessagePaused($phone, $from, $msgid, $type, $time);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -636,8 +636,8 @@ class WhatsAppEvent
         $type,
         $time
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $msgid, $type, $time) {  
+            $listener->onMessageReceivedClient($phone, $from, $msgid, $type, $time);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -649,8 +649,8 @@ class WhatsAppEvent
         $type,
         $time
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $msgid, $type, $time) {  
+            $listener->onMessageReceivedServer($phone, $from, $msgid, $type, $time);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -659,8 +659,8 @@ class WhatsAppEvent
         $phone,
         $msgid
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $msgid) { 
+            $listener->onPing($phone, $msgid);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -670,8 +670,8 @@ class WhatsAppEvent
         $from,
         $type
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $type) {  
+            $listener->onPresence($phone, $from, $type);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -682,8 +682,8 @@ class WhatsAppEvent
         $id,
         $t            
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $id, $t) {  
+            $listener->onProfilePictureChanged($phone, $from, $id, $t);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -694,8 +694,8 @@ class WhatsAppEvent
         $id,
         $t            
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $from, $id, $t) {  
+            $listener->onProfilePictureDeleted($phone, $from, $id, $t);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -705,8 +705,8 @@ class WhatsAppEvent
         $time,
         $from
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) {  
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $time, $from) {  
+            $listener->onSendMessageReceived($phone, $time, $from);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -715,8 +715,8 @@ class WhatsAppEvent
         $phone,
         $msgid
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $msgid) { 
+            $listener->onSendPong($phone, $msgid);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -727,8 +727,8 @@ class WhatsAppEvent
         $id,
         $node 
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $targets, $id, $node) { 
+            $listener->onSendMessage($phone, $targets, $id, $node);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -738,8 +738,8 @@ class WhatsAppEvent
         $type,
         $name
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $type, $name) { 
+            $listener->onSendPresence($phone, $type, $name);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -748,8 +748,8 @@ class WhatsAppEvent
         $phone,
         $msg
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $msg) { 
+            $listener->onSendStatusUpdate($phone, $msg);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -759,8 +759,8 @@ class WhatsAppEvent
         $name,
         $url
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $name, $url) { 
+            $listener->onUploadFile($phone, $name, $url);
         };
         $this->fireCallback($callbackEvent);          
     }
@@ -769,8 +769,8 @@ class WhatsAppEvent
         $phone,
         $name
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) { 
-            $listener;
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $name) { 
+            $listener->onUploadFileFailed($phone, $name);
         };
         $this->fireCallback($callbackEvent);          
     }
