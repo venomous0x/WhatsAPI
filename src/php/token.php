@@ -12,19 +12,19 @@ function generateRequestToken($country, $phone) {
 
 	//TODO: This phone prefix split XXX-ZZZZZ... is ok for +34 numbers, but needs to be checked
 	//      for other countries
-	$phone1 = substr($phone, 0, 3);
+//	$phone1 = substr($phone, 0, 3);
 	$phone2 = substr($phone, 3);
 
-	// This AES secret is not really needed right now
-	$id = base64_decode($waString) . $country . $phone2;
-	$salt = substr(base64_decode($noMediaHash),2,4);
-	$key = pbkdf2('sha1', $id, $salt, 16, 16, true);
-	$iv = substr(base64_decode($noMediaHash),6,16);
-	$data = substr(base64_decode($noMediaHash),22);
-	$td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', 'nofb', '');
-	mcrypt_generic_init($td, $key, $iv);
-	$aes_secret = mcrypt_generic($td, $data);
-	mcrypt_module_close($td);
+//	// This AES secret is not really needed right now
+//	$id = base64_decode($waString) . $country . $phone2;
+//	$salt = substr(base64_decode($noMediaHash),2,4);
+//	$key = pbkdf2('sha1', $id, $salt, 16, 16, true);
+//	$iv = substr(base64_decode($noMediaHash),6,16);
+//	$data = substr(base64_decode($noMediaHash),22);
+//	$td = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', 'nofb', '');
+//	mcrypt_generic_init($td, $key, $iv);
+//	$aes_secret = mcrypt_generic($td, $data);
+//	mcrypt_module_close($td);
 
 
 	// We xor this file because I don't want to have a copyrighted png 
