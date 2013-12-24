@@ -11,7 +11,10 @@ $listener = new WhatsAppEventListenerCapture();
 $w->eventManager()->addEventListener($listener);
 
 // Old event bindings:
-$old_function_called = array();
+$old_function1_called = array();
+$old_function2_called = array();
+
+// Function bound to variable:
 $oldFunction = function(
     $phone, 
     $from, 
@@ -20,8 +23,8 @@ $oldFunction = function(
     $time, 
     $name, 
     $message 
-) use (&$old_function_called) {
-    array_push($old_function_called, array( 
+) use (&$old_function1_called) {
+    array_push($old_function1_called, array( 
         'onGetMessage',
         array(
             $phone, 
@@ -34,7 +37,37 @@ $oldFunction = function(
         )
     ) );
 };
+
+// Named funciton:
+function oldFunction2(
+    $phone, 
+    $from, 
+    $msgid,
+    $type, 
+    $time, 
+    $name, 
+    $message 
+) {
+    global $old_function2_called;
+    
+    array_push($old_function2_called, array( 
+        'onGetMessage',
+        array(
+            $phone, 
+            $from, 
+            $msgid,
+            $type, 
+            $time, 
+            $name, 
+            $message             
+        )
+    ) );
+};
+
+// Callback approach:
 $w->eventManager()->bind('onGetMessage', $oldFunction );
+// String approach:
+$w->eventManager()->bind('onGetMessage', 'oldFunction2' );
 
 print( "Test #1: onGetMessage\n" );
 /*
@@ -95,13 +128,33 @@ unset($actual[0][1][1]); // Remove the time.
 
 // Analyze the results:
 if( $expected === $actual 
-    && $old_expected === $old_function_called ) {
-    print( "Test Passed.\n");
+    && $old_expected === $old_function1_called
+    && $old_expected === $old_function2_called ) {
+    print( "Test 1 Passed.\n");
 } else {
-    print( "Test Failed!!!!!\n" );
+    print( "Test 1 Failed!!!!!\n" );
 }
-$old_function_called = array();
+$old_function1_called = array();
+$old_function2_called = array();
 
+$expected = array(
+    //First event raised:
+    array( 
+        // Event name:
+        'onGetMessage',
+        // Event Arguments:
+        array(
+            '$username',
+            '441234123456',
+            '1234567890-123',
+            'chat',
+            '1234567890',
+            'First LastName',
+            'TestMessage'
+        )
+    )
+);
+$old_expected = $expected;
 
 print( "Test #2: Legacy Fire\n" );
 $w->eventManager()->fire('onGetMessage', array(        
@@ -113,15 +166,18 @@ $w->eventManager()->fire('onGetMessage', array(
     'First LastName',
     'TestMessage'
 ) );
+
 // Analyze the results:
 $actual = $listener->getAndResetCapture();
-if( $old_expected === $actual 
-    && $old_expected === $old_function_called ) {
-    print( "Test Passed.\n");
+if( $expected === $actual 
+    && $old_expected === $old_function1_called
+    && $old_expected === $old_function2_called ) {
+    print( "Test 2 Passed.\n");
 } else {
-    print( "Test Failed!!!!!\n" );
+    print( "Test 2 Failed!!!!!\n" );
 }
-$old_function_called = array();
+$old_function1_called = array();
+$old_function2_called = array();
     
 
 print( "Test #3: onGetGroupMessage\n" );
@@ -179,9 +235,9 @@ $expected = array(
 unset($actual[0][1][1]); // Remove the time.
 
 if( $expected === $actual ) {
-    print( "Test Passed.\n");
+    print( "Test 3 Passed.\n");
 } else {
-    print( "Test Failed!!!!!\n" );
+    print( "Test 3 Failed!!!!!\n" );
 }
      
         
