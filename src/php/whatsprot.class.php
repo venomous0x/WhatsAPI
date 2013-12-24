@@ -2008,18 +2008,19 @@ class WhatsProt
                 && strncmp($node->getAttribute('from'), $this->phoneNumber, strlen($this->phoneNumber)) != 0
                 && strpos($node->getAttribute('from'), "-") !== false
                 && $node->getAttribute('type') != null) {
-                $groupId = reset(explode('@', $node->getAttribute('from')));
+                $groupId = self::parseJID($node->getAttribute('from'));
                 if ($node->getAttribute('add') != null) {
                     $this->eventManager()->fireGroupsParticipantsAdd(
                         $this->phoneNumber,
-                        $groupId, reset(explode('@', $node->getAttribute('add')))
+                        $groupId,
+                        self::parseJID($node->getAttribute('add'))
                     );
                 } elseif ($node->getAttribute('remove') != null) {
                     $this->eventManager()->fireGroupsParticipantsRemove(
                         $this->phoneNumber,
                         $groupId,
-                        reset(explode('@', $node->getAttribute('remove'))),
-                        reset(explode('@', $node->getAttribute('author')))
+                        self::parseJID($node->getAttribute('remove')),
+                        self::parseJID($node->getAttribute('author'))
                     );
                 }
             }
@@ -2117,7 +2118,7 @@ class WhatsProt
                         );
                     }
                     if($node->nodeIdContains('getgroupparticipants')){
-                        $groupId = reset(explode('@', $node->getAttribute('from')));
+                        $groupId = self::parseJID($node->getAttribute('from'));
                         $this->eventManager()->fireGetGroupParticipants(
                             $this->phoneNumber,
                             $groupId,
@@ -2711,4 +2712,14 @@ class WhatsProt
         return $string;
     }
 
+    /**
+     * @param string $jid
+     * @return string
+     */
+    public static function parseJID($jid)
+    {
+        $parts = explode('@', $jid);
+        $parts = reset($parts);
+        return $parts;
+    }
 }
