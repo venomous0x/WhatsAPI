@@ -571,7 +571,7 @@ class Whatsapp
 
         if (!empty($groupArray)) {
             foreach ($groupArray as $group) {
-                $formattedGroups[] = array('name' => "GROUP: " . $group['subject'], 'id' => $group['group_id']);
+                $formattedGroups[] = array('name' => "GROUP: " . $group['subject'], 'id' => $group['id']);
             }
 
             $this->waGroupList = $formattedGroups;
