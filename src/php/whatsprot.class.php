@@ -1980,6 +1980,7 @@ class WhatsProt
                         reset($reset_from),
                         $node->getAttribute('t'),
                         reset($reset_author),
+                        reset($reset_author),
                         $node->getChild(0)->getAttribute('name'),
                         $node->getChild(2)->getData()
                     );
