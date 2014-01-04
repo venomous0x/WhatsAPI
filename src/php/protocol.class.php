@@ -164,6 +164,15 @@ class ProtocolNode
         return $ret;
     }
 
+    /**
+     * @param string $needle
+     * @return boolean
+     */
+    public function nodeIdContains($needle)
+    {
+        return (strpos($this->getAttribute("id"), $needle) !== false);
+    }
+
     //get children supports string tag or int index
     /**
      * @param $tag
