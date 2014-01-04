@@ -367,15 +367,17 @@ class WhatsProt
     }
 
     /**
-     * Disconnect to the WhatsApp network.
+     * Disconnect from the WhatsApp network.
      */
     public function disconnect()
     {
-        fclose($this->socket);
-        $this->eventManager()->fireDisconnect(
-            $this->phoneNumber, 
-            $this->socket
-        );
+        if (is_resource($this->socket)) {
+            fclose($this->socket);
+            $this->eventManager()->fireDisconnect(
+                $this->phoneNumber,
+                $this->socket
+            );
+        }
     }
 
     /**
