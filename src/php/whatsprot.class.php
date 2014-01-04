@@ -367,15 +367,17 @@ class WhatsProt
     }
 
     /**
-     * Disconnect to the WhatsApp network.
+     * Disconnect from the WhatsApp network.
      */
     public function disconnect()
     {
-        fclose($this->socket);
-        $this->eventManager()->fireDisconnect(
-            $this->phoneNumber, 
-            $this->socket
-        );
+        if (is_resource($this->socket)) {
+            fclose($this->socket);
+            $this->eventManager()->fireDisconnect(
+                $this->phoneNumber,
+                $this->socket
+            );
+        }
     }
 
     /**
@@ -1231,7 +1233,7 @@ class WhatsProt
             $txt
         );
         //listen for response
-        $this->pollMessages();
+        $this->waitForServer($messageHash["id"]);
     }
 
     /**
@@ -1977,6 +1979,7 @@ class WhatsProt
                         $this->phoneNumber,
                         reset($reset_from),
                         $node->getAttribute('t'),
+                        reset($reset_author),
                         reset($reset_author),
                         $node->getChild(0)->getAttribute('name'),
                         $node->getChild(2)->getData()
