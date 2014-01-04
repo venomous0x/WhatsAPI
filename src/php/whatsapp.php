@@ -774,8 +774,6 @@ class Whatsapp
                 </style>
                 <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
 
-                <!-- Javascript -->
-                <script type="text/javascript" src="//scottjehl.github.io/iOS-Orientationchange-Fix/ios-orientationchange-fix.js"></script>
             </head>
 
             <body>
