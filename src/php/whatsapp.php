@@ -905,7 +905,7 @@ class Whatsapp
                         -webkit-border-radius: 5px;
                     }
                     .nav-tabs>li>a {
-                        padding: 0 6px;
+                        padding: 0 5px;
                         line-height: 15px;
                         font-size: 10px;
                     }
