@@ -571,7 +571,7 @@ class Whatsapp
 
         if (!empty($groupArray)) {
             foreach ($groupArray as $group) {
-                $formattedGroups[] = array('name' => "GROUP: " . $group['subject'], 'id' => $group['group_id']);
+                $formattedGroups[] = array('name' => "GROUP: " . $group['subject'], 'id' => $group['id']);
             }
 
             $this->waGroupList = $formattedGroups;
@@ -774,8 +774,6 @@ class Whatsapp
                 </style>
                 <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-responsive.min.css" rel="stylesheet">
 
-                <!-- Javascript -->
-                <script type="text/javascript" src="//scottjehl.github.io/iOS-Orientationchange-Fix/ios-orientationchange-fix.js"></script>
             </head>
 
             <body>
@@ -905,7 +903,7 @@ class Whatsapp
                         -webkit-border-radius: 5px;
                     }
                     .nav-tabs>li>a {
-                        padding: 0 6px;
+                        padding: 0 5px;
                         line-height: 15px;
                         font-size: 10px;
                     }
