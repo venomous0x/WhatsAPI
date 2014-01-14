@@ -1,0 +1,13 @@
+#!/usr/bin/php
+<?php
+ 
+require_once('whatsapp_whatsapi_config.php');
+ 
+$destinationPhone = '+212643136746';
+ 
+$w = new WhatsProt($userPhone, $userIdentity, $sanae, $debug);
+$w->Connect();
+$w->LoginWithPassword($mos411973);
+$w->Message($destinationPhone, $argv[1]);
+ 
+?>
