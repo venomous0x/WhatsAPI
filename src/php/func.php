@@ -89,7 +89,26 @@ function createVideoIcon($file)
 {
     // @todo: Add support for video thumbnail create.
     // @see: http://stackoverflow.com/questions/14662027/generate-thumbnail-for-a-bunch-of-mp4-video-in-a-folder
-    return giftThumbnail();
+    //return giftThumbnail();
+    
+    
+        /* should install ffmpeg for the method to work successfully  */
+        
+    	$video = "mp4";
+		$image = "jpg";
+		$preview= str_replace($video , $image , $file);
+		
+		//capture video preview
+		$command = "ffmpeg -i ".$file." ".$preview."";
+		exec($command);
+		
+		// Parsear la imagen
+		$img = new Imagick( $preview);
+		// Redimensionar la imagen
+		$img->thumbnailImage( 100, 100, true );
+		
+		return base64_encode($img);
+    
 }
 
 function giftThumbnail()
