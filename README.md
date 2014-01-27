@@ -43,7 +43,7 @@ Interface to WhatsApp Messenger
 
 *Big overhaul in the code. Big thanks to:*
 - *[Ali Hubail](https://github.com/hubail) and*
-- *[Ahmed Moh'd](fb.com/ahmed.mhd) for making this project happen (and adding me as a member)*
+- *[Ahmed Moh'd](http://fb.com/ahmed.mhd) for making this project happen (and adding me as a member)*
 - *[Jannik Vogel](https://github.com/JayFoxRox) for helping me retrieve the latest WhatsApp token, someone should write a book about it some day..*
 - *[Tarek Galal](https://github.com/tgalal) for providing the latest WhatsApp functionality in yowsup*
 - *[Atans](https://github.com/atans) and*
