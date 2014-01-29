@@ -459,7 +459,7 @@ class WhatsProt
      */
     public function pollMessages()
     {
-        $this->processInboundData($this->readData());
+        $this->processInboundData($this->readStanza());
     }
 
     /**
@@ -1542,7 +1542,7 @@ class WhatsProt
         $this->sendNode($feat);
         $this->sendNode($auth);
 
-        $this->processInboundData($this->readData());
+        $this->pollMessages();
 
         if($this->loginStatus != static::CONNECTED_STATUS) {
             $data = $this->createAuthResponseNode();
@@ -1552,7 +1552,7 @@ class WhatsProt
         }
         $cnt = 0;
         do {
-            $this->processInboundData($this->readData());
+            $this->pollMessages();
         } while (($cnt++ < 100) && (strcmp($this->loginStatus, static::DISCONNECTED_STATUS) == 0));
         $this->eventManager()->fireLogin(
             $this->phoneNumber
@@ -2326,16 +2326,32 @@ class WhatsProt
     /**
      * Read 1024 bytes from the whatsapp server.
      */
-    protected function readData()
+    protected function readStanza()
     {
         $buff = '';
         if($this->socket != null)
         {
-            $ret = @fread($this->socket, 1024);
-            if ($ret) {
-                $buff = $this->incompleteMessage . $ret;
-                $this->incompleteMessage = '';
-            } else if (@feof($this->socket)) {
+            $header = @fread($this->socket, 3);//read stanza header
+            if(strlen($header) == 0)
+            {
+                //no data received
+                return;
+            }
+            if(strlen($header) != 3)
+            {
+                var_dump($header);
+                throw new Exception("Failed to read stanza header");
+            }
+            $treeLength = 0;
+            $treeLength = ord($header[1]) << 8;
++           $treeLength |= ord($header[2]) << 0;
+
+            $buff = @fread($this->socket, $treeLength);
+            if (strlen($buff) != $treeLength) {
+                var_dump($header, ord($header[1]), ord($header[2]), $treeLength, $buff);
+                throw new Exception("Tree length did not match received length");
+            } else
+            if (@feof($this->socket)) {
                 $error = "socket EOF, closing socket...";
                 fclose($this->socket);
                 $this->socket = null;
@@ -2344,6 +2360,7 @@ class WhatsProt
                     $error
                 );
             }
+            $buff = $header . $buff;
         }
 
         return $buff;
