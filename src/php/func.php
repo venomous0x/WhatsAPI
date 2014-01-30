@@ -93,8 +93,10 @@ function createVideoIcon($file)
     
     
         /* should install ffmpeg for the method to work successfully  */
-        
-    	$video = "mp4";
+        if (class_exists("Imagick") && checkFFMPEG())
+        {
+        	//generate thumbnail
+    		$video = "mp4";
 		$image = "jpg";
 		$preview= str_replace($video , $image , $file);
 		
@@ -103,12 +105,28 @@ function createVideoIcon($file)
 		exec($command);
 		
 		// Parsear la imagen
+		//TODO: Make it work using libGD (see createIcon())
 		$img = new Imagick( $preview);
 		// Redimensionar la imagen
 		$img->thumbnailImage( 100, 100, true );
 		
 		return base64_encode($img);
-    
+        }
+    	else
+    	{
+    		//fallback
+    		return giftThumbnail();
+    	}
+}
+
+function checkFFMPEG()
+{
+	//check if ffmpeg is intalled
+	$cmd = "ffmpeg -version";
+	$res =  exec($cmd, $output, $returnvalue);
+	if($returnvalue == 0)
+		return true;
+	return false;
 }
 
 function giftThumbnail()
