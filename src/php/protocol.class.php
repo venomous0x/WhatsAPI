@@ -236,14 +236,8 @@ class ProtocolNode
 
 class BinTreeNodeReader
 {
-    private $dictionary;
     private $input;
     private $key;
-
-    public function __construct($dictionary)
-    {
-        $this->dictionary = $dictionary;
-    }
 
     public function resetKey()
     {
@@ -286,12 +280,17 @@ class BinTreeNodeReader
     protected function getToken($token)
     {
         $ret = "";
-        if (($token >= 0) && ($token < count($this->dictionary))) {
-            $ret = $this->dictionary[$token];
-        } else {
-            throw new Exception("BinTreeNodeReader->getToken: Invalid token $token");
+        $subdict = false;
+        TokenMap::GetToken($token, $subdict, $ret);
+        if(!$ret)
+        {
+            $token = $this->readInt8();
+            TokenMap::GetToken($token, $subdict, $ret);
+            if(!$ret)
+            {
+                throw new Exception("BinTreeNodeReader->getToken: Invalid token $token");
+            }
         }
-
         return $ret;
     }
 
@@ -475,17 +474,7 @@ class BinTreeNodeReader
 class BinTreeNodeWriter
 {
     private $output;
-    private $tokenMap = array();
     private $key;
-
-    public function __construct($dictionary)
-    {
-        for ($i = 0; $i < count($dictionary); $i++) {
-            if (strlen($dictionary[$i]) > 0) {
-                $this->tokenMap[$dictionary[$i]] = $i;
-            }
-        }
-    }
 
     public function resetKey()
     {
@@ -502,7 +491,7 @@ class BinTreeNodeWriter
         $attributes = array();
         $header = "WA";
         $header .= $this->writeInt8(1);
-        $header .= $this->writeInt8(2);
+        $header .= $this->writeInt8(4);
 
         $attributes["to"] = $domain;
         $attributes["resource"] = $resource;
@@ -630,18 +619,24 @@ class BinTreeNodeWriter
 
     protected function writeString($tag)
     {
-        if (isset($this->tokenMap[$tag])) {
-            $key = $this->tokenMap[$tag];
-            $this->writeToken($key);
-        } else {
-            $index = strpos($tag, '@');
-            if ($index) {
-                $server = substr($tag, $index + 1);
-                $user = substr($tag, 0, $index);
-                $this->writeJid($user, $server);
-            } else {
-                $this->writeBytes($tag);
+        $intVal = -1;
+        $subdict = false;
+        if(TokenMap::TryGetToken($tag, $subdict, $intVal))
+        {
+            if($subdict)
+            {
+                $this->writeToken(236);
             }
+            $this->writeToken($intVal);
+            return;
+        }
+        $index = strpos($tag, '@');
+        if ($index) {
+            $server = substr($tag, $index + 1);
+            $user = substr($tag, 0, $index);
+            $this->writeJid($user, $server);
+        } else {
+            $this->writeBytes($tag);
         }
     }
 

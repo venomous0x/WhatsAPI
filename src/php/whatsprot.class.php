@@ -5,6 +5,8 @@ require_once 'func.php';
 require_once 'token.php';
 require_once 'rc4.php';
 require_once 'mediauploader.php';
+require_once 'keystream.class.php';
+require_once 'tokenmap.class.php';
 
 class WhatsProt
 {
@@ -73,9 +75,8 @@ class WhatsProt
      */
     public function __construct($number, $identity, $nickname, $debug = false)
     {
-        $dict = getDictionary();
-        $this->writer = new BinTreeNodeWriter($dict);
-        $this->reader = new BinTreeNodeReader($dict);
+        $this->writer = new BinTreeNodeWriter();
+        $this->reader = new BinTreeNodeReader();
         $this->debug = $debug;
         $this->phoneNumber = $number;
         if (!$this->checkIdentity($identity)) {
@@ -1353,12 +1354,13 @@ class WhatsProt
      */
     protected function authenticate()
     {
-        $key = pbkdf2('sha1', base64_decode($this->password), $this->challengeData, 16, 20, true);
-        $this->inputKey = new KeyStream($key);
-        $this->outputKey = new KeyStream($key);
-        $array = $this->phoneNumber . $this->challengeData . time();
-        $response = $this->outputKey->encode($array, 0, strlen($array), false);
-
+        $key = wa_pbkdf2('sha1', base64_decode($this->password), $this->challengeData, 16, 20, true);
+        $keys = KeyStream::GenerateKeys(base64_decode($this->password), $this->challengeData);
+        $this->inputKey = new KeyStream($keys[2], $keys[3]);
+        $this->outputKey = new KeyStream($keys[0], $keys[1]);
+        $phone = $this->dissectPhone();
+        $array = "\0\0\0\0" . $this->phoneNumber . $this->challengeData . time() . static::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"], 3, "0", STR_PAD_LEFT) . "001";
+        $response = $this->outputKey->EncodeMessage($array, 0, strlen($array));
         return $response;
     }
 
@@ -1372,7 +1374,7 @@ class WhatsProt
     {
         $authHash = array();
         $authHash["xmlns"] = "urn:ietf:params:xml:ns:xmpp-sasl";
-        $authHash["mechanism"] = "WAUTH-1";
+        $authHash["mechanism"] = "WAUTH-2";
         $authHash["user"] = $this->phoneNumber;
         $data = $this->createAuthBlob();
         $node = new ProtocolNode("auth", $authHash, null, $data);
@@ -1383,13 +1385,13 @@ class WhatsProt
     protected function createAuthBlob()
     {
         if($this->challengeData) {
-            $key = pbkdf2('sha1', base64_decode($this->password), $this->challengeData, 16, 20, true);
+            $key = wa_pbkdf2('sha1', base64_decode($this->password), $this->challengeData, 16, 20, true);
             $this->inputKey = new KeyStream($key);
             $this->outputKey = new KeyStream($key);
             $this->reader->setKey($this->inputKey);
             //$this->writer->setKey($this->outputKey);
             $phone = $this->dissectPhone();
-            $array = $this->phoneNumber . $this->challengeData . time() . static::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"], 3, "0", STR_PAD_LEFT) . "001";
+            $array = "\0\0\0\0" . $this->phoneNumber . $this->challengeData . time() . static::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"], 3, "0", STR_PAD_LEFT) . "001";
             $this->challengeData = null;
             return $this->outputKey->encode($array, 0, strlen($array), false);
         }
@@ -1543,7 +1545,7 @@ class WhatsProt
         $this->sendNode($auth);
 
         $this->pollMessages();
-
+die("AHA");
         if($this->loginStatus != static::CONNECTED_STATUS) {
             $data = $this->createAuthResponseNode();
             $this->sendNode($data);
@@ -1739,6 +1741,7 @@ class WhatsProt
      */
     protected function processInboundData($data)
     {
+        die(var_dump($data));
         try {
             $node = $this->reader->nextTree($data);
             if( $node != null ) {
@@ -2335,6 +2338,7 @@ class WhatsProt
             if(strlen($header) == 0)
             {
                 //no data received
+                die("zero");
                 return;
             }
             if(strlen($header) != 3)
@@ -2361,6 +2365,10 @@ class WhatsProt
                 );
             }
             $buff = $header . $buff;
+        }
+        else
+        {
+            throw new Exception("Socket closed");
         }
 
         return $buff;
