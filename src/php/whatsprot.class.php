@@ -417,14 +417,8 @@ class WhatsProt
      *
      * If you know your password and wish to use it without generating
      * a new password - use the loginWithPassword() method instead.
-     *
-     * @param  bool $profileSubscribe
-     *
-     * Set this to true if you would like Whatsapp to send a
-     * notification to your phone when one of your contacts
-     * changes/update their picture.
      */
-    public function login($profileSubscribe = false)
+    public function login()
     {
         $this->accountInfo = (array) $this->checkCredentials();
         if ($this->accountInfo['status'] == 'ok') {
@@ -433,7 +427,7 @@ class WhatsProt
             }
             $this->password = $this->accountInfo['pw'];
         }
-        $this->doLogin($profileSubscribe);
+        $this->doLogin();
     }
 
     /**
@@ -443,16 +437,15 @@ class WhatsProt
      * using this method.
      *
      * @param  string  $password         Your whatsapp password. You must already know this!
-     * @param  bool $profileSubscribe Add a feature
      */
-    public function loginWithPassword($password, $profileSubscribe = false)
+    public function loginWithPassword($password)
     {
         $this->password = $password;
         $challengeData = @file_get_contents("nextChallenge.dat");
         if($challengeData) {
             $this->challengeData = $challengeData;
         }
-        $this->doLogin($profileSubscribe);
+        $this->doLogin();
     }
 
     /**
@@ -1552,7 +1545,7 @@ class WhatsProt
         $this->eventManager()->fireLogin(
             $this->phoneNumber
         );
-        //$this->sendPresence();
+        $this->sendPresence();
     }
 
     /**
