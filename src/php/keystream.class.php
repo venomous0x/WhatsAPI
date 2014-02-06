@@ -34,7 +34,7 @@ class KeyStream {
         $nonce .= '0';
         for($j = 0; $j < count($array); $j++)
         {
-            $nonce[(strlen($nonce) - 1)] = $array2[$j];
+            $nonce[(strlen($nonce) - 1)] = chr($array2[$j]);
             $foo = wa_pbkdf2("sha1", $password, $nonce, 2, 20, true);
             $array[$j] = $foo;
         }
@@ -43,7 +43,7 @@ class KeyStream {
 
     public function DecodeMessage($buffer, $macOffset, $offset, $length)
     {
-        $mac = $this->computeMac($buffer, $offset);
+        $mac = $this->computeMac($buffer, $offset, $length);
         //validate mac
         for($i = 0; $i < 4; $i++)
         {
@@ -54,20 +54,20 @@ class KeyStream {
                 throw new Exception("MAC mismatch: $foo != $bar");
             }
         }
-        $this->rc4->cipher($buffer, $offset, $length);
+        return $this->rc4->cipher($buffer, $offset, $length);
     }
 
     public function EncodeMessage($buffer, $offset, $length)
     {
         $data = $this->rc4->cipher($buffer, $offset, $length);
-        $mac = $this->computeMac($buffer, $offset);
-        return $mac . $data;
+        $mac = $this->computeMac($data, $offset, $length);
+        return substr($mac, 0, 4) . substr($data, 4);
     }
 
-    private function computeMac($buffer, $offset)
+    private function computeMac($buffer, $offset, $length)
     {
         $hmac = hash_init("sha1", HASH_HMAC, $this->macKey);
-        hash_update($hmac, substr($buffer, $offset));
+        hash_update($hmac, substr($buffer, $offset, $length));
         $array = chr($this->seq >> 24)
             . chr($this->seq >> 16)
             . chr($this->seq >> 8)
