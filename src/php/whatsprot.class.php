@@ -740,15 +740,13 @@ class WhatsProt
      */
     public function sendGetRequestLastSeen($to)
     {
-        $queryHash = array();
-        $queryHash['xmlns'] = "jabber:iq:last";
-        $queryNode = new ProtocolNode("query", $queryHash, null, null);
+        $queryNode = new ProtocolNode("query", null, null, null);
 
         $messageHash = array();
         $messageHash["to"] = $this->getJID($to);
         $messageHash["type"] = "get";
         $messageHash["id"] = $this->createMsgId("lastseen");
-        $messageHash["from"] = $this->getJID($this->phoneNumber);
+        $messageHash["xmlns"] = "jabber:iq:last";
 
         $messageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
         $this->sendNode($messageNode);
