@@ -407,14 +407,14 @@ class TokenMap
         $foo = array_search($string, self::$primaryStrings);
         if($foo)
         {
-            $token = self::$primaryStrings[$foo];
+            $token = $foo;
             return true;
         }
         $foo = array_search($string, self::$secondaryStrings);
         if($foo)
         {
             $subdict = true;
-            $token = self::$secondaryStrings[$foo];
+            $token = $foo;
             return true;
         }
         return false;
