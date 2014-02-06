@@ -452,7 +452,12 @@ class WhatsProt
      */
     public function pollMessages()
     {
-        $this->processInboundData($this->readStanza());
+        $stanza = $this->readStanza();
+        while($stanza)
+        {
+            $this->processInboundData($stanza);
+            $stanza = $this->readStanza();
+        }
     }
 
     /**
@@ -1773,41 +1778,11 @@ class WhatsProt
                 $this->sendMessageReceived($node);
             }
 
-            // check if it is a response to a status request
-            $foo = explode('@', $node->getAttribute('from'));
-            if (is_array($foo) && count($foo) > 1 && strcmp($foo[1], "s.us") == 0 && $node->getChild('body') != null) {
-                 $this->eventManager()->fireGetStatus(
-                    $this->phoneNumber,
-                    $node->getAttribute('from'),
-                    $node->getAttribute('type'),
-                    $node->getAttribute('id'),
-                    $node->getAttribute('t'),
-                    $node->getChild("body")->getData()
-                 );
-            }
             if ($node->hasChild('x') && $this->lastId == $node->getAttribute('id')) {
                 $this->sendNextMessage();
             }
             if ($this->newMsgBind && $node->getChild('body')) {
                 $this->newMsgBind->process($node);
-            }
-            if ($node->getChild('composing') != null) {
-                $this->eventManager()->fireMessageComposing(
-                    $this->phoneNumber,
-                    $node->getAttribute('from'),
-                    $node->getAttribute('id'),
-                    $node->getAttribute('type'),
-                    $node->getAttribute('t')
-                );
-            }
-            if ($node->getChild('paused') != null) {
-                $this->eventManager()->fireMessagePaused(
-                    $this->phoneNumber,
-                    $node->getAttribute('from'),
-                    $node->getAttribute('type'),
-                    $node->getAttribute('id'),
-                    $node->getAttribute('t')
-                );
             }
             if ($node->getChild('notify') != null && $node->getChild(0)->getAttribute('name') != '' && $node->getChild('body') != null) {
                 $author = $node->getAttribute("author");
@@ -1838,6 +1813,8 @@ class WhatsProt
                         $node->getChild("body")->getData()
                     );
                 }
+
+                $this->sendMessageReceived($node);
             }
             if ($node->hasChild('notification') && $node->getChild('notification')->getAttribute('type') == 'picture') {
                 if ($node->getChild('notification')->hasChild('set')) {
@@ -1937,6 +1914,8 @@ class WhatsProt
                         $node->getChild(2)->getData()
                     );
                 }
+
+                $this->sendMessageReceived($node);
             }
             if ($node->getChild('x') != null) {
                 $this->serverReceivedId = $node->getAttribute('id');
@@ -2145,7 +2124,54 @@ class WhatsProt
                 default:
                     throw new Exception("Method $type not implemented");
             }
+            $this->sendNotificationAck($node);
         }
+        if($node->getTag() == "ib")
+        {
+            foreach($node->getChildren() as $child)
+            {
+                switch($child->getTag())
+                {
+                    case "dirty":
+                        $this->sendClearDirty(array($child->getAttribute("type")));
+                        break;
+                    case "offline":
+
+                        break;
+                    default:
+                        throw new Exception("ib handler for " . $child->getTag() . " not implemented");
+                }
+            }
+        }
+        if($node->getTag() == "ack")
+        {
+            ////on get ack
+        }
+
+    }
+
+    /**
+     * @param $node ProtocolNode
+     */
+    protected function sendNotificationAck($node)
+    {
+        $from = $node->getAttribute("from");
+        $to = $node->getAttribute("to");
+        $participant = $node->getAttribute("participant");
+        $id = $node->getAttribute("id");
+        $type = $node->getAttribute("type");
+
+        $attributes = array();
+        if($to)
+            $attributes["from"] = $to;
+        if($participant)
+            $attributes["participant"] = $participant;
+        $attributes["to"] = $from;
+        $attributes["class"] = "notification";
+        $attributes["id"] = $id;
+        $attributes["type"] = $type;
+        $ack = new ProtocolNode("ack", $attributes, null, null);
+        $this->sendNode($ack);
     }
     
     /**
@@ -2521,7 +2547,7 @@ class WhatsProt
      *
      * @param $to
      *   The recipient to send.
-     * @param $node
+     * @param $node ProtocolNode
      *   The node that contains the message.
      */
     protected function sendMessageNode($to, $node, $id = null)
@@ -2540,7 +2566,14 @@ class WhatsProt
 
         $messageHash = array();
         $messageHash["to"] = $this->getJID($to);
-        $messageHash["type"] = "chat";
+        if($node->getTag() == "body")
+        {
+            $messageHash["type"] = "text";
+        }
+        else
+        {
+            $messageHash["type"] = "chat";
+        }
         $messageHash["id"] = ($id == null?$this->createMsgId("message"):$id);
         $messageHash["t"] = time();
 

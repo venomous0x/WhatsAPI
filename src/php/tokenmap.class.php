@@ -439,7 +439,7 @@ class TokenMap
 
         if($token < 0 || $token > count($tokenMap))
         {
-            throw new Exception("Error invalid token $token");
+            return;//fail
         }
         $string = $tokenMap[$token];
         if(!$string)
