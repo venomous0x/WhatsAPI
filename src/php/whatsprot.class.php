@@ -581,15 +581,15 @@ class WhatsProt
 
         $catnodes = array();
         foreach ($categories as $category) {
-            $catnode = new ProtocolNode("category", array("name" => $category), null, null);
+            $catnode = new ProtocolNode("clean", array("type" => $category), null, null);
             $catnodes[] = $catnode;
         }
-        $clean = new ProtocolNode("clean", array("xmlns" => "urn:xmpp:whatsapp:dirty"), $catnodes, null);
         $node = new ProtocolNode("iq", array(
             "id" => $msgId,
             "type" => "set",
-            "to" => "s.whatsapp.net"
-                ), array($clean), null);
+            "to" => "s.whatsapp.net",
+            "xmlns" => "urn:xmpp:whatsapp:dirty"
+                ), $catnodes, null);
         $this->sendNode($node);
     }
 
