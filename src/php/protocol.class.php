@@ -237,6 +237,7 @@ class ProtocolNode
 class BinTreeNodeReader
 {
     private $input;
+    /** @var $key KeyStream */
     private $key;
 
     public function resetKey()
@@ -264,8 +265,8 @@ class BinTreeNodeReader
         $this->readInt24();
         if ($stanzaFlag & 8) {
             if (isset($this->key)) {
-                $remainingData = substr($this->input, $stanzaSize);
-                $this->input = $this->key->decode($this->input, 0, $stanzaSize) . $remainingData;
+                $realSize = $stanzaSize - 4;
+                $this->input = $this->key->DecodeMessage($this->input, $realSize, 0, $realSize);// . $remainingData;
             } else {
                 throw new Exception("Encountered encrypted message, missing key");
             }
@@ -509,7 +510,7 @@ class BinTreeNodeWriter
      * @param ProtocolNode $node
      * @return string
      */
-    public function write($node)
+    public function write($node, $encrypt = true)
     {
         if ($node == null) {
             $this->output .= "\x00";
@@ -517,7 +518,7 @@ class BinTreeNodeWriter
             $this->writeInternal($node);
         }
 
-        return $this->flushBuffer();
+        return $this->flushBuffer($encrypt);
     }
 
     /**
@@ -549,44 +550,40 @@ class BinTreeNodeWriter
         }
     }
 
-    protected function flushBuffer()
+    protected function parseInt24($data)
     {
-        //$data = (isset($this->key)) ? $this->key->encode($this->output, 0, strlen($this->output)) : $this->output;
+        $ret = ord(substr($data, 0, 1)) << 16;
+        $ret |= ord(substr($data, 1, 1)) << 8;
+        $ret |= ord(substr($data, 2, 1)) << 0;
+        return $ret;
+    }
 
+    protected function flushBuffer($encrypt = true)
+    {
         $size = strlen($this->output);
         $data = $this->output;
-        if($this->key != null)
+        if($this->key != null && $encrypt)
         {
             $size = $this->getInt24($size);
             //encrypt
             $data = $this->key->EncodeMessage($data, 0, $size);
             $len = strlen($data);
-            $size[0] = ((8 << 4) | (($len & 16711680) >> 16));
-            $size[1] = (($len & 65280) >> 8);
-            $size[2] = ($len & 255);
+            $size[0] = chr((8 << 4) | (($len & 16711680) >> 16));
+            $size[1] = chr(($len & 65280) >> 8);
+            $size[2] = chr($len & 255);
+            $size = $this->parseInt24($size);
         }
-
         $ret = $this->writeInt24($size) . $data;
         $this->output = '';
-        return $ret;
-
-
-
-
-        $ret = $this->writeInt8(isset($this->key) ? (1 << 4) : 0);
-        $ret .= $this->writeInt16($size);
-        $ret .= $data;
-        $this->output = "";
-
         return $ret;
     }
 
     protected function getInt24($length)
     {
         $ret = '';
-        $ret .= (($length & 0xf0000) >> 16);
-        $ret .= (($length & 0xff00) >> 8);
-        $ret .= ($length & 0xff);
+        $ret .= chr((($length & 0xf0000) >> 16));
+        $ret .= chr((($length & 0xff00) >> 8));
+        $ret .= chr(($length & 0xff));
         return $ret;
     }
 

@@ -1354,13 +1354,12 @@ class WhatsProt
      */
     protected function authenticate()
     {
-        $key = wa_pbkdf2('sha1', base64_decode($this->password), $this->challengeData, 16, 20, true);
         $keys = KeyStream::GenerateKeys(base64_decode($this->password), $this->challengeData);
         $this->inputKey = new KeyStream($keys[2], $keys[3]);
         $this->outputKey = new KeyStream($keys[0], $keys[1]);
         $phone = $this->dissectPhone();
-        $array = "\0\0\0\0" . $this->phoneNumber . $this->challengeData . time() . static::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"], 3, "0", STR_PAD_LEFT) . "001";
-        $response = $this->outputKey->EncodeMessage($array, 0, strlen($array));
+        $array = "\0\0\0\0" . $this->phoneNumber . $this->challengeData;// . time() . static::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"], 3, "0", STR_PAD_LEFT) . "001";
+        $response = $this->outputKey->EncodeMessage($array, 4, strlen($array) - 4);
         return $response;
     }
 
@@ -1386,14 +1385,14 @@ class WhatsProt
     {
         if($this->challengeData) {
             $key = wa_pbkdf2('sha1', base64_decode($this->password), $this->challengeData, 16, 20, true);
-            $this->inputKey = new KeyStream($key);
-            $this->outputKey = new KeyStream($key);
+            $this->inputKey = new KeyStream($key[2], $key[3]);
+            $this->outputKey = new KeyStream($key[0], $key[1]);
             $this->reader->setKey($this->inputKey);
             //$this->writer->setKey($this->outputKey);
             $phone = $this->dissectPhone();
             $array = "\0\0\0\0" . $this->phoneNumber . $this->challengeData . time() . static::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"], 3, "0", STR_PAD_LEFT) . "001";
             $this->challengeData = null;
-            return $this->outputKey->encode($array, 0, strlen($array), false);
+            return $this->outputKey->EncodeMessage($array, 0, strlen($array), false);
         }
         return null;
     }
@@ -1421,15 +1420,9 @@ class WhatsProt
      * @return ProtocolNode
      *   Return itself.
      */
-    protected function createFeaturesNode($profileSubscribe = false)
+    protected function createFeaturesNode()
     {
-        $nodes = array();
-        $nodes[] = new ProtocolNode("receipt_acks", null, null, "");
-        if ($profileSubscribe) {
-            $nodes[] = new ProtocolNode("w:profile:picture", array("type" => "all"), null, '');
-        }
-        $nodes[] = new ProtocolNode("status", null, null, "");
-        $parent = new ProtocolNode("stream:features", null, $nodes, "");
+        $parent = new ProtocolNode("stream:features", null, null, null);
 
         return $parent;
     }
@@ -1532,34 +1525,34 @@ class WhatsProt
      * notification to your phone when one of your contacts
      * changes/update their picture.
      */
-    protected function doLogin($profileSubscribe = false)
+    protected function doLogin()
     {
         $this->writer->resetKey();
         $this->reader->resetKey();
         $resource = static::WHATSAPP_DEVICE . '-' . static::WHATSAPP_VER . '-' . static::PORT;
         $data = $this->writer->StartStream(static::WHATSAPP_SERVER, $resource);
-        $feat = $this->createFeaturesNode($profileSubscribe);
+        $feat = $this->createFeaturesNode();
         $auth = $this->createAuthNode();
         $this->sendData($data);
         $this->sendNode($feat);
         $this->sendNode($auth);
 
         $this->pollMessages();
-die("AHA");
-        if($this->loginStatus != static::CONNECTED_STATUS) {
-            $data = $this->createAuthResponseNode();
-            $this->sendNode($data);
-            $this->reader->setKey($this->inputKey);
-            $this->writer->setKey($this->outputKey);
-        }
         $cnt = 0;
         do {
             $this->pollMessages();
-        } while (($cnt++ < 100) && (strcmp($this->loginStatus, static::DISCONNECTED_STATUS) == 0));
+            if($this->challengeData != null) {
+                $data = $this->createAuthResponseNode();
+                $this->sendNode($data);
+                $this->reader->setKey($this->inputKey);
+                $this->writer->setKey($this->outputKey);
+                $this->pollMessages();
+            }
+        } while ($this->challengeData == null && ($cnt++ < 100) && (strcmp($this->loginStatus, static::DISCONNECTED_STATUS) == 0));
         $this->eventManager()->fireLogin(
             $this->phoneNumber
         );
-        $this->sendPresence();
+        //$this->sendPresence();
     }
 
     /**
@@ -1741,7 +1734,6 @@ die("AHA");
      */
     protected function processInboundData($data)
     {
-        die(var_dump($data));
         try {
             $node = $this->reader->nextTree($data);
             if( $node != null ) {
@@ -2338,12 +2330,10 @@ die("AHA");
             if(strlen($header) == 0)
             {
                 //no data received
-                die("zero");
                 return;
             }
             if(strlen($header) != 3)
             {
-                var_dump($header);
                 throw new Exception("Failed to read stanza header");
             }
             $treeLength = 0;
@@ -2352,7 +2342,6 @@ die("AHA");
 
             $buff = @fread($this->socket, $treeLength);
             if (strlen($buff) != $treeLength) {
-                var_dump($header, ord($header[1]), ord($header[2]), $treeLength, $buff);
                 throw new Exception("Tree length did not match received length");
             } else
             if (@feof($this->socket)) {
@@ -2604,10 +2593,10 @@ die("AHA");
      * Send node to the WhatsApp server.
      * @param ProtocolNode $node
      */
-    protected function sendNode($node)
+    protected function sendNode($node, $encrypt = true)
     {
         $this->debugPrint($node->nodeString("tx  ") . "\n");
-        $this->sendData($this->writer->write($node));
+        $this->sendData($this->writer->write($node, $encrypt));
     }
 
     /**
