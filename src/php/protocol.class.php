@@ -564,14 +564,14 @@ class BinTreeNodeWriter
         $data = $this->output;
         if($this->key != null && $encrypt)
         {
-            $size = $this->getInt24($size);
+            $bsize = $this->getInt24($size);
             //encrypt
             $data = $this->key->EncodeMessage($data, 0, $size);
             $len = strlen($data);
-            $size[0] = chr((8 << 4) | (($len & 16711680) >> 16));
-            $size[1] = chr(($len & 65280) >> 8);
-            $size[2] = chr($len & 255);
-            $size = $this->parseInt24($size);
+            $bsize[0] = chr((8 << 4) | (($len & 16711680) >> 16));
+            $bsize[1] = chr(($len & 65280) >> 8);
+            $bsize[2] = chr($len & 255);
+            $size = $this->parseInt24($bsize);
         }
         $ret = $this->writeInt24($size) . $data;
         $this->output = '';
