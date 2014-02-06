@@ -22,16 +22,17 @@ class rc4
 
     public function cipher($data, $offset, $length)
     {
-        $r = '';
+        $out = $data;
         for ($n = $length; $n > 0; $n--) {
-            $this->i = ($this->i + 1) & 255;
-            $this->j = ($this->j + $this->s[$this->i]) & 255;
+            $this->i = ($this->i + 1) & 0xff;
+            $this->j = ($this->j + $this->s[$this->i]) & 0xff;
             $this->swap($this->i, $this->j);
-            $d = ord($data{$offset++});
-            $r .= chr($d ^ $this->s[($this->s[$this->i] + $this->s[$this->j]) & 255]);
+            $d = ord($data{$offset});
+            $out[$offset] = chr($d ^ $this->s[($this->s[$this->i] + $this->s[$this->j]) & 0xff]);
+            $offset++;
         }
 
-        return $r;
+        return $out;
     }
 
     protected function swap($i, $j)
