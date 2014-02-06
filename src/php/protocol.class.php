@@ -474,6 +474,7 @@ class BinTreeNodeReader
 class BinTreeNodeWriter
 {
     private $output;
+    /** @var $key KeyStream */
     private $key;
 
     public function resetKey()
@@ -550,13 +551,42 @@ class BinTreeNodeWriter
 
     protected function flushBuffer()
     {
-        $data = (isset($this->key)) ? $this->key->encode($this->output, 0, strlen($this->output)) : $this->output;
-        $size = strlen($data);
+        //$data = (isset($this->key)) ? $this->key->encode($this->output, 0, strlen($this->output)) : $this->output;
+
+        $size = strlen($this->output);
+        $data = $this->output;
+        if($this->key != null)
+        {
+            $size = $this->getInt24($size);
+            //encrypt
+            $data = $this->key->EncodeMessage($data, 0, $size);
+            $len = strlen($data);
+            $size[0] = ((8 << 4) | (($len & 16711680) >> 16));
+            $size[1] = (($len & 65280) >> 8);
+            $size[2] = ($len & 255);
+        }
+
+        $ret = $this->writeInt24($size) . $data;
+        $this->output = '';
+        return $ret;
+
+
+
+
         $ret = $this->writeInt8(isset($this->key) ? (1 << 4) : 0);
         $ret .= $this->writeInt16($size);
         $ret .= $data;
         $this->output = "";
 
+        return $ret;
+    }
+
+    protected function getInt24($length)
+    {
+        $ret = '';
+        $ret .= (($length & 0xf0000) >> 16);
+        $ret .= (($length & 0xff00) >> 8);
+        $ret .= ($length & 0xff);
         return $ret;
     }
 
