@@ -22,16 +22,17 @@ class rc4
 
     public function cipher($data, $offset, $length)
     {
-        $r = '';
+        $out = $data;
         for ($n = $length; $n > 0; $n--) {
-            $this->i = ($this->i + 1) & 255;
-            $this->j = ($this->j + $this->s[$this->i]) & 255;
+            $this->i = ($this->i + 1) & 0xff;
+            $this->j = ($this->j + $this->s[$this->i]) & 0xff;
             $this->swap($this->i, $this->j);
-            $d = ord($data{$offset++});
-            $r .= chr($d ^ $this->s[($this->s[$this->i] + $this->s[$this->j]) & 255]);
+            $d = ord($data{$offset});
+            $out[$offset] = chr($d ^ $this->s[($this->s[$this->i] + $this->s[$this->j]) & 0xff]);
+            $offset++;
         }
 
-        return $r;
+        return $out;
     }
 
     protected function swap($i, $j)
@@ -43,32 +44,33 @@ class rc4
 
 }
 
-class KeyStream
-{
-    private $rc4;
-    private $key;
-
-    public function __construct($key)
-    {
-        $this->rc4 = new RC4($key, 256);
-        $this->key = $key;
-    }
-
-    public function encode($data, $offset, $length, $append = true)
-    {
-        $d = $this->rc4->cipher($data, $offset, $length);
-        $h = substr(hash_hmac('sha1', $d, $this->key, true), 0, 4);
-        if ($append)
-            return $d . $h;
-        else
-            return $h . $d;
-    }
-
-    public function decode($data, $offset, $length)
-    {
-        /* TODO: Hash check */
-
-        return $this->rc4->cipher($data, $offset + 4, $length - 4);
-    }
-
-}
+// DEPRECATED: WAUTH-1
+//class KeyStream
+//{
+//    private $rc4;
+//    private $key;
+//
+//    public function __construct($key)
+//    {
+//        $this->rc4 = new RC4($key, 256);
+//        $this->key = $key;
+//    }
+//
+//    public function encode($data, $offset, $length, $append = true)
+//    {
+//        $d = $this->rc4->cipher($data, $offset, $length);
+//        $h = substr(hash_hmac('sha1', $d, $this->key, true), 0, 4);
+//        if ($append)
+//            return $d . $h;
+//        else
+//            return $h . $d;
+//    }
+//
+//    public function decode($data, $offset, $length)
+//    {
+//        /* TODO: Hash check */
+//
+//        return $this->rc4->cipher($data, $offset + 4, $length - 4);
+//    }
+//
+//}
