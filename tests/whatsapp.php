@@ -32,6 +32,7 @@ if ($argc < 2) {
     echo "\t-set: Cambia to estado a <estado>\n";
     echo "\t-music: Envia un fichero de musica a alguien\n";
 	echo "\t-photo: Cambia tu foto de perfil\n";
+	echo "\t-send: Manda una imagen a alguien\n";
     exit(1);
 }
 
@@ -116,6 +117,13 @@ if ($_SERVER['argv'][1] == "-photo") {
 	$path = $_SERVER['argv'][3];
     echo "\n[] Cambiando foto de perfil...\n";
     $wa->sendSetProfilePicture($path);
+    exit(0);
+}
+
+if ($_SERVER['argv'][1] == "-send") {
+	$image = $_SERVER['argv'][3];
+    echo "\n[] Enviando el archivo de imagen: $image\nn";
+    $wa->sendMessageImage($dst, $music);
     exit(0);
 }
 
