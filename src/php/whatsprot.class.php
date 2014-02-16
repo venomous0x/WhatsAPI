@@ -1055,7 +1055,7 @@ class WhatsProt
      */
     public function sendMessageVideo($to, $filepath, $storeURLmedia = false)
     {
-        $allowedExtensions = array('mp4', 'mov', 'avi');
+        $allowedExtensions = array('3gp', 'mp4', 'mov', 'avi');
         $size = 20 * 1024 * 1024; // Easy way to set maximum file size for this media type.
         return $this->sendCheckAndSendMedia($filepath, $size, $to, 'video', $allowedExtensions, $storeURLmedia);
     }
@@ -1572,6 +1572,31 @@ class WhatsProt
         return (strlen(urldecode($identity)) == 20);
     }
 
+    public function sendSync(array $numbers, $mode = "full", $context = "registration", $index = 0, $last = true)
+    {
+        $users = array();
+        foreach ($numbers as $number) {
+            $users[] =  new ProtocolNode("user", null, null, $number);
+        }
+
+        $node = new ProtocolNode("iq", array(
+            "to" => $this->getJID($this->phoneNumber),
+            "type" => "get",
+            "id" => $this->createMsgId("sendsync_"),
+            "xmlns" => "urn:xmpp:whatsapp:sync"
+        ), array(
+            new ProtocolNode("sync", array(
+                "mode" => $mode,
+                "context" => $context,
+                "sid" => "".((time() + 11644477200) * 10000000),
+                "index" => "".$index,
+                "last" => $last ? "true" : "false"
+            ), $users, null)
+        ), null);
+
+        $this->sendNode($node);
+    }
+
     /**
      * Process number/jid and turn it into a JID if necessary
      *
@@ -1594,6 +1619,8 @@ class WhatsProt
 
         return $number;
     }
+
+
 
     /**
      * Retrieves media file and info from either a URL or localpath
@@ -2002,6 +2029,34 @@ class WhatsProt
             $this->sendPong($node->getAttribute('id'));
         }
         if ($node->getTag() == "iq"
+            && $node->getChild(0)->getTag() == "sync") {
+
+            //sync result
+            $sync = $node->getChild('sync');
+            $existing = $sync->getChild("in");
+            $nonexisting = $sync->getChild("out");
+
+            //process existing first
+            $existingUsers = array();
+            foreach ($existing->getChildren() as $child) {
+                $existingUsers[$child->getData()] = $child->getAttribute("jid");
+            }
+
+            //now process failed numbers
+            $failedNumbers = array();
+            foreach ($nonexisting->getChildren() as $child) {
+                $failedNumbers[] = $child->getData();
+            }
+
+            $index = $sync->getAttribute("index");
+            $this->eventManager()->fireGetSyncResult(
+                $index,
+                $sync->getAttribute("sync"),
+                $existingUsers,
+                $failedNumbers
+            );
+        }
+        if ($node->getTag() == "iq"
             && $node->getAttribute('type') == "result") {
             $this->serverReceivedId = $node->getAttribute('id');
             if ($node->getChild(0) != null &&
@@ -2328,7 +2383,7 @@ class WhatsProt
                 $icon = createIcon($filepath);
                 break;
             case "video":
-                $icon = videoThumbnail();
+                $icon = createVideoIcon($filepath);
                 break;
             default:
                 $icon = '';
