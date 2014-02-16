@@ -431,5 +431,11 @@ class WhatsAppEventListenerBase implements WhatsAppEventListener {
         $node
     ) {}
 
+    public function onGetSyncResult(
+        $index,
+        $sid,
+        $existingUsers,
+        $failedNumbers
+    ) {}
 
 }
