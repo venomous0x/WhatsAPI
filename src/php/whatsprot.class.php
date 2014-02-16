@@ -1055,7 +1055,7 @@ class WhatsProt
      */
     public function sendMessageVideo($to, $filepath, $storeURLmedia = false)
     {
-        $allowedExtensions = array('mp4', 'mov', 'avi');
+        $allowedExtensions = array('3gp', 'mp4', 'mov', 'avi');
         $size = 20 * 1024 * 1024; // Easy way to set maximum file size for this media type.
         return $this->sendCheckAndSendMedia($filepath, $size, $to, 'video', $allowedExtensions, $storeURLmedia);
     }
@@ -2328,7 +2328,7 @@ class WhatsProt
                 $icon = createIcon($filepath);
                 break;
             case "video":
-                $icon = videoThumbnail();
+                $icon = createVideoIcon($filepath);
                 break;
             default:
                 $icon = '';
