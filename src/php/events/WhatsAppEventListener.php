@@ -423,4 +423,10 @@ interface WhatsAppEventListener {
         $failedNumbers
     );
 
+    function onGetReceipt(
+        $from,
+        $id,
+        $offline,
+        $retry
+    );
 }

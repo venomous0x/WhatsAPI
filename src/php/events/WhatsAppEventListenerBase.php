@@ -438,4 +438,10 @@ class WhatsAppEventListenerBase implements WhatsAppEventListener {
         $failedNumbers
     ) {}
 
+    public function onGetReceipt(
+        $from,
+        $id,
+        $offline,
+        $retry
+    ) {}
 }

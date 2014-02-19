@@ -2060,6 +2060,14 @@ class WhatsProt
                 $failedNumbers
             );
         }
+        if ($node->getTag() == "receipt") {
+            $this->eventManager()->fireGetReceipt(
+                $node->getAttribute('from'),
+                $node->getAttribute('id'),
+                $node->getAttribute('offline'),
+                $node->getAttribute('retry')
+            );
+        }
         if ($node->getTag() == "iq"
             && $node->getAttribute('type') == "result") {
             $this->serverReceivedId = $node->getAttribute('id');

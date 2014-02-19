@@ -786,4 +786,16 @@ class WhatsAppEvent
         $this->fireCallback($callbackEvent);
     }
 
+    function fireGetReceipt(
+        $from,
+        $id,
+        $offline,
+        $retry
+    ) {
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($from, $id, $offline, $retry) {
+            $listener->onGetReceipt($from, $id, $offline, $retry);
+        };
+        $this->fireCallback($callbackEvent);
+    }
+
 }
