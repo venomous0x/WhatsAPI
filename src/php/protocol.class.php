@@ -564,7 +564,7 @@ class BinTreeNodeWriter
         {
             $bsize = $this->getInt24($size);
             //encrypt
-            $data = $this->key->EncodeMessage($data, 0, $size);
+            $data = $this->key->EncodeMessage($data, $size, 0, $size);
             $len = strlen($data);
             $bsize[0] = chr((8 << 4) | (($len & 16711680) >> 16));
             $bsize[1] = chr(($len & 65280) >> 8);
@@ -682,7 +682,7 @@ class BinTreeNodeWriter
         } elseif ($len < 256) {
             $this->output .= "\xf8" . chr($len);
         } else {
-            $this->output .= "\xf9" . chr($len);
+            $this->output .= "\xf9" . $this->writeInt16($len);
         }
     }
 

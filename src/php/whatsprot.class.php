@@ -1360,7 +1360,7 @@ class WhatsProt
         $this->outputKey = new KeyStream($keys[0], $keys[1]);
         $phone = $this->dissectPhone();
         $array = "\0\0\0\0" . $this->phoneNumber . $this->challengeData;// . time() . static::WHATSAPP_USER_AGENT . " MccMnc/" . str_pad($phone["mcc"], 3, "0", STR_PAD_LEFT) . "001";
-        $response = $this->outputKey->EncodeMessage($array, 4, strlen($array) - 4);
+        $response = $this->outputKey->EncodeMessage($array, 0, 4, strlen($array) - 4);
         return $response;
     }
 
@@ -1575,8 +1575,8 @@ class WhatsProt
     public function sendSync(array $numbers, $mode = "full", $context = "registration", $index = 0, $last = true)
     {
         $users = array();
-        foreach ($numbers as $number) {
-            $users[] =  new ProtocolNode("user", null, null, $number);
+        foreach ($numbers as $number) { // number must start with '+' if international contact
+            $users[] = new ProtocolNode("user", null, null, $number);
         }
 
         $node = new ProtocolNode("iq", array(
@@ -2038,14 +2038,18 @@ class WhatsProt
 
             //process existing first
             $existingUsers = array();
-            foreach ($existing->getChildren() as $child) {
-                $existingUsers[$child->getData()] = $child->getAttribute("jid");
+            if (!empty($existing)) {
+                foreach ($existing->getChildren() as $child) {
+                    $existingUsers[$child->getData()] = $child->getAttribute("jid");
+                }
             }
 
             //now process failed numbers
             $failedNumbers = array();
-            foreach ($nonexisting->getChildren() as $child) {
-                $failedNumbers[] = $child->getData();
+            if (!empty($nonexisting)) {
+                foreach ($nonexisting->getChildren() as $child) {
+                    $failedNumbers[] = str_replace($child->getData());
+                }
             }
 
             $index = $sync->getAttribute("index");
