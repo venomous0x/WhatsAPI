@@ -57,11 +57,11 @@ class KeyStream {
         return $this->rc4->cipher($buffer, $offset, $length);
     }
 
-    public function EncodeMessage($buffer, $offset, $length)
+    public function EncodeMessage($buffer, $macOffset, $offset, $length)
     {
         $data = $this->rc4->cipher($buffer, $offset, $length);
         $mac = $this->computeMac($data, $offset, $length);
-        return substr($mac, 0, 4) . substr($data, 4);
+        return substr($data, 0, $macOffset).substr($mac, 0, 4).substr($data, $macOffset + 4);
     }
 
     private function computeMac($buffer, $offset, $length)
