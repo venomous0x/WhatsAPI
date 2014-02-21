@@ -216,14 +216,14 @@ class vCard
         if(substr($photo, 0, 4) == 'http')
         {
             //url
-            $data .= 'VALUE=URL;TYPE=' . $type . ":" . $photo;
+            $data .= 'URL:' . $photo;
         }
         else
         {
             //path
             $bindata = file_get_contents($photo);
             $bindata = base64_encode($bindata);
-            $data .= 'ENCODING=BASE64;TYPE=' . $type . ":" . $bindata;
+            $data .= 'BASE64:' . $bindata;
         }
         $data .= "\r\n";
         return $data;
