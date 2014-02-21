@@ -210,7 +210,6 @@ class vCard
     {
         $photo = $this->data['photo'];
         $data = "PHOTO;";
-        $type = $this->getPhotoTypeByExt($photo);
 
         //detect type
         if(substr($photo, 0, 4) == 'http')
@@ -227,25 +226,6 @@ class vCard
         }
         $data .= "\r\n";
         return $data;
-    }
-
-    protected function getPhotoTypeByExt($photo)
-    {
-        $parts = explode('.', $photo);
-        $ext = $parts[count($parts) - 1];
-        $ext = strtoupper($ext);
-
-        switch($ext)
-        {
-            case 'PNG':
-                return 'PNG';
-            case 'GIF':
-                return 'GIF';
-            case 'BMP':
-                return 'BMP';
-            default:
-                return 'JPEG';
-        }
     }
 
     /**
