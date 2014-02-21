@@ -1255,9 +1255,7 @@ class WhatsProt
         $vCardNode = new ProtocolNode("vcard", $vCardAttribs, null, $vCard);
 
         $mediaAttribs = array();
-        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
         $mediaAttribs["type"] = "vcard";
-        $mediaAttribs["encoding"] = "text";
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, array($vCardNode), "");
         $this->sendMessageNode($to, $mediaNode);
@@ -2639,7 +2637,7 @@ class WhatsProt
         }
         else
         {
-            $messageHash["type"] = "chat";
+            $messageHash["type"] = "media";
         }
         $messageHash["id"] = ($id == null?$this->createMsgId("message"):$id);
         $messageHash["t"] = time();
