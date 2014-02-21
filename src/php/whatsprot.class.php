@@ -2027,8 +2027,7 @@ class WhatsProt
             $this->sendPong($node->getAttribute('id'));
         }
         if ($node->getTag() == "iq"
-            && $node->getChild(0) != null
-            && $node->getChild(0)->getTag() == "sync") {
+            && $node->getChild("sync") != null) {
 
             //sync result
             $sync = $node->getChild('sync');
