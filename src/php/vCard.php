@@ -198,8 +198,34 @@ class vCard
         if ($this->data['note']) {
             $this->card .= "NOTE:" . $this->data['note'] . "\r\n";
         }
+        if($this->data['photo'])
+        {
+            $this->card .= $this->generatePhotoData();
+        }
         $this->card .= "TZ:" . $this->data['timezone'] . "\r\n";
         $this->card .= "END:VCARD\r\n";
+    }
+
+    protected function generatePhotoData()
+    {
+        $photo = $this->data['photo'];
+        $data = "PHOTO;";
+
+        //detect type
+        if(substr($photo, 0, 4) == 'http')
+        {
+            //url
+            $data .= 'URL:' . $photo;
+        }
+        else
+        {
+            //path
+            $bindata = file_get_contents($photo);
+            $bindata = base64_encode($bindata);
+            $data .= 'BASE64:' . $bindata;
+        }
+        $data .= "\r\n";
+        return $data;
     }
 
     /**
