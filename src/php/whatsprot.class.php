@@ -2048,7 +2048,7 @@ class WhatsProt
             $failedNumbers = array();
             if (!empty($nonexisting)) {
                 foreach ($nonexisting->getChildren() as $child) {
-                    $failedNumbers[] = str_replace($child->getData());
+                    $failedNumbers[] = str_replace('+', '', $child->getData());
                 }
             }
 
