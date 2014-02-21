@@ -1576,7 +1576,7 @@ class WhatsProt
     {
         $users = array();
         foreach ($numbers as $number) { // number must start with '+' if international contact
-            $users[] = new ProtocolNode("user", null, null, $number);
+            $users[] = new ProtocolNode("user", null, null, (substr($number, 0, 1) != '+')?('+' . $number):($number));
         }
 
         $node = new ProtocolNode("iq", array(
