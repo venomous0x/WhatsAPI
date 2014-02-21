@@ -198,8 +198,54 @@ class vCard
         if ($this->data['note']) {
             $this->card .= "NOTE:" . $this->data['note'] . "\r\n";
         }
+        if($this->data['photo'])
+        {
+            $this->card .= $this->generatePhotoData();
+        }
         $this->card .= "TZ:" . $this->data['timezone'] . "\r\n";
         $this->card .= "END:VCARD\r\n";
+    }
+
+    protected function generatePhotoData()
+    {
+        $photo = $this->data['photo'];
+        $data = "PHOTO;";
+        $type = $this->getPhotoTypeByExt($photo);
+
+        //detect type
+        if(substr($photo, 0, 4) == 'http')
+        {
+            //url
+            $data .= 'VALUE=URL;TYPE=' . $type . ":" . $photo;
+        }
+        else
+        {
+            //path
+            $bindata = file_get_contents($photo);
+            $bindata = base64_encode($bindata);
+            $data .= 'ENCODING=BASE64;TYPE=' . $type . ":" . $bindata;
+        }
+        $data .= "\r\n";
+        return $data;
+    }
+
+    protected function getPhotoTypeByExt($photo)
+    {
+        $parts = explode('.', $photo);
+        $ext = $parts[count($parts) - 1];
+        $ext = strtoupper($ext);
+
+        switch($ext)
+        {
+            case 'PNG':
+                return 'PNG';
+            case 'GIF':
+                return 'GIF';
+            case 'BMP':
+                return 'BMP';
+            default:
+                return 'JPEG';
+        }
     }
 
     /**
