@@ -89,7 +89,39 @@ function createVideoIcon($file)
 {
     // @todo: Add support for video thumbnail create.
     // @see: http://stackoverflow.com/questions/14662027/generate-thumbnail-for-a-bunch-of-mp4-video-in-a-folder
-    return giftThumbnail();
+    //return giftThumbnail();
+
+    /* should install ffmpeg for the method to work successfully  */
+    if (class_exists("Imagick") && checkFFMPEG()) {
+        //generate thumbnail
+        $preview = sys_get_temp_dir().'/'.md5($file).'.jpg';
+        @unlink($preview);
+
+        //capture video preview
+        $command = "ffmpeg -i \"" . $file . "\" \"" . $preview . "\"";
+        exec($command);
+
+        // Parsear la imagen
+        //TODO: Make it work using libGD (see createIcon())
+        $img = new Imagick($preview);
+        // Redimensionar la imagen
+        $img->thumbnailImage(100, 100, true);
+
+        return base64_encode($img);
+    } else {
+        //fallback
+        return giftThumbnail();
+    }
+}
+
+function checkFFMPEG()
+{
+	//check if ffmpeg is intalled
+	$cmd = "ffmpeg -version";
+	$res =  exec($cmd, $output, $returnvalue);
+	if($returnvalue == 0)
+		return true;
+	return false;
 }
 
 function giftThumbnail()

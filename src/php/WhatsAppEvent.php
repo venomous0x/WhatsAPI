@@ -773,4 +773,29 @@ class WhatsAppEvent
         };
         $this->fireCallback($callbackEvent);          
     }
+
+    function fireGetSyncResult(
+        $index,
+        $sid,
+        $existingUsers,
+        $failedNumbers
+    ) {
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($index, $sid, $existingUsers, $failedNumbers) {
+            $listener->onGetSyncResult($index, $sid, $existingUsers, $failedNumbers);
+        };
+        $this->fireCallback($callbackEvent);
+    }
+
+    function fireGetReceipt(
+        $from,
+        $id,
+        $offline,
+        $retry
+    ) {
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($from, $id, $offline, $retry) {
+            $listener->onGetReceipt($from, $id, $offline, $retry);
+        };
+        $this->fireCallback($callbackEvent);
+    }
+
 }

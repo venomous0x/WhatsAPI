@@ -415,4 +415,18 @@ interface WhatsAppEventListener {
         $phone, // The user phone number including the country code.
         $name // The filename.     
     );
+
+    function onGetSyncResult(
+        $index,
+        $sid,
+        $existingUsers,
+        $failedNumbers
+    );
+
+    function onGetReceipt(
+        $from,
+        $id,
+        $offline,
+        $retry
+    );
 }
