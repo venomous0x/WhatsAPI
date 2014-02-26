@@ -7,7 +7,7 @@ Interfaz de WhatsApp Messenger
 
 Soporte en español de WhatsAPI, ejemplos básicos, etc...
 
-**Antes de preguntar, echad un ojo a la [wiki](https://github.com/mgp25/WhatsAPI-Spanish/wiki)**
+**--> Antes de preguntar, echad un ojo a la [wiki](https://github.com/mgp25/WhatsAPI-Spanish/wiki)**
 
 **15/02/2014 WhatsApp ha dado la orden de bloquear todos los repositorios en Github que contuviesen el nombre WhatsApp argumentando motivos de Copyright, aunque todos sabemos de sobra por que lo han hecho... Intentaré mantener todo actualizado. La repo oficial ya no se encuentra en Github, pero podeis encontrarla ;)**
 
