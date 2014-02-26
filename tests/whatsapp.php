@@ -18,10 +18,15 @@ function fgets_u($pStdn)
 
 
 $nickname = "WhatsAPI Test"; // Nick de usuario
+
+
+// #### DO NOT ADD YOUR INFO AND THEN COMMIT THIS FILE! ####
+
+// #### NO PONGAS TUS DATOS Y HAGAS COMMIT! ####
 $sender = 	""; // numero de telefono con el codigo de pais ej: 34123456789
 $imei = 	""; // Direccion MAC para iOS / IMEI para otras plataformas [NOTA]: NO es necesario
 $password =     ""; // Tu contraseña obtenida con WART o WhatsAPI
-$debug = TRUE; // Para ver el modo debug, FALSE, lo desactiva.
+
 
 if ($argc < 2) {
     echo "USO: ".$_SERVER['argv'][0]." [-l] [-s <telefono> <mensaje>] [-i <telefono>] [-set <estado>] [-music <telefono> <url>] [-photo <ruta de la imagen>]\n";
@@ -43,7 +48,7 @@ for ($i=3; $i<$argc; $i++) {
 }
 
 echo "[] Iniciando sesion como '$nickname' ($sender)\n";
-$wa = new WhatsProt($sender, $imei, $nickname, $debug);
+$wa = new WhatsProt($sender, $imei, $nickname, TRUE);
 
 $wa->connect(); // Nos conectamos a la red de WhatsApp
 $wa->loginWithPassword($password); // Iniciamos sesion con nuestra contraseña
