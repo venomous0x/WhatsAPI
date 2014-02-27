@@ -2170,6 +2170,18 @@ class WhatsProt
                         $node->getChild(0)
                     );
         }
+        
+        $children = $node->getChild(0);
+		if ($node->getTag() == "stream:error" && empty($children) == false && $node->getChild(0)->getTag() == "system-shutdown") 
+		{
+		
+			throw new Exception('Error system-shutdown');
+		
+		}
+        
+        
+        
+        
         if($node->getTag() == "notification")
         {
             $name = $node->getAttribute("notify");
