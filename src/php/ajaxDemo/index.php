@@ -33,13 +33,14 @@ $target = "***********"; //conversation target number/JID
                 initial: initial,
                 target: target
             }
-        }).done(function(data) {
+        }).done(function(data) { // on success, you can get the parameter as "data".
             //write debug info
             //if(data)
             //{
             //    var foo = $("#debug").text();
             //    $("#debug").text(foo + data);
-            //}
+            //}		    
+        }).always(function() { //if DONE is used, the service is stopped in case of failure of connection.
             setTimeout(function() {
                 Listen(false)
             }, 1000);
@@ -56,7 +57,8 @@ $target = "***********"; //conversation target number/JID
             method: "POST",
             data: {
                 method: "pollMessages",
-            }}).done(function(data) {
+            }
+        }).done(function(data) {
             if (data)
             {
                 if (data.profilepic != "")
@@ -68,6 +70,7 @@ $target = "***********"; //conversation target number/JID
                     addMessage(data.messages[i], "toMe");
                 }
             }
+        }).always(function() { //if DONE is used, the service is stopped in case of failure of connection.
             setTimeout(function() {
                 getMessages()
             }, 1000);
