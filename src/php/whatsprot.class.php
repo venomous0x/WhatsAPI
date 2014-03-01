@@ -751,6 +751,7 @@ class WhatsProt
         $messageHash["to"] = $this->getJID($to);
         $messageHash["type"] = "get";
         $messageHash["id"] = $this->createMsgId("lastseen");
+        $messageHash["from"] = $this->getJID($this->phoneNumber);
         $messageHash["xmlns"] = "jabber:iq:last";
 
         $messageNode = new ProtocolNode("iq", $messageHash, array($queryNode), "");
