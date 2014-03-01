@@ -1255,9 +1255,7 @@ class WhatsProt
         $vCardNode = new ProtocolNode("vcard", $vCardAttribs, null, $vCard);
 
         $mediaAttribs = array();
-        $mediaAttribs["xmlns"] = "urn:xmpp:whatsapp:mms";
         $mediaAttribs["type"] = "vcard";
-        $mediaAttribs["encoding"] = "text";
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, array($vCardNode), "");
         $this->sendMessageNode($to, $mediaNode);
@@ -1576,7 +1574,7 @@ class WhatsProt
     {
         $users = array();
         foreach ($numbers as $number) { // number must start with '+' if international contact
-            $users[] = new ProtocolNode("user", null, null, $number);
+            $users[] = new ProtocolNode("user", null, null, (substr($number, 0, 1) != '+')?('+' . $number):($number));
         }
 
         $node = new ProtocolNode("iq", array(
@@ -2029,7 +2027,7 @@ class WhatsProt
             $this->sendPong($node->getAttribute('id'));
         }
         if ($node->getTag() == "iq"
-            && $node->getChild(0)->getTag() == "sync") {
+            && $node->getChild("sync") != null) {
 
             //sync result
             $sync = $node->getChild('sync');
@@ -2048,7 +2046,7 @@ class WhatsProt
             $failedNumbers = array();
             if (!empty($nonexisting)) {
                 foreach ($nonexisting->getChildren() as $child) {
-                    $failedNumbers[] = str_replace($child->getData());
+                    $failedNumbers[] = str_replace('+', '', $child->getData());
                 }
             }
 
@@ -2651,7 +2649,7 @@ class WhatsProt
         }
         else
         {
-            $messageHash["type"] = "chat";
+            $messageHash["type"] = "media";
         }
         $messageHash["id"] = ($id == null?$this->createMsgId("message"):$id);
         $messageHash["t"] = time();
