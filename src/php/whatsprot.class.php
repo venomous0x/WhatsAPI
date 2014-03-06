@@ -2079,7 +2079,7 @@ class WhatsProt
                         $node->getChild(0)->getChild(0)->getChildren()
                     );
                 }
-                if ($node->getChild(0)->getAttribute('xmlns') == 'jabber:iq:last') {
+                if ($node->getChild("query") != null) {
                     $this->eventManager()->fireGetRequestLastSeen(
                         $this->phoneNumber,
                         $node->getAttribute('from'),
@@ -2168,18 +2168,15 @@ class WhatsProt
                         $node->getChild(0)
                     );
         }
-        
+
         $children = $node->getChild(0);
-		if ($node->getTag() == "stream:error" && empty($children) == false && $node->getChild(0)->getTag() == "system-shutdown") 
-		{
-		
-			throw new Exception('Error system-shutdown');
-		
-		}
-        
-        
-        
-        
+        if ($node->getTag() == "stream:error" && empty($children) == false && $node->getChild(0)->getTag() == "system-shutdown")
+        {
+
+            throw new Exception('Error system-shutdown');
+
+        }
+
         if($node->getTag() == "notification")
         {
             $name = $node->getAttribute("notify");
@@ -2196,6 +2193,9 @@ class WhatsProt
                         $node->getChild(0)->getData()); //status message
                     break;
                 case "picture":
+                    //TODO
+                    break;
+                case "contacts":
                     //TODO
                     break;
                 default:
