@@ -1105,9 +1105,14 @@ class WhatsProt
         );
     }
 
-    public function sendAvailableForChat()
+    public function sendAvailableForChat($nickname = null)
     {
         $presence = array();
+        if($nickname)
+        {
+            //update nickname
+            $this->name = $nickname;
+        }
         $presence['name'] = $this->name;
         $node = new ProtocolNode("presence", $presence, null, "");
         $this->sendNode($node);
