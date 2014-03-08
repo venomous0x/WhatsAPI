@@ -8,6 +8,24 @@ require_once 'mediauploader.php';
 require_once 'keystream.class.php';
 require_once 'tokenmap.class.php';
 
+class SyncResult
+{
+    public $index;
+    public $syncId;
+    /** @var array $existing */
+    public $existing;
+    /** @var array $nonExisting */
+    public $nonExisting;
+
+    public function __construct($index, $syncId, $existing, $nonExisting)
+    {
+        $this->index = $index;
+        $this->syncId = $syncId;
+        $this->existing = $existing;
+        $this->nonExisting = $nonExisting;
+    }
+}
+
 class WhatsProt
 {
     /**
@@ -2056,12 +2074,10 @@ class WhatsProt
             }
 
             $index = $sync->getAttribute("index");
-            $this->eventManager()->fireGetSyncResult(
-                $index,
-                $sync->getAttribute("sync"),
-                $existingUsers,
-                $failedNumbers
-            );
+
+            $result = new SyncResult($index, $sync->getAttribute("sync"), $existingUsers, $failedNumbers);
+
+            $this->eventManager()->fireGetSyncResult($result);
         }
         if ($node->getTag() == "receipt") {
             $this->eventManager()->fireGetReceipt(

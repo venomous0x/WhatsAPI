@@ -774,14 +774,14 @@ class WhatsAppEvent
         $this->fireCallback($callbackEvent);          
     }
 
+    /**
+     * @param $result SyncResult
+     */
     function fireGetSyncResult(
-        $index,
-        $sid,
-        $existingUsers,
-        $failedNumbers
+        $result
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) use ($index, $sid, $existingUsers, $failedNumbers) {
-            $listener->onGetSyncResult($index, $sid, $existingUsers, $failedNumbers);
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($result) {
+            $listener->onGetSyncResult($result);
         };
         $this->fireCallback($callbackEvent);
     }
