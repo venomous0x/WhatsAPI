@@ -2074,8 +2074,7 @@ class WhatsProt
         if ($node->getTag() == "iq"
             && $node->getAttribute('type') == "result") {
             $this->serverReceivedId = $node->getAttribute('id');
-            if ($node->getChild(0) != null &&
-                $node->getChild(0)->getTag() == "query") {
+            if ($node->getChild("query") != null) {
                 if ($node->getChild(0)->getAttribute('xmlns') == 'jabber:iq:privacy') {
                     // ToDo: We need to get explicitly list out the children as arguments
                     //       here.
@@ -2084,17 +2083,15 @@ class WhatsProt
                         $node->getChild(0)->getChild(0)->getChildren()
                     );
                 }
-                if ($node->getChild("query") != null) {
-                    $this->eventManager()->fireGetRequestLastSeen(
-                        $this->phoneNumber,
-                        $node->getAttribute('from'),
-                        $node->getAttribute('id'),
-                        $node->getChild(0)->getAttribute('seconds')
-                   );
-                }
+                $this->eventManager()->fireGetRequestLastSeen(
+                    $this->phoneNumber,
+                    $node->getAttribute('from'),
+                    $node->getAttribute('id'),
+                    $node->getChild(0)->getAttribute('seconds')
+               );
                 array_push($this->messageQueue, $node);
             }
-            if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "props") {
+            if ($node->getChild("props") != null) {
                 //server properties
                 $props = array();
                 foreach($node->getChild(0)->getChildren() as $child) {
@@ -2106,7 +2103,7 @@ class WhatsProt
                     $props
                );
             }
-            if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "picture") {
+            if ($node->getChild("picture") != null) {
                 $this->eventManager()->fireGetProfilePicture(
                     $this->phoneNumber,
                     $node->getAttribute("from"),
@@ -2114,10 +2111,7 @@ class WhatsProt
                     $node->getChild("picture")->getData()
                 );
             }
-            if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "media") {
-                $this->processUploadResponse($node);
-            }
-            if ($node->getChild(0) != null && $node->getChild(0)->getTag() == "duplicate") {
+            if ($node->getChild("media") != null || $node->getChild("duplicate") != null) {
                 $this->processUploadResponse($node);
             }
             if ($node->nodeIdContains("group")) {
@@ -2741,7 +2735,6 @@ class WhatsProt
     protected function sendRequestFileUpload($b64hash, $type, $size, $filepath, $to)
     {
         $hash = array();
-        $hash["xmlns"] = "w:m";
         $hash["hash"] = $b64hash;
         $hash["type"] = $type;
         $hash["size"] = $size;
@@ -2752,6 +2745,7 @@ class WhatsProt
         $hash["id"] = $id;
         $hash["to"] = static::WHATSAPP_SERVER;
         $hash["type"] = "set";
+        $hash["xmlns"] = "w:m";
         $node = new ProtocolNode("iq", $hash, array($mediaNode), null);
 
         if (!is_array($to)) {
