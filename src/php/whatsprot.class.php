@@ -72,7 +72,7 @@ class WhatsProt
     protected $outQueue = array();      // Queue for outgoing messages.
     protected $password;                // The user password.
     protected $phoneNumber;             // The user phone number including the country code without '+' or '00'.
-    protected $reader;                  // An instance of the BinaryTreeNodeReader class.
+    public $reader;                  // An instance of the BinaryTreeNodeReader class.
     protected $serverReceivedId;        // Confirm that the *server* has received your command.
     protected $socket;                  // A socket to connect to the WhatsApp network.
     protected $writer;                  // An instance of the BinaryTreeNodeWriter class.
@@ -1600,10 +1600,12 @@ class WhatsProt
             $users[] = new ProtocolNode("user", null, null, (substr($number, 0, 1) != '+')?('+' . $number):($number));
         }
 
+        $id = $this->createMsgId("sendsync_");
+
         $node = new ProtocolNode("iq", array(
             "to" => $this->getJID($this->phoneNumber),
             "type" => "get",
-            "id" => $this->createMsgId("sendsync_"),
+            "id" => $id,
             "xmlns" => "urn:xmpp:whatsapp:sync"
         ), array(
             new ProtocolNode("sync", array(
@@ -1616,6 +1618,8 @@ class WhatsProt
         ), null);
 
         $this->sendNode($node);
+
+        return $id;
     }
 
     /**
@@ -2449,7 +2453,7 @@ class WhatsProt
     /**
      * Read 1024 bytes from the whatsapp server.
      */
-    protected function readStanza()
+    public function readStanza()
     {
         $buff = '';
         if($this->socket != null)
