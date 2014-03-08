@@ -431,11 +431,12 @@ class WhatsAppEventListenerBase implements WhatsAppEventListener {
         $node
     ) {}
 
+    /**
+     * @param SyncResult $result
+     * @return mixed|void
+     */
     public function onGetSyncResult(
-        $index,
-        $sid,
-        $existingUsers,
-        $failedNumbers
+        $result
     ) {}
 
     public function onGetReceipt(

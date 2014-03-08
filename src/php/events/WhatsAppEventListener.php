@@ -416,11 +416,12 @@ interface WhatsAppEventListener {
         $name // The filename.     
     );
 
+    /**
+     * @param $result SyncResult
+     * @return mixed
+     */
     function onGetSyncResult(
-        $index,
-        $sid,
-        $existingUsers,
-        $failedNumbers
+        $result
     );
 
     function onGetReceipt(
