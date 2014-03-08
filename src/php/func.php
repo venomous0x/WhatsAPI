@@ -46,14 +46,7 @@ function preprocessProfilePicture($path)
 
 function createIcon($file)
 {
-    // @todo: Add support for others methods.
-    if (class_exists("Imagick")) {
-        $img = new Imagick();
-        $img->readImageBlob(file_get_contents($file));
-        $img->thumbnailImage(100, 100, true);
-
-        return base64_encode($img);
-    } elseif (extension_loaded('gd')) {
+    if (extension_loaded('gd')) {
         return createIconGD($file);
     } else {
         return giftThumbnail();
@@ -92,7 +85,7 @@ function createVideoIcon($file)
     //return giftThumbnail();
 
     /* should install ffmpeg for the method to work successfully  */
-    if (class_exists("Imagick") && checkFFMPEG()) {
+    if (checkFFMPEG()) {
         //generate thumbnail
         $preview = sys_get_temp_dir().'/'.md5($file).'.jpg';
         @unlink($preview);
@@ -103,11 +96,7 @@ function createVideoIcon($file)
 
         // Parsear la imagen
         //TODO: Make it work using libGD (see createIcon())
-        $img = new Imagick($preview);
-        // Redimensionar la imagen
-        $img->thumbnailImage(100, 100, true);
-
-        return base64_encode($img);
+        return createIconGD($preview);
     } else {
         //fallback
         return giftThumbnail();
