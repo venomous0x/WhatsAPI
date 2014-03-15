@@ -4,6 +4,10 @@ Interface to WhatsApp Messenger
 
 ----------
 
+### Update March 15th, 2014
+
+Sources are back after brief downtime due to [DCMA takedown](https://github.com/github/dmca/blob/master/2014-02-12-WhatsApp.md).
+
 ### Note July 30th, 2013
 *New policy:*
 
