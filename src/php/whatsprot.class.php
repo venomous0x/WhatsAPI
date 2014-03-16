@@ -1240,25 +1240,19 @@ class WhatsProt
      */
     public function sendStatusUpdate($txt)
     {
-        $bodyNode = new ProtocolNode("body", null, null, $txt);
-        $serverNode = new ProtocolNode("server", null, null, "");
-        $xHash = array();
-        $xHash["xmlns"] = "jabber:x:event";
-        $xNode = new ProtocolNode("x", $xHash, array($serverNode), "");
+        $child = new ProtocolNode("status", null, null, $txt);
+        $node = new ProtocolNode("iq", array(
+            "to" => "s.whatsapp.net",
+            "type" => "set",
+            "id" => $this->createMsgId("sendstatus"),
+            "xmlns" => "status"
+        ), array($child), null);
 
-        $messageHash = array();
-        $messageHash["to"] = 's.us';
-        $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->createMsgId("sendstatus");
-
-        $messageNode = new ProtocolNode("message", $messageHash, array($xNode, $bodyNode), "");
-        $this->sendNode($messageNode);
+        $this->sendNode($node);
         $this->eventManager()->fireSendStatusUpdate(
             $this->phoneNumber, 
             $txt
         );
-        //listen for response
-        $this->waitForServer($messageHash["id"]);
     }
 
     /**
