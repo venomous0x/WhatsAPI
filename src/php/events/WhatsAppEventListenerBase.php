@@ -331,8 +331,9 @@ class WhatsAppEventListenerBase implements WhatsAppEventListener {
 
     function onSendMessageReceived(
         $phone,
-        $time,
-        $from
+        $id,
+        $from,
+        $type
     ) {}
 
     function onSendPong(

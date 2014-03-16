@@ -385,8 +385,9 @@ interface WhatsAppEventListener {
 
     function onSendMessageReceived(
         $phone, // The user phone number including the country code.
-        $time, // The unix time when send message notification.
-        $from // The sender JID.
+        $id, // Message ID
+        $from, // The sender JID.
+        $type // Message type
     );
 
     function onSendPong(
