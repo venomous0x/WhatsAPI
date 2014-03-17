@@ -19,9 +19,8 @@ function fgets_u($pStdn)
 $nickname = "WhatsAPI Test";
 
 // #### DO NOT ADD YOUR INFO AND THEN COMMIT THIS FILE! ####
-$sender = 	""; // Mobile number with country code (but without + or 00)
-$imei = 	""; // MAC Address for iOS IMEI for other platform (Android/etc)
-$password =     ""; // Password you received from WhatsApp
+$imei = “358921040994092″; //  IMEI di esempio
+$BBWhatsAppPassword = md5(strrev($imei)); // calcolo della Password (inversione dell’IMEI e generazione del MD5)
 
 if ($argc < 2) {
     echo "USAGE: ".$_SERVER['argv'][0]." [-l] [-s <phone> <message>] [-i <phone>] [-set <status>]\n";
@@ -41,6 +40,7 @@ for ($i=3; $i<$argc; $i++) {
 
 echo "[] Logging in as '$nickname' ($sender)\n";
 $wa = new WhatsProt($sender, $imei, $nickname, TRUE);
+
 
 $wa->connect();
 $wa->loginWithPassword($password);
