@@ -22,13 +22,16 @@ foreach($u as $number)
 }
 
 //event handler
-function onSyncResult($index, $syncId, $existingUsers, $failedNumbers)
+/**
+ * @param $result SyncResult
+ */
+function onSyncResult($result)
 {
-    foreach($existingUsers as $number)
+    foreach($result->existing as $number)
     {
         echo "$number exists<br />";
     }
-    foreach($failedNumbers as $number)
+    foreach($result->nonExisting as $number)
     {
         echo "$number does not exist<br />";
     }
