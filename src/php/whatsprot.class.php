@@ -203,7 +203,7 @@ class WhatsProt
     public function codeRegister($code)
     {
         if (!$phone = $this->dissectPhone()) {
-            throw new Exception('The prived phone number is not valid.');
+            throw new Exception('The provided phone number is not valid.');
         }
 
         // Build the url.
@@ -2460,9 +2460,25 @@ class WhatsProt
             $treeLength = ord($header[1]) << 8;
 +           $treeLength |= ord($header[2]) << 0;
 
+            //read full length
             $buff = @fread($this->socket, $treeLength);
+            $trlen = $treeLength;
+            $len = strlen($buff);
+            $prev = 0;
+            while(strlen($buff) < $treeLength)
+            {
+                $toRead = $treeLength - strlen($buff);
+                $buff .= @fread($this->socket, $toRead);
+                if($len == strlen($buff))
+                {
+                    //no new data read, fuck it
+                    break;
+                }
+                $len = strlen($buff);
+            }
+
             if (strlen($buff) != $treeLength) {
-                throw new Exception("Tree length did not match received length");
+                throw new Exception("Tree length did not match received length (buff = " . strlen($buff) . " & treeLength = $treeLength)");
             } else
             if (@feof($this->socket)) {
                 $error = "socket EOF, closing socket...";
