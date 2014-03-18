@@ -231,6 +231,24 @@ class ProtocolNode
             $this->attributeHash['t'] = time();
         }
     }
+    
+    
+    /**
+     * Print human readable ProtocolNode object
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        $readableNode = array(
+            'tag'           => $this->tag,
+            'attributeHash' => $this->attributeHash,
+            'children'      => $this->children,
+            'data'          => $this->data
+        );
+
+        return print_r( $readableNode, true );
+    }
 
 }
 
