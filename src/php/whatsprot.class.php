@@ -2475,7 +2475,7 @@ class WhatsProt
             }
             $treeLength = 0;
             $treeLength = ord($header[1]) << 8;
-+           $treeLength |= ord($header[2]) << 0;
+            $treeLength |= ord($header[2]) << 0;
 
             //read full length
             $buff = @fread($this->socket, $treeLength);
