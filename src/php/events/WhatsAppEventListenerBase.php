@@ -314,8 +314,7 @@ class WhatsAppEventListenerBase implements WhatsAppEventListener {
         $phone,
         $from,
         $msgid,
-        $type,
-        $time
+        $type
     ) {}
 
     function onPing(
