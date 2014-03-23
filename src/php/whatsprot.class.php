@@ -994,18 +994,7 @@ class WhatsProt
      */
     public function sendMessageComposing($to)
     {
-        $comphash = array();
-        $comphash['xmlns'] = 'http://jabber.org/protocol/chatstates';
-        $compose = new ProtocolNode("composing", $comphash, null, "");
-
-        $messageHash = array();
-        $messageHash["to"] = $this->getJID($to);
-        $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->createMsgId("composing");
-        $messageHash["t"] = time();
-
-        $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
-        $this->sendNode($messageNode);
+        $this->sendChatState($to, "composing");
     }
 
     /**
@@ -1067,18 +1056,13 @@ class WhatsProt
      */
     public function sendMessagePaused($to)
     {
-        $comphash = array();
-        $comphash['xmlns'] = 'http://jabber.org/protocol/chatstates';
-        $compose = new ProtocolNode("paused", $comphash, null, "");
+        $this->sendChatState($to, "paused");
+    }
 
-        $messageHash = array();
-        $messageHash["to"] = $this->getJID($to);
-        $messageHash["type"] = "chat";
-        $messageHash["id"] = $this->createMsgId("paused");
-        $messageHash["t"] = time();
-
-        $messageNode = new ProtocolNode("message", $messageHash, array($compose), "");
-        $this->sendNode($messageNode);
+    protected function sendChatState($to, $state)
+    {
+        $node = new ProtocolNode("chatstate", array("to" => GetJID($to)), array(new ProtocolNode($state, null, null, null)), null);
+        $this->sendNode($node);
     }
 
     /**
