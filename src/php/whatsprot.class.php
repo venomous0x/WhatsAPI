@@ -1830,6 +1830,15 @@ class WhatsProt
                 $node->getChild(0)->getTag()
             );
         }
+        elseif($node->getTag() == '' && $node->getAttribute("class") == "message")
+        {
+            $this->eventManager()->fireMessageReceivedServer(
+                $this->phoneNumber,
+                $node->getAttribute('from'),
+                $node->getAttribute('id'),
+                $node->getAttribute('class')
+            );
+        }
         if ($node->getTag() == "message") {
             array_push($this->messageQueue, $node);
 
@@ -1977,15 +1986,6 @@ class WhatsProt
                 {
                     $this->sendMessageReceived($node);
                 }
-            }
-            if ($node->getChild('x') != null) {
-                $this->eventManager()->fireMessageReceivedServer(
-                    $this->phoneNumber,
-                    $node->getAttribute('from'),
-                    $node->getAttribute('id'),
-                    $node->getAttribute('type'),
-                    $node->getAttribute('t')
-                );
             }
             if ($node->getChild('received') != null) {
                 $this->eventManager()->fireMessageReceivedClient(
@@ -2796,9 +2796,7 @@ class WhatsProt
             $data = fread($fp, filesize($filepath));
             if ($data) {
                 //this is where the fun starts
-                $hash = array();
-                $hash["xmlns"] = "w:profile:picture";
-                $picture = new ProtocolNode("picture", $hash, null, $data);
+                $picture = new ProtocolNode("picture", null, null, $data);
 
                 $icon = createIconGD($filepath, 96, true);
                 $thumb = new ProtocolNode("picture", array("type" => "preview"), null, $icon);
@@ -2808,6 +2806,7 @@ class WhatsProt
                 $hash["id"] = $nodeID;
                 $hash["to"] = $this->getJID($jid);
                 $hash["type"] = "set";
+                $hash["xmlns"] = "w:profile:picture";
                 $node = new ProtocolNode("iq", $hash, array($picture, $thumb), null);
 
                 $this->sendNode($node);

@@ -347,8 +347,7 @@ interface WhatsAppEventListener {
         $phone, // The user phone number including the country code.
         $from, // The sender JID.
         $msgid, // The message id.
-        $type, // The message type.
-        $time // The unix time when send message notification.
+        $type // The message type.
     );
 
     function onPing(
