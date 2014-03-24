@@ -1061,7 +1061,7 @@ class WhatsProt
 
     protected function sendChatState($to, $state)
     {
-        $node = new ProtocolNode("chatstate", array("to" => GetJID($to)), array(new ProtocolNode($state, null, null, null)), null);
+        $node = new ProtocolNode("chatstate", array("to" => $this->getJID($to)), array(new ProtocolNode($state, null, null, null)), null);
         $this->sendNode($node);
     }
 
