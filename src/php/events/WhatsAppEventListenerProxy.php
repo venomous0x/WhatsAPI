@@ -144,7 +144,8 @@ abstract class WhatsAppEventListenerProxy implements WhatsAppEventListener {
     }
 
     function onGetError(
-        $phone, 
+        $phone,
+        $id,
         $error 
     ) {
         $this->handleEvent(__FUNCTION__, func_get_args());
