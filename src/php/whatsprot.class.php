@@ -797,12 +797,11 @@ class WhatsProt
      */
     public function sendGetServerProperties()
     {
-        $child = new ProtocolNode("props", array(
-            "xmlns" => "w"
-                ), null, null);
+        $child = new ProtocolNode("props", null, null, null);
         $node = new ProtocolNode("iq", array(
             "id" => $this->createMsgId("getproperties"),
             "type" => "get",
+            "xmlns" => "w",
             "to" => "s.whatsapp.net"
                 ), array($child), null);
         $this->sendNode($node);
