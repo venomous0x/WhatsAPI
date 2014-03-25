@@ -121,7 +121,8 @@ class WhatsAppEventListenerBase implements WhatsAppEventListener {
     ) {}
 
     function onGetError(
-        $phone, 
+        $phone,
+        $id,
         $error 
     ) {}
 
