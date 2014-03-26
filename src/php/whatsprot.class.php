@@ -810,18 +810,27 @@ class WhatsProt
      * Get the current status message of a specific user.
      *
      * @deprecated Use ContactSyncV2 to get status
-     * @param  string $jid The user JID
+     * @param  string[] $jids The users' JIDs
      */
-    public function sendGetStatus($jid)
+    public function sendGetStatuses($jids)
     {
-        $parts = explode("@", $jid);
-        $to = $parts[0] . "@s.us";
-        $child = new ProtocolNode("action", array("type" => "get"), null, null);
-        $node = new ProtocolNode("message", array(
-            "to" => $to,
-            "type" => "action",
-            "id" => $this->createMsgId("message")
-                ), array($child), null);
+        if(!is_array($jids))
+        {
+            $jids = array($jids);
+        }
+        $children = array();
+        foreach($jids as $jid)
+        {
+            $children[] = new ProtocolNode("user", array("jid" => $this->getJID($jid)), null, null);
+        }
+        $node = new ProtocolNode("iq", array(
+            "to" => "s.whatsapp.net",
+            "type" => "get",
+            "xmlns" => "status",
+            "id" => $this->createMsgId("getstatus")
+        ), array(
+            new ProtocolNode("status", null, $children, null)
+        ), null);
         $this->sendNode($node);
     }
 
