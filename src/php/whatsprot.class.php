@@ -2175,7 +2175,21 @@ class WhatsProt
                         $groupList
                     );
                 }
-
+            }
+            if($node->getChild("status") != null)
+            {
+                $child = $node->getChild("status");
+                foreach($child->getChildren() as $status)
+                {
+                    $this->eventManager()->fireGetStatus(
+                        $this->phoneNumber,
+                        $status->getAttribute("jid"),
+                        "requested",
+                        $node->getAttribute("id"),
+                        $status->getAttribute("t"),
+                        $status->getData()
+                    );
+                }
             }
         }
         if ($node->getTag() == "iq" && $node->getAttribute('type') == "error") {
