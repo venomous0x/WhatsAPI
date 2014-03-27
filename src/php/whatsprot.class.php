@@ -754,7 +754,6 @@ class WhatsProt
     public function sendGetProfilePicture($number, $large = false)
     {
         $hash = array();
-        $hash["xmlns"] = "w:profile:picture";
         $hash["type"] = "image";
         if (!$large) {
             $hash["type"] = "preview";
@@ -764,6 +763,7 @@ class WhatsProt
         $hash = array();
         $hash["id"] = $this->createMsgId("getpicture");
         $hash["type"] = "get";
+        $hash["xmlns"] = "w:profile:picture";
         $hash["to"] = $this->getJID($number);
         $node = new ProtocolNode("iq", $hash, array($picture), null);
         $this->sendNode($node);
@@ -809,7 +809,6 @@ class WhatsProt
     /**
      * Get the current status message of a specific user.
      *
-     * @deprecated Use ContactSyncV2 to get status
      * @param  string[] $jids The users' JIDs
      */
     public function sendGetStatuses($jids)
