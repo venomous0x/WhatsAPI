@@ -1575,10 +1575,18 @@ class WhatsProt
                 $this->pollMessages();
             }
         } while ($this->challengeData == null && ($cnt++ < 100) && (strcmp($this->loginStatus, static::DISCONNECTED_STATUS) == 0));
-        $this->eventManager()->fireLogin(
-            $this->phoneNumber
-        );
-        $this->sendAvailableForChat();
+        
+        if(strcmp($this->loginStatus, static::DISCONNECTED_STATUS) == 0)
+		{
+			throw new Exception('Login Failure');
+		}
+		else
+		{
+            $this->eventManager()->fireLogin(
+                $this->phoneNumber
+            );
+            $this->sendAvailableForChat();
+		}
     }
 
     /**
@@ -1806,9 +1814,17 @@ class WhatsProt
     protected function processInboundDataNode(ProtocolNode $node, $autoReceipt = true) {
         $this->debugPrint($node->nodeString("rx  ") . "\n");
         $this->serverReceivedId = $node->getAttribute('id');
+        
         if ($node->getTag() == "challenge") {
             $this->processChallenge($node);
-        } elseif ($node->getTag() == "success") {
+        } 
+        elseif($node->getTag() == "failure"  )
+		{
+
+			$this->loginStatus = static::DISCONNECTED_STATUS;
+			
+		}
+        elseif ($node->getTag() == "success") {
             $this->loginStatus = static::CONNECTED_STATUS;
             $challengeData = $node->getData();
             file_put_contents("nextChallenge.dat", $challengeData);
