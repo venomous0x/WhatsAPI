@@ -2835,6 +2835,19 @@ class WhatsProt
             }
         }
     }
+    /**
+     * This function extracts the phone number.
+     *
+     * @param string $from
+     * The remitter delivered by WHATSAPP example 1234567890@s.whatsapp.net
+     * 
+     * @return string 
+     * Returns the number of phone cleanly.
+     *
+    **/
+    public function ExtractNumber($from){
+        return str_replace(array("@s.whatsapp.net","@g.us"), "", $from);
+    }
 
     /**
      * Parse the message text for emojis
