@@ -586,7 +586,7 @@ class WhatsProt
     public function sendBroadcastMessage($targets, $message)
     {
         $bodyNode = new ProtocolNode("body", null, null, $message);
-        $this->sendBroadcast($targets, $bodyNode, "chat");
+        $this->sendBroadcast($targets, $bodyNode, "text");
     }
 
     /**
@@ -1047,7 +1047,7 @@ class WhatsProt
         $mediaNode = new ProtocolNode("media", $mediaHash, null, null);
 
         if (is_array($to)) {
-            $id = $this->sendBroadcast($to, $mediaNode);
+            $id = $this->sendBroadcast($to, $mediaNode, "media");
         } else {
             $id = $this->sendMessageNode($to, $mediaNode);
         }
@@ -2463,7 +2463,7 @@ class WhatsProt
 
         $mediaNode = new ProtocolNode("media", $mediaAttribs, null, $icon);
         if (is_array($to)) {
-            $this->sendBroadcast($to, $mediaNode);
+            $this->sendBroadcast($to, $mediaNode, "media");
         } else {
             $this->sendMessageNode($to, $mediaNode);
         }
@@ -2577,7 +2577,7 @@ class WhatsProt
      * @param  array $targets Array of numbers to send to
      * @param  object $node
      */
-    protected function sendBroadcast($targets, $node)
+    protected function sendBroadcast($targets, $node, $type)
     {
         if (!is_array($targets)) {
             $targets = array($targets);
@@ -2600,7 +2600,7 @@ class WhatsProt
 
         $messageHash = array();
         $messageHash["to"] = "broadcast";
-        $messageHash["type"] = "chat";
+        $messageHash["type"] = $type;
         $id = $this->createMsgId("broadcast");
         $messageHash["id"] = $id;
 
