@@ -117,7 +117,7 @@ function createVideoIcon($file)
         @unlink($preview);
 
         //capture video preview
-        $command = "ffmpeg -i \"" . $file . "\" \"" . $preview . "\"";
+        $command = "ffmpeg -i \"" . $file . "\" -f image2 -vframes 1 \"" . $preview . "\"";
         exec($command);
 
         // Parsear la imagen
