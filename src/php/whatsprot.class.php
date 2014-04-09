@@ -585,6 +585,7 @@ class WhatsProt
      */
     public function sendBroadcastMessage($targets, $message)
     {
+    	$message = $this->parseMessageForEmojis($message);
         $bodyNode = new ProtocolNode("body", null, null, $message);
         $this->sendBroadcast($targets, $bodyNode, "text");
     }
