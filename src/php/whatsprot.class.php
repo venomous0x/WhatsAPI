@@ -870,6 +870,18 @@ class WhatsProt
         return $groupId;
     }
 
+    public function SendSetGroupSubject($gjid, $subject)
+    {
+        $child = new ProtocolNode("subject", array("value" => $subject), null, null);
+        $node = new ProtocolNode("iq", array(
+            "id" => $this->createMsgId("set_group_subject"),
+            "type" => "set",
+            "to" => $this->getJID($gjid),
+            "xmlns" => "w:g"
+        ), array($child), null);
+        $this->sendNode($node);
+    }
+
     /**
      * End or delete a group chat
      *
