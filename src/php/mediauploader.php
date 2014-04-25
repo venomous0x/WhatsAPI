@@ -61,6 +61,10 @@ class WhatsMediaUploader
         $boundary = "zzXXzzYYzzXXzzQQ";
         $contentlength = 0;
 
+        if(is_array($to)) {
+            $to = implode(',', $to);
+        }
+
         $hBAOS = "--" . $boundary . "\r\n";
         $hBAOS .= "Content-Disposition: form-data; name=\"to\"\r\n\r\n";
         $hBAOS .= $to . "\r\n";
