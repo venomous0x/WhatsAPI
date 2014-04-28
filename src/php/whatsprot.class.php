@@ -76,7 +76,7 @@ class WhatsProt
     protected $serverReceivedId;        // Confirm that the *server* has received your command.
     protected $socket;                  // A socket to connect to the WhatsApp network.
     protected $writer;                  // An instance of the BinaryTreeNodeWriter class.
-    protected $nextChallenge = 'nextChallenge.dat'; // Next challendge file name
+    protected $nextChallengeFile = 'nextChallenge.dat'; // Next challendge file name
 
     /**
      * Default class constructor.
@@ -113,9 +113,9 @@ class WhatsProt
      *
      * @param $filename
      */
-    public function setNextChallenge($filename)
+    public function setNextChallengeFile($filename)
     {
-        $this->nextChallenge = $filename;
+        $this->nextChallengeFile = $filename;
     }
 
     /**
@@ -469,7 +469,7 @@ class WhatsProt
     public function loginWithPassword($password)
     {
         $this->password = $password;
-        $challengeData = @file_get_contents($this->nextChallenge);
+        $challengeData = @file_get_contents($this->nextChallengeFile);
         if($challengeData) {
             $this->challengeData = $challengeData;
         }
@@ -1851,7 +1851,7 @@ class WhatsProt
         elseif ($node->getTag() == "success") {
             $this->loginStatus = static::CONNECTED_STATUS;
             $challengeData = $node->getData();
-            file_put_contents($this->nextChallenge, $challengeData);
+            file_put_contents($this->nextChallengeFile, $challengeData);
             $this->writer->setKey($this->outputKey);
         } elseif($node->getTag() == "failure")
         {
