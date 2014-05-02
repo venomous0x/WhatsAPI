@@ -235,13 +235,13 @@ class WhatsProt
                 $this->phoneNumber, 
                 $response->status, 
                 $response->reason, 
-                $response->retry_after
+                property_exists($response, 'retry_after') ? $response->retry_after : null
             );
             if ($this->debug) {
                 print_r($query);
                 print_r($response);
             }
-            throw new Exception('An error occurred registering the registration code from WhatsApp.');
+            //throw new Exception('An error occurred registering the registration code from WhatsApp.');
         } else {
             $this->eventManager()->fireCodeRegister(
                 $this->phoneNumber,
