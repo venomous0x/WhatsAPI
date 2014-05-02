@@ -350,7 +350,7 @@ class WhatsProt
                     $response->retry_after
                 );
                 $minutes = round($response->retry_after / 60);
-                throw new Exception("Code already sent. Retry after $minutes minutes.");
+                //throw new Exception("Code already sent. Retry after $minutes minutes.");
             } else {
                 $this->eventManager()->fireCodeRequestFailed(
                     $this->phoneNumber, 
@@ -358,7 +358,7 @@ class WhatsProt
                     $response->reason, 
                     $response->param
                 );
-                throw new Exception('There was a problem trying to request the code.');
+                //throw new Exception('There was a problem trying to request the code.');
             }
         } else {
             $this->eventManager()->fireCodeRequest(
@@ -1376,7 +1376,7 @@ class WhatsProt
                     if ($m->getChild('received') != null && $m->getAttribute('retry') != null) {
                         $received = true;
                     } elseif ($m->getChild('received') != null && $m->getAttribute('retry') != null) {
-                        throw new Exception('There was a problem trying to send the message, please retry.');
+                        //throw new Exception('There was a problem trying to send the message, please retry.');
                     }
                 }
             }
@@ -1602,7 +1602,7 @@ class WhatsProt
         
         if(strcmp($this->loginStatus, static::DISCONNECTED_STATUS) == 0)
 		{
-			throw new Exception('Login Failure');
+			//throw new Exception('Login Failure');
 		}
 		else
 		{
@@ -2243,7 +2243,7 @@ class WhatsProt
         if ($node->getTag() == "stream:error" && empty($children) == false && $node->getChild(0)->getTag() == "system-shutdown")
         {
 
-            throw new Exception('Error system-shutdown');
+            //throw new Exception('Error system-shutdown');
 
         }
 
@@ -2272,7 +2272,7 @@ class WhatsProt
                     //TODO
                     break;
                 default:
-                    throw new Exception("Method $type not implemented");
+                    //throw new Exception("Method $type not implemented");
             }
             $this->sendNotificationAck($node);
         }
@@ -2289,7 +2289,7 @@ class WhatsProt
 
                         break;
                     default:
-                        throw new Exception("ib handler for " . $child->getTag() . " not implemented");
+                        //throw new Exception("ib handler for " . $child->getTag() . " not implemented");
                 }
             }
         }
@@ -2520,7 +2520,7 @@ class WhatsProt
             }
             if(strlen($header) != 3)
             {
-                throw new Exception("Failed to read stanza header");
+                //throw new Exception("Failed to read stanza header");
             }
             $treeLength = 0;
             $treeLength = ord($header[1]) << 8;
@@ -2544,7 +2544,7 @@ class WhatsProt
             }
 
             if (strlen($buff) != $treeLength) {
-                throw new Exception("Tree length did not match received length (buff = " . strlen($buff) . " & treeLength = $treeLength)");
+                //throw new Exception("Tree length did not match received length (buff = " . strlen($buff) . " & treeLength = $treeLength)");
             } else
             if (@feof($this->socket)) {
                 $error = "socket EOF, closing socket...";
@@ -2559,7 +2559,7 @@ class WhatsProt
         }
         else
         {
-            throw new Exception("Socket closed");
+            //throw new Exception("Socket closed");
         }
 
         return $buff;
