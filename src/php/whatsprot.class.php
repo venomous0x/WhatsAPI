@@ -7,6 +7,7 @@ require_once 'rc4.php';
 require_once 'mediauploader.php';
 require_once 'keystream.class.php';
 require_once 'tokenmap.class.php';
+require_once 'exceptions/exceptions.php';
 
 class SyncResult
 {
@@ -1602,7 +1603,7 @@ class WhatsProt
         
         if(strcmp($this->loginStatus, static::DISCONNECTED_STATUS) == 0)
 		{
-			//throw new Exception('Login Failure');
+            throw new Whatsprot_LoginFailureException('Login Failure');
 		}
 		else
 		{
@@ -1827,6 +1828,11 @@ class WhatsProt
         if( $node != null ) {
             $this->processInboundDataNode($node, $autoReceipt);
         }
+    }
+
+    public function getLoginStatus()
+    {
+        return $this->loginStatus;
     }
 
     /**
