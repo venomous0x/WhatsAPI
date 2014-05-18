@@ -1,6 +1,6 @@
 <?php
 require_once("whatsprot.class.php");
-require_once("contacts.php");
+//require_once("contacts.php");
 /**
  * Created by JetBrains PhpStorm.
  * User: Max
