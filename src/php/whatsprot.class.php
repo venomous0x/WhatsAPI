@@ -1300,6 +1300,29 @@ class WhatsProt
         $mediaNode = new ProtocolNode("media", $mediaAttribs, array($vCardNode), "");
         $this->sendMessageNode($to, $mediaNode);
     }
+    
+    /**
+     * Send a vCard to the user/group as Broadcast.
+     *
+     * @param $targets
+     *   Array of recipients to send.
+     * @param $name
+     *   The vCard contact name.
+     * @param $vCard
+     *   The contact vCard to send.
+     */
+	public function sendBroadcastVcard($targets, $name, $vCard)
+    {
+        $vCardAttribs = array();
+        $vCardAttribs['name'] = $name;
+        $vCardNode = new ProtocolNode("vcard", $vCardAttribs, null, $vCard);
+
+        $mediaAttribs = array();
+        $mediaAttribs["type"] = "vcard";
+
+        $mediaNode = new ProtocolNode("media", $mediaAttribs, array($vCardNode), "");
+        $this->sendBroadcast($targets, $mediaNode, "media");
+    }
 
     /**
      * Sets the bind of the new message.
