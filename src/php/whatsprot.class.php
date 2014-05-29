@@ -2076,7 +2076,7 @@ class WhatsProt
         }
         if ($node->getTag() == "presence"
             && strncmp($node->getAttribute('from'), $this->phoneNumber, strlen($this->phoneNumber)) != 0
-            && strpos($node->getAttribute('from'), "-") != false
+            && strpos($node->getAttribute('from'), "-") !== false
             && $node->getAttribute('type') != null) {
             $groupId = self::parseJID($node->getAttribute('from'));
             if ($node->getAttribute('add') != null) {
