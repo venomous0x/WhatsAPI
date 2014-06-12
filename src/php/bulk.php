@@ -1,6 +1,5 @@
 <?php
 require_once("whatsprot.class.php");
-//require_once("contacts.php");
 /**
  * Created by JetBrains PhpStorm.
  * User: Max
@@ -9,10 +8,18 @@ require_once("whatsprot.class.php");
  * To change this template use File | Settings | File Templates.
  *
  * Usage:
+ * $username = "";
+ * 
+ * $password = "";
+ *
+ * $contacts = array("", "", ""); // or read them from a file
+ *  
  * $wbs = new WaBulkSender($username, $password);
  * $wbs->Login();
  * $wbs->SyncContacts($contacts);
  * $wbs->SendBulk($contacts, "bulk message");
+ * or
+ * $wbs->SendBroadcast($contacts, "Broadcast Message");
  */
 
 class WaBulkSender
@@ -84,12 +91,12 @@ class WaBulkSender
         echo "connected to WhatsApp<br />";
     }
 
-    public static function event_onMessageReceivedServer($mynumber, $from, $id, $type, $time)
+    public static function event_onMessageReceivedServer($mynumber, $from, $id, $type)
     {
         if($from != "broadcast")
         {
             //unlock
-            echo "$type message $id from $mynumber to $from received by server on $time<br />";
+            echo "$type with id $id from $mynumber to $from received by server<br />";
             static::$sendLock = false;
         }
     }
@@ -99,17 +106,8 @@ class WaBulkSender
      */
     public function SyncContacts($contacts)
     {
-        echo "Syncing contacts... ";
-        $wacs = new WhatsAppContactSync($this->username, $this->password, $contacts, true);
-        $res = $wacs->executeSync();
-        if(!is_array($res))
-        {
-            echo "sync failed<br />";
-        }
-        else
-        {
-            echo "synced " . count($res) . " contacts<br />";
-        }
+		$this->wa->sendSync($contacts);
+		echo "Synced " . count($contacts) . " contacts<br />";
     }
 
     /**
