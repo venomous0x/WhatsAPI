@@ -9,11 +9,17 @@ require_once("whatsprot.class.php");
  * To change this template use File | Settings | File Templates.
  *
  * Usage:
- * $wbs = new WaBulkSender($username, $password);
- * $wbs->Login();
- * $wbs->SyncContacts($contacts);
- * $wbs->SendBulk($contacts, "bulk message");
- */
+ *$username = "";
+ *
+ *$password = "";
+ *
+ *$contacts = array("","",""); // you can also read numbers from a txt file
+ * 
+ *$wbs = new WaBulkSender($username, $password);
+ *$wbs->Login();
+ *$wbs->SyncContacts($contacts);
+ *$wbs->SendBulk($contacts, "bulk message");
+**/
 
 class WaBulkSender
 {
@@ -44,6 +50,7 @@ class WaBulkSender
         $this->wa->eventManager()->bind("onLogin", "WaBulkSender::event_onLogin");
         $this->wa->eventManager()->bind("onConnect", "WaBulkSender::event_onConnect");
         $this->wa->eventManager()->bind("onMessageReceivedServer", "WaBulkSender::event_onMessageReceivedServer");
+        $this->wa->eventManager()->bind("onGetSyncResult", "WaBulkSender::onSyncResult");
     }
 
     public function Login()
@@ -57,6 +64,19 @@ class WaBulkSender
         $this->wa->pollMessages();
         echo "Ready for work!<br />";
     }
+    
+    public static function onSyncResult($result)
+	{
+    	foreach($result->existing as $number)
+    	{
+        	echo "$number exists<br />";
+    	}
+    	foreach($result->nonExisting as $number)
+    	{
+        	echo "$number does not exist<br />";
+    	}
+    	die();//to break out of the while(true) loop
+	}
 
     /**
      * @param string $number
@@ -99,17 +119,7 @@ class WaBulkSender
      */
     public function SyncContacts($contacts)
     {
-        echo "Syncing contacts... ";
-        $wacs = new WhatsAppContactSync($this->username, $this->password, $contacts, true);
-        $res = $wacs->executeSync();
-        if(!is_array($res))
-        {
-            echo "sync failed<br />";
-        }
-        else
-        {
-            echo "synced " . count($res) . " contacts<br />";
-        }
+        $this->wa->sendSync($contacts);
     }
 
     /**
