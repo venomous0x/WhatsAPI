@@ -736,10 +736,11 @@ class WhatsAppEvent
     
     function fireSendPresence(
         $phone,
-        $type
+        $type,
+        $name
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $type) {
-            $listener->onSendPresence($phone, $type);
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $type, $name) {
+            $listener->onSendPresence($phone, $type, $name);
         };
         $this->fireCallback($callbackEvent);          
     }
