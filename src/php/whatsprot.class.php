@@ -1882,6 +1882,16 @@ class WhatsProt
                 $node->getAttribute('class')
             );
         }
+        elseif($node->getTag() == 'receipt')
+        {
+            $this->eventManager()->fireMessageReceivedClient(
+                $this->phoneNumber,
+                $node->getAttribute('from'),
+                $node->getAttribute('id'),
+                $node->getAttribute('class'),
+                $node->getAttribute('t')
+            );
+        }
         if ($node->getTag() == "message") {
             array_push($this->messageQueue, $node);
 
