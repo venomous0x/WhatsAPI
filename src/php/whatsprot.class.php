@@ -2867,6 +2867,12 @@ if (strcmp($node->getTag(), "presence") == 0
      */
     protected function sendSetPicture($jid, $filepath)
     {
+    	if(stripos($filepath, 'http') == 0 && !preg_match('/\s/',$filepath)){
+		$newImageName = rand(0, 100000);
+		$imagePath = static::PICTURES_FOLDER."/".$newImageName.".jpg";
+		copy($filepath, $imagePath);
+		$filepath = $imagePath;
+	}
         preprocessProfilePicture($filepath);
         $fp = @fopen($filepath, "r");
         if ($fp) {
