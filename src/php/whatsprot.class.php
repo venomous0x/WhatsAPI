@@ -2122,7 +2122,7 @@ class WhatsProt
                 	$this->phoneNumber,
                 	$node->getAttribute('from'),
                 	$node->getAttribute('id'),
-                	"compsing",
+                	"composing",
                 	$node->getAttribute('t')
             	);
             }
