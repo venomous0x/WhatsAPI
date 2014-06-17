@@ -2075,7 +2075,7 @@ class WhatsProt
                 }
             $this->sendClearDirty($categories);
         }
-if (strcmp($node->getTag(), "presence") == 0
+	if (strcmp($node->getTag(), "presence") == 0
             && strncmp($node->getAttribute('from'), $this->phoneNumber, strlen($this->phoneNumber)) != 0
             && strpos($node->getAttribute('from'), "-") == false) {
             $presence = array();
@@ -2113,6 +2113,28 @@ if (strcmp($node->getTag(), "presence") == 0
                     self::parseJID($node->getAttribute('author'))
                 );
             }
+        }
+        if (strcmp($node->getTag(), "chatstate") == 0
+            && strncmp($node->getAttribute('from'), $this->phoneNumber, strlen($this->phoneNumber)) != 0
+            && strpos($node->getAttribute('from'), "-") == false) {
+            if($node->getChild(0)->getTag() == "composing"){
+            	$this->eventManager()->fireMessageComposing(
+                	$this->phoneNumber,
+                	$node->getAttribute('from'),
+                	$node->getAttribute('id'),
+                	"compsing",
+                	$node->getAttribute('t')
+            	);
+            }
+            else{
+            	$this->eventManager()->fireMessagePaused(
+                	$this->phoneNumber,
+                	$node->getAttribute('from'),
+                	$node->getAttribute('id'),
+                	"paused",
+                	$node->getAttribute('t')
+            	);
+            }          	
         }
         if ($node->getTag() == "iq"
             && $node->getAttribute('type') == "get"
