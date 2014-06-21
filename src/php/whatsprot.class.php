@@ -98,7 +98,7 @@ class WhatsProt
         $this->phoneNumber = $number;
         if (!$this->checkIdentity($identity)) {
             //compute sha identity hash
-            $this->identity = $this->buildIdentity($identity);
+            $this->identity = $this->buildIdentity($number, $identity);
         } else {
             //use provided identity hash
             $this->identity = $identity;
@@ -1630,11 +1630,11 @@ class WhatsProt
      * Create an identity string
      *
      * @param  string $identity A user string
-     * @return string           Correctly formatted identity
+     * @return string Correctly formatted identity
      */
-    protected function buildIdentity($identity)
+    protected function buildIdentity($number, $identity)
     {
-        return strtolower(urlencode(sha1($identity, true)));
+        return strtolower(urlencode(sha1($identity + $number, true)));
     }
 
     protected function checkIdentity($identity)
