@@ -1632,9 +1632,9 @@ class WhatsProt
      * @param  string $identity A user string
      * @return string Correctly formatted identity
      */
-    protected function buildIdentity($number, $identity)
+    protected function buildIdentity($number, $salt = "")
     {
-        return strtolower(urlencode(sha1($identity + $number, true)));
+        return strtolower(urlencode(sha1(strrev($salt + $number), true)));
     }
 
     protected function checkIdentity($identity)
