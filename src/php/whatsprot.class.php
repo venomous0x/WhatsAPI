@@ -2893,7 +2893,7 @@ class WhatsProt
 		$extension = end(explode(".", $filepath));
 		$newImageName = rand(0, 100000);
 		$imagePath = static::PICTURES_FOLDER."/".$newImageName.".jpg";
-		if($extension == jpg){
+		if($extension == 'jpg'){
 			copy($filepath, $imagePath);
 			$filepath = $imagePath;
 		}
