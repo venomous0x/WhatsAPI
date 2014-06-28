@@ -51,6 +51,7 @@ class WaBulkSender
         $this->wa->eventManager()->bind("onLogin", "WaBulkSender::event_onLogin");
         $this->wa->eventManager()->bind("onConnect", "WaBulkSender::event_onConnect");
         $this->wa->eventManager()->bind("onMessageReceivedServer", "WaBulkSender::event_onMessageReceivedServer");
+        $this->wa->eventManager()->bind("onGetSyncResult", "WaBulkSender::event_onSyncResult");
     }
 
     public function Login()
@@ -99,6 +100,19 @@ class WaBulkSender
             echo "$type with id $id from $mynumber to $from received by server<br />";
             static::$sendLock = false;
         }
+    }
+    
+    public static function event_onSyncResult($result)
+    {
+    	foreach($result->existing as $number)
+    	{
+        	echo "$number exists<br />";
+    	}
+    	foreach($result->nonExisting as $number)
+    	{
+	    echo "$number does not exist<br />";
+    	}
+    die();//to break out of the while(true) loop
     }
 
     /**
