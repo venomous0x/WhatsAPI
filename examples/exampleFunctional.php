@@ -1,7 +1,6 @@
 <?php
 set_time_limit(10);
 require_once '../src/whatsprot.class.php';
-// require_once 'contacts.php';
 
 // phone number, deviceIdentity, and name.
 $options = getopt("d::", array("debug::"));
