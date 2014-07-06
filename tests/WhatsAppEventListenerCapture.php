@@ -1,5 +1,5 @@
 <?php
-require_once '../src/php/events/WhatsAppEventListenerProxy.php';
+require_once '../src/events/WhatsAppEventListenerProxy.php';
 
 /**
  * Records all calls to the WhatsAppEventListener so they can be analyzed 
