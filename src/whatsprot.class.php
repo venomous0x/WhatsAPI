@@ -53,6 +53,7 @@ class WhatsProt
      * Property declarations.
      */
     protected $accountInfo;             // The AccountInfo object.
+    protected $challengeFilename = 'nextChallenge.dat';
     protected $challengeData;           //
     protected $debug;                   // Determines whether debug mode is on or off.
     protected $event;                   // An instance of the WhatsAppEvent class.
@@ -105,6 +106,15 @@ class WhatsProt
         }
         $this->name = $nickname;
         $this->loginStatus = static::DISCONNECTED_STATUS;
+    }
+
+    /**
+     * If you need use diferent challenge fileName you can use this
+     *
+     * @param string $filename
+     */
+    public function setChallengeName($filename){
+        $this->challengeFilename = $filename;
     }
 
     /**
@@ -458,7 +468,7 @@ class WhatsProt
     public function loginWithPassword($password)
     {
         $this->password = $password;
-        $challengeData = @file_get_contents("nextChallenge.dat");
+        $challengeData = @file_get_contents($this->challengeFilename);
         if($challengeData) {
             $this->challengeData = $challengeData;
         }
@@ -1864,7 +1874,7 @@ class WhatsProt
         elseif ($node->getTag() == "success") {
             $this->loginStatus = static::CONNECTED_STATUS;
             $challengeData = $node->getData();
-            file_put_contents("nextChallenge.dat", $challengeData);
+            file_put_contents($this->challengeFilename, $challengeData);
             $this->writer->setKey($this->outputKey);
         } elseif($node->getTag() == "failure")
         {
