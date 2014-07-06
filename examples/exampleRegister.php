@@ -9,7 +9,7 @@
  */
 
 
-require_once('whatsprot.class.php');
+require_once('../src/whatsprot.class.php');
 
 /**
  * Config data.
