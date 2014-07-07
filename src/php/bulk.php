@@ -1,5 +1,5 @@
 <?php
-require_once("whatsprot.class.php");
+require_once("../src/whatsprot.class.php");
 /**
  * Created by JetBrains PhpStorm.
  * User: Max
@@ -9,11 +9,11 @@ require_once("whatsprot.class.php");
  *
  * Usage:
  * $username = "";
- * 
+ *
  * $password = "";
  *
  * $contacts = array("", "", ""); // or read them from a file
- *  
+ *
  * $wbs = new WaBulkSender($username, $password);
  * $wbs->Login();
  * $wbs->SyncContacts($contacts);
@@ -21,7 +21,6 @@ require_once("whatsprot.class.php");
  * or
  * $wbs->SendBroadcast($contacts, "Broadcast Message");
  */
-
 class WaBulkSender
 {
     protected $username;
@@ -97,22 +96,16 @@ class WaBulkSender
         if($from != "broadcast")
         {
             //unlock
-            echo "$type with id $id from $mynumber to $from received by server<br />";
+            echo "<br /> $type with id $id from $mynumber to $from received by server<br />";
             static::$sendLock = false;
         }
     }
-    
+
     public static function event_onSyncResult($result)
     {
-    	foreach($result->existing as $number)
-    	{
-        	echo "$number exists<br />";
-    	}
-    	foreach($result->nonExisting as $number)
-    	{
-	    echo "$number does not exist<br />";
-    	}
-    die();//to break out of the while(true) loop
+    	$i=0;
+    	global $contacts;
+      $contacts = $result->existing;
     }
 
     /**
@@ -122,6 +115,7 @@ class WaBulkSender
     {
 		$this->wa->sendSync($contacts);
 		echo "Synced " . count($contacts) . " contacts<br />";
+		$this->wa->pollMessages();
     }
 
     /**
@@ -145,20 +139,20 @@ class WaBulkSender
      * @param string[] $targets
      * @param $message
      */
-    public function SendBulk($targets, $message)
+    public function SendBulk($contacts, $message)
     {
-        echo "Sending " . count($targets) . " bulk messages...<br />";
-        foreach($targets as $target)
+        echo "Sending " . count($contacts) . " bulk messages...<br />";
+        foreach($contacts as $contact)
         {
-            $this->wa->sendPresenceSubscription($target);
+            $this->wa->sendPresenceSubscription($contact);
             $this->wa->pollMessages();
-            $this->wa->sendMessageComposing($target);
+            $this->wa->sendMessageComposing($contact);
             sleep(1);
             $this->wa->pollMessages();
-            $this->wa->sendMessagePaused($target);
+            $this->wa->sendMessagePaused($contact);
             static::$sendLock = true;
-            echo "Sending message from " . $this->username . " to $target... ";
-            $this->wa->sendMessage($target, $message);
+            echo "Sending message from " . $this->username . " to $contact... ";
+            $this->wa->sendMessage($contact, $message);
             while(static::$sendLock)
             {
                 //wait for server receipt
