@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-require '../src/php/whatsprot.class.php';
+require '../src/whatsprot.class.php';
 
 function fgets_u($pStdn)
 {

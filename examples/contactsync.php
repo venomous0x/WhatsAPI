@@ -1,7 +1,7 @@
 <?php
 set_time_limit(30);
 
-require_once("whatsprot.class.php");
+require_once("../src/whatsprot.class.php");
 
 $username = $_GET["phone"];
 $password = $_GET["pass"];
