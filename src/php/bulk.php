@@ -103,9 +103,8 @@ class WaBulkSender
 
     public static function event_onSyncResult($result)
     {
-    	$i=0;
     	global $contacts;
-      $contacts = $result->existing;
+    	$contacts = $result->existing;
     }
 
     /**
