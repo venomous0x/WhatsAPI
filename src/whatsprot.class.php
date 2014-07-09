@@ -2559,12 +2559,10 @@ class WhatsProt
 
         switch ($filetype) {
             case "image":
-            	if(file_exists($filepath))
-                	$icon = createIcon($filepath);
+                $icon = createIcon($filepath);
                 break;
             case "video":
-            	if(file_exists($filepath))
-                	$icon = createVideoIcon($filepath);
+                $icon = createVideoIcon($filepath);
                 break;
             default:
                 $icon = '';
