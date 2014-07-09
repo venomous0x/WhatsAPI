@@ -1034,13 +1034,23 @@ class WhatsProt
      * @param  string $filepath
      *   The url/uri to the image file.
      * @param  bool $storeURLmedia Keep copy of file
+     * @param  int $fsize size of the media file
+     * @param string $fhash base64 hash of the media file
+     *
      * @return bool
      */
-    public function sendMessageImage($to, $filepath, $storeURLmedia = false)
+    public function sendMessageImage($to, $filepath, $storeURLmedia = false, $fsize = 0, $fhash = "")
     {
-        $allowedExtensions = array('jpg', 'jpeg', 'gif', 'png');
-        $size = 5 * 1024 * 1024; // Easy way to set maximum file size for this media type.
-        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'image', $allowedExtensions, $storeURLmedia);
+    	if ($fsize==0 || $fhash == "")
+    	{
+        	$allowedExtensions = array('jpg', 'jpeg', 'gif', 'png');
+        	$size = 5 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        	return $this->sendCheckAndSendMedia($filepath, $size, $to, 'image', $allowedExtensions, $storeURLmedia);
+        }
+        else{
+        $this->sendRequestFileUpload($fhash, 'image', $fsize, $filepath, $to);
+    	return true;  
+    	}
     }
 
     /**
@@ -1102,13 +1112,23 @@ class WhatsProt
      * @param string $filepath
      *   The url/uri to the MP4/MOV video.
      * @param  bool $storeURLmedia Keep a copy of media file.
+	 * @param  int $fsize size of the media file
+     * @param string $fhash base64 hash of the media file
+     * 
      * @return bool
      */
-    public function sendMessageVideo($to, $filepath, $storeURLmedia = false)
+    public function sendMessageVideo($to, $filepath, $storeURLmedia = false, $fsize = 0, $fhash = "")
     {
-        $allowedExtensions = array('3gp', 'mp4', 'mov', 'avi');
-        $size = 20 * 1024 * 1024; // Easy way to set maximum file size for this media type.
-        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'video', $allowedExtensions, $storeURLmedia);
+    	if ($fsize==0 || $fhash == "")
+    	{
+        	$allowedExtensions = array('3gp', 'mp4', 'mov', 'avi');
+        	$size = 20 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        	return $this->sendCheckAndSendMedia($filepath, $size, $to, 'video', $allowedExtensions, $storeURLmedia);
+        }
+        else{
+    		$this->sendRequestFileUpload($fhash, 'video', $fsize, $filepath, $to);
+    		return true;   
+    	}
     }
 
     /**
@@ -2539,10 +2559,12 @@ class WhatsProt
 
         switch ($filetype) {
             case "image":
-                $icon = createIcon($filepath);
+            	if(file_exists($filepath))
+                	$icon = createIcon($filepath);
                 break;
             case "video":
-                $icon = createVideoIcon($filepath);
+            	if(file_exists($filepath))
+                	$icon = createVideoIcon($filepath);
                 break;
             default:
                 $icon = '';
