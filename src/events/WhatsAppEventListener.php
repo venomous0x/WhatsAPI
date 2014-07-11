@@ -309,6 +309,7 @@ interface WhatsAppEventListener {
         $url,
         $filename,
         $filesize,
+        $filehash,
         $icon        
     );
     
