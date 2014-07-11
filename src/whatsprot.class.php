@@ -525,12 +525,12 @@ class WhatsProt
      * @param  string  $path          URL or local path to the audio file to send
      * @param  bool $storeURLmedia Keep a copy of the audio file on your server
      */
-    public function sendBroadcastAudio($targets, $path, $storeURLmedia = false)
+    public function sendBroadcastAudio($targets, $path, $storeURLmedia = false, $fsize = 0, $fhash = "")
     {
         if (!is_array($targets)) {
             $targets = array($targets);
         }
-        $this->sendMessageAudio($targets, $path, $storeURLmedia);
+        $this->sendMessageAudio($targets, $path, $storeURLmedia, $fsize, $fhash);
     }
 
     /**
@@ -545,12 +545,12 @@ class WhatsProt
      * @param  string  $path          URL or local path to the image file to send
      * @param  bool $storeURLmedia Keep a copy of the audio file on your server
      */
-    public function sendBroadcastImage($targets, $path, $storeURLmedia = false)
+    public function sendBroadcastImage($targets, $path, $storeURLmedia = false, $fsize = 0, $fhash = "")
     {
         if (!is_array($targets)) {
             $targets = array($targets);
         }
-        $this->sendMessageImage($targets, $path, $storeURLmedia);
+        $this->sendMessageImage($targets, $path, $storeURLmedia, $fsize, $fhash);
     }
 
     /**
@@ -612,12 +612,12 @@ class WhatsProt
      * @param  string  $path          URL or local path to the video file to send
      * @param  bool $storeURLmedia Keep a copy of the audio file on your server
      */
-    public function sendBroadcastVideo($targets, $path, $storeURLmedia = false)
+    public function sendBroadcastVideo($targets, $path, $storeURLmedia = false, $fsize = 0, $fhash = "")
     {
         if (!is_array($targets)) {
             $targets = array($targets);
         }
-        $this->sendMessageVideo($targets, $path, $storeURLmedia);
+        $this->sendMessageVideo($targets, $path, $storeURLmedia, $fsize, $fhash);
     }
 
     /**
