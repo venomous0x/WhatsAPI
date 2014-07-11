@@ -2515,7 +2515,7 @@ class WhatsProt
             $url = $duplicate->getAttribute("url");
             $filesize = $duplicate->getAttribute("size");
 //            $mimetype = $duplicate->getAttribute("mimetype");
-//            $filehash = $duplicate->getAttribute("filehash");
+            $filehash = $duplicate->getAttribute("filehash");
             $filetype = $duplicate->getAttribute("type");
 //            $width = $duplicate->getAttribute("width");
 //            $height = $duplicate->getAttribute("height");
@@ -2540,7 +2540,7 @@ class WhatsProt
             $url = $json->url;
             $filesize = $json->size;
 //            $mimetype = $json->mimetype;
-//            $filehash = $json->filehash;
+            $filehash = $json->filehash;
             $filetype = $json->type;
 //            $width = $json->width;
 //            $height = $json->height;
@@ -2553,6 +2553,7 @@ class WhatsProt
         $mediaAttribs["url"] = $url;
         $mediaAttribs["file"] = $filename;
         $mediaAttribs["size"] = $filesize;
+        $mediaAttribs["hash"] = $filehash;
 
         $filepath = $this->mediaQueue[$id]['filePath'];
         $to = $this->mediaQueue[$id]['to'];
@@ -2583,6 +2584,7 @@ class WhatsProt
             $url,
             $filename,
             $filesize,
+            $filehash,
             $icon
         );
         return true;
