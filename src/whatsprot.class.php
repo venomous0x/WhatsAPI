@@ -1010,9 +1010,16 @@ class WhatsProt
      */
     public function sendMessageAudio($to, $filepath, $storeURLmedia = false)
     {
-        $allowedExtensions = array('3gp', 'caf', 'wav', 'mp3', 'wma', 'ogg', 'aif', 'aac', 'm4a');
-        $size = 10 * 1024 * 1024; // Easy way to set maximum file size for this media type.
-        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'audio', $allowedExtensions, $storeURLmedia);
+    	if ($fsize==0 || $fhash == "")
+    	{
+        	$allowedExtensions = array('3gp', 'caf', 'wav', 'mp3', 'wma', 'ogg', 'aif', 'aac', 'm4a');
+        	$size = 10 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        	return $this->sendCheckAndSendMedia($filepath, $size, $to, 'audio', $allowedExtensions, $storeURLmedia);
+        }
+        else{
+    		$this->sendRequestFileUpload($fhash, 'audio', $fsize, $filepath, $to);
+    		return true;   
+    	}
     }
 
     /**
