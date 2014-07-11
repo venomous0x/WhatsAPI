@@ -491,6 +491,7 @@ abstract class WhatsAppEventListenerProxy implements WhatsAppEventListener {
         $url, 
         $filename, 
         $filesize,
+        $filehash,
         $icon
     ) {
         $this->handleEvent(__FUNCTION__, func_get_args());
