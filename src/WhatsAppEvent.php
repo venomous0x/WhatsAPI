@@ -596,10 +596,11 @@ class WhatsAppEvent
         $url,
         $filename,
         $filesize,
+        $filehash,
         $icon        
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $to, $id, $filetype, $url, $filename, $filesize, $icon) { 
-            $listener->onMediaMessageSent($phone, $to, $id, $filetype, $url, $filename, $filesize, $icon);
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone, $to, $id, $filetype, $url, $filename, $filesize, $filehash, $icon) { 
+            $listener->onMediaMessageSent($phone, $to, $id, $filetype, $url, $filename, $filesize, $filehash, $icon);
         };
         $this->fireCallback($callbackEvent);          
     }
