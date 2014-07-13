@@ -3,7 +3,7 @@ require_once 'Protocol.class.php';
 require_once 'WhatsAppEvent.php';
 require_once 'func.php';
 require_once 'token.php';
-require_once 'rc4.php';
+require_once 'RC4.class.php';
 require_once 'Mediauploader.class.php';
 require_once 'keystream.class.php';
 require_once 'tokenmap.class.php';
