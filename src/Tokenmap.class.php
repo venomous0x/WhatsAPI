@@ -1,11 +1,5 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: max
- * Date: 2-2-14
- * Time: 12:24
- * To change this template use File | Settings | File Templates.
- */
+
 class TokenMap
 {
     private static $primaryStrings = array(
