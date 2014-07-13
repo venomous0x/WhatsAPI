@@ -73,7 +73,7 @@ $config['YOURNAME'] = array(
  * NOTHING ELSE TO EDIT BELOW THIS LINE.
  *
  */
-require '../src/whatsprot.class.php';
+require '../src/Whatsprot.class.php';
 
 /**
  * For the future, other ways of getting contacts from various sources
