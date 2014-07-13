@@ -1,5 +1,5 @@
 <?php
-require_once 'protocol.class.php';
+require_once 'Protocol.class.php';
 require_once 'WhatsAppEvent.php';
 require_once 'func.php';
 require_once 'token.php';
