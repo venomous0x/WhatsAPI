@@ -1,5 +1,5 @@
 <?php
-require_once '../src/whatsprot.class.php';
+require_once '../src/Whatsprot.class.php';
 
 /**
  * Used to expose protected methods to the testing framework.
