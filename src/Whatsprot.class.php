@@ -1,12 +1,12 @@
 <?php
-require_once 'protocol.class.php';
+require_once 'Protocol.class.php';
 require_once 'WhatsAppEvent.php';
 require_once 'func.php';
 require_once 'token.php';
-require_once 'rc4.php';
-require_once 'mediauploader.php';
-require_once 'keystream.class.php';
-require_once 'tokenmap.class.php';
+require_once 'RC4.class.php';
+require_once 'Mediauploader.class.php';
+require_once 'Keystream.class.php';
+require_once 'Tokenmap.class.php';
 
 class SyncResult
 {
@@ -1562,7 +1562,7 @@ class WhatsProt
      */
     protected function dissectPhone()
     {
-        if (($handle = fopen(dirname(__FILE__).'/countries.csv', 'rb')) !== false) {
+        if (($handle = fopen(dirname(__FILE__).'/assets/countries.csv', 'rb')) !== false) {
             while (($data = fgetcsv($handle, 1000)) !== false) {
                 if (strpos($this->phoneNumber, $data[1]) === 0) {
                     // Return the first appearance.
