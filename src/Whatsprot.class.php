@@ -6,7 +6,7 @@ require_once 'token.php';
 require_once 'RC4.class.php';
 require_once 'Mediauploader.class.php';
 require_once 'Keystream.class.php';
-require_once 'tokenmap.class.php';
+require_once 'Tokenmap.class.php';
 
 class SyncResult
 {
