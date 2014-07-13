@@ -6,7 +6,7 @@
  * Time: 11:55
  * To change this template use File | Settings | File Templates.
  */
-require_once("rc4.php");
+require_once("RC4.php");
 require_once("func.php");
 
 class KeyStream {
