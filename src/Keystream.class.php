@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: max
- * Date: 29-1-14
- * Time: 11:55
- * To change this template use File | Settings | File Templates.
- */
 require_once("RC4.class.php");
 require_once("func.php");
 
