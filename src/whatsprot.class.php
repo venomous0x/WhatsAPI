@@ -2175,7 +2175,7 @@ class WhatsProt
         }
         if ($node->getTag() == "iq"
             && $node->getAttribute('type') == "get"
-            && $node->getChild(0)->getTag() == "ping") {
+            && $node->getAttribute('xmlns') == "urn:xmpp:ping") {
             $this->eventManager()->firePing(
                 $this->phoneNumber,
                 $node->getAttribute('id')
