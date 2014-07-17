@@ -1010,9 +1010,16 @@ class WhatsProt
      */
     public function sendMessageAudio($to, $filepath, $storeURLmedia = false)
     {
-        $allowedExtensions = array('3gp', 'caf', 'wav', 'mp3', 'wma', 'ogg', 'aif', 'aac', 'm4a');
-        $size = 10 * 1024 * 1024; // Easy way to set maximum file size for this media type.
-        return $this->sendCheckAndSendMedia($filepath, $size, $to, 'audio', $allowedExtensions, $storeURLmedia);
+    	if ($fsize==0 || $fhash == "")
+    	{
+        	$allowedExtensions = array('3gp', 'caf', 'wav', 'mp3', 'wma', 'ogg', 'aif', 'aac', 'm4a');
+        	$size = 10 * 1024 * 1024; // Easy way to set maximum file size for this media type.
+        	return $this->sendCheckAndSendMedia($filepath, $size, $to, 'audio', $allowedExtensions, $storeURLmedia);
+        }
+        else{
+    		$this->sendRequestFileUpload($fhash, 'audio', $fsize, $filepath, $to);
+    		return true;   
+    	}
     }
 
     /**
@@ -2515,7 +2522,7 @@ class WhatsProt
             $url = $duplicate->getAttribute("url");
             $filesize = $duplicate->getAttribute("size");
 //            $mimetype = $duplicate->getAttribute("mimetype");
-//            $filehash = $duplicate->getAttribute("filehash");
+            $filehash = $duplicate->getAttribute("filehash");
             $filetype = $duplicate->getAttribute("type");
 //            $width = $duplicate->getAttribute("width");
 //            $height = $duplicate->getAttribute("height");
@@ -2540,7 +2547,7 @@ class WhatsProt
             $url = $json->url;
             $filesize = $json->size;
 //            $mimetype = $json->mimetype;
-//            $filehash = $json->filehash;
+            $filehash = $json->filehash;
             $filetype = $json->type;
 //            $width = $json->width;
 //            $height = $json->height;
@@ -2553,6 +2560,7 @@ class WhatsProt
         $mediaAttribs["url"] = $url;
         $mediaAttribs["file"] = $filename;
         $mediaAttribs["size"] = $filesize;
+        $mediaAttribs["hash"] = $filehash;
 
         $filepath = $this->mediaQueue[$id]['filePath'];
         $to = $this->mediaQueue[$id]['to'];
@@ -2583,6 +2591,7 @@ class WhatsProt
             $url,
             $filename,
             $filesize,
+            $filehash,
             $icon
         );
         return true;
