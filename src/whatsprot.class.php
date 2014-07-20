@@ -2362,6 +2362,9 @@ class WhatsProt
                 case "participant":
                     //TODO
                     break;
+               	case "subject":
+                    //TODO
+                    break;
                 default:
                     throw new Exception("Method $type not implemented");
             }
