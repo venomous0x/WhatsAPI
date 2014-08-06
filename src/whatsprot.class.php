@@ -2358,9 +2358,26 @@ class WhatsProt
                     //TODO
                     break;
                 case "participant":
-                    //TODO
+                    switch ($node->getChild(0)->getTag())
+                    {
+                        case "add":
+                            $this->eventManager()->fireGroupsParticipantsAdd(
+                            $this->phoneNumber,
+                            self::parseJID($node->getAttribute('from')),
+                            self::parseJID($node->getChild(0)->getAttribute('jid'))
+                            );    
+                        break;
+                        case "remove":
+                            $this->eventManager()->fireGroupsParticipantsRemove(
+                            $this->phoneNumber,
+                            self::parseJID($node->getAttribute('from')),
+                            self::parseJID($node->getChild(0)->getAttribute('jid')),
+                            self::parseJID($node->getChild(0)->getAttribute('author'))
+                              );
+                        break;
+                    }
                     break;
-               	case "subject":
+                case "subject":
                     //TODO
                     break;
                 default:
