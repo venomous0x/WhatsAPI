@@ -2193,7 +2193,7 @@ class WhatsProt
 
             $result = new SyncResult($index, $sync->getAttribute("sync"), $existingUsers, $failedNumbers);
 
-            $this->eventManager()->fireGetSyncResult($result);
+            $this->eventManager()->fireGetSyncResult($this->phoneNumber,$result);
         }
         if ($node->getTag() == "receipt") {
             $this->eventManager()->fireGetReceipt(
