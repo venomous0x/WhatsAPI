@@ -46,8 +46,8 @@ class WhatsProt
     const WHATSAPP_SERVER = 's.whatsapp.net';               // The hostname used to login/send messages.
     const WHATSAPP_UPLOAD_HOST = 'https://mms.whatsapp.net/client/iphone/upload.php'; // The upload host.
     const WHATSAPP_DEVICE = 'Android';                      // The device name.
-    const WHATSAPP_VER = '2.11.209';                // The WhatsApp version.
-    const WHATSAPP_USER_AGENT = 'WhatsApp/2.11.209 Android/4.3 Device/GalaxyS3';// User agent used in request/registration code.
+    const WHATSAPP_VER = '2.11.301';                // The WhatsApp version.
+    const WHATSAPP_USER_AGENT = 'WhatsApp/2.11.301 Android/4.3 Device/GalaxyS3';// User agent used in request/registration code.
 
     /**
      * Property declarations.
@@ -1637,19 +1637,18 @@ class WhatsProt
         $this->sendNode($feat);
         $this->sendNode($auth);
 
-        $this->pollMessages();
-        $cnt = 0;
-        do {
-            $this->pollMessages();
-            if($this->challengeData != null) {
-                $data = $this->createAuthResponseNode();
-                $this->sendNode($data);
-                $this->reader->setKey($this->inputKey);
-                $this->writer->setKey($this->outputKey);
-                $this->pollMessages();
-            }
-        } while ($this->challengeData == null && ($cnt++ < 100) && (strcmp($this->loginStatus, static::DISCONNECTED_STATUS) == 0));
-        
+        $this->pollMessage();
+        $this->pollMessage();
+        $this->pollMessage();
+
+        if($this->challengeData != null) {
+            $data = $this->createAuthResponseNode();
+            $this->sendNode($data);
+            $this->reader->setKey($this->inputKey);
+            $this->writer->setKey($this->outputKey);
+            $this->pollMessage();
+        }
+
         if(strcmp($this->loginStatus, static::DISCONNECTED_STATUS) == 0)
 		{
 			throw new Exception('Login Failure');
