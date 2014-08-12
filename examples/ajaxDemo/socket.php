@@ -98,7 +98,7 @@ $w->SendPresenceSubscription($target);
 //TODO: presense handling (online/offline/typing/last seen)
 
 while (running($time)) {
-    $w->pollMessages();
+    while($w->pollMessage());
 
     running($time); //check again if timestamp has been updated
     //check for outbound messages to send:

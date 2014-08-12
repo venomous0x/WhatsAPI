@@ -53,5 +53,5 @@ $wa->sendSync($numbers);
 //wait for response
 while(true)
 {
-    $wa->pollMessages();
+    $wa->pollMessage();
 }

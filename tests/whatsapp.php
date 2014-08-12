@@ -49,7 +49,7 @@ if ($_SERVER['argv'][1] == "-i") {
     echo "\n[] Interactive conversation with $dst:\n";
     stream_set_timeout(STDIN,1);
     while (TRUE) {
-        $wa->pollMessages();
+        while($wa->pollMessage());
         $buff = $wa->getMessages();
         if (!empty($buff)) {
             print_r($buff);
@@ -84,7 +84,7 @@ if ($_SERVER['argv'][1] == "-i") {
 if ($_SERVER['argv'][1] == "-l") {
     echo "\n[] Listen mode:\n";
     while (TRUE) {
-        $wa->pollMessages();
+        $wa->pollMessage();
         $data = $wa->getMessages();
         if(!empty($data)) print_r($data);
         sleep(1);

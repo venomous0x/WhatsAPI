@@ -476,19 +476,6 @@ class WhatsProt
     }
 
     /**
-     * Pull from the socket, and place incoming messages in the message queue.
-     */
-    public function pollMessages($autoReceipt = true)
-    {
-        $stanza = $this->readStanza();
-        while($stanza)
-        {
-            $this->processInboundData($stanza, $autoReceipt);
-            $stanza = $this->readStanza();
-        }
-    }
-
-    /**
      * Fetch a single message node
      * @param bool $autoReceipt
      * @return bool
@@ -1418,7 +1405,7 @@ class WhatsProt
     {
         $received = false;
         do {
-            $this->pollMessages();
+            $this->pollMessage();
             $msgs = $this->getMessages();
             foreach ($msgs as $m) {
                 // Process inbound messages.

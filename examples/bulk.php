@@ -61,7 +61,7 @@ class WaBulkSender
         $this->wa->loginWithPassword($this->password);
         $this->wa->sendClientConfig();
         $this->wa->sendGetServerProperties();
-        $this->wa->pollMessages();
+        while($this->wa->pollMessage());
         echo "Ready for work!<br />";
     }
 
@@ -123,7 +123,7 @@ class WaBulkSender
         }
         echo "Sending broadcast... ";
         $this->wa->sendBroadcastMessage($targets, $message);
-        $this->wa->pollMessages();
+        $this->wa->pollMessage();
         echo "done!<br />";
     }
 
@@ -137,10 +137,10 @@ class WaBulkSender
         foreach($targets as $target)
         {
             $this->wa->sendPresenceSubscription($target);
-            $this->wa->pollMessages();
+            $this->wa->pollMessage();
             $this->wa->sendMessageComposing($target);
             sleep(1);
-            $this->wa->pollMessages();
+            $this->wa->pollMessage();
             $this->wa->sendMessagePaused($target);
             static::$sendLock = true;
             echo "Sending message from " . $this->username . " to $target... ";

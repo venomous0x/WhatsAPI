@@ -102,7 +102,7 @@ $w->sendMessageImage($target, "demo/x3.jpg");
 $w->sendMessage($target, "Guess the number :)");
 $w->sendMessage($target, "Sent from WhatsApi at " . date('H:i'));
 
-$w->pollMessages();
+while($w->pollMessage());
 
 /**
  * You can create a ProcessNode class (or whatever name you want) that has a process($node) function
@@ -115,7 +115,7 @@ $w->setNewMessageBind($pn);
 echo "\n\nYou can also write and send messages to $target (interactive conversation)\n\n> ";
 
 while (1) {
-    $w->pollMessages();
+    $w->pollMessage();
     $msgs = $w->getMessages();
     foreach ($msgs as $m) {
         # process inbound messages
