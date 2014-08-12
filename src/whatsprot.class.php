@@ -231,9 +231,9 @@ class WhatsProt
 
         if ($response->status != 'ok') {
             $this->eventManager()->fireCodeRegisterFailed(
-                $this->phoneNumber, 
-                $response->status, 
-                $response->reason, 
+                $this->phoneNumber,
+                $response->status,
+                $response->reason,
                 $response->retry_after
             );
             if ($this->debug) {
@@ -343,18 +343,18 @@ class WhatsProt
         } else if ($response->status != 'sent') {
             if (isset($response->reason) && $response->reason == "too_recent") {
                 $this->eventManager()->fireCodeRequestFailedTooRecent(
-                    $this->phoneNumber, 
-                    $method, 
-                    $response->reason, 
+                    $this->phoneNumber,
+                    $method,
+                    $response->reason,
                     $response->retry_after
                 );
                 $minutes = round($response->retry_after / 60);
                 throw new Exception("Code already sent. Retry after $minutes minutes.");
             } else {
                 $this->eventManager()->fireCodeRequestFailed(
-                    $this->phoneNumber, 
-                    $method, 
-                    $response->reason, 
+                    $this->phoneNumber,
+                    $method,
+                    $response->reason,
                     $response->param
                 );
                 throw new Exception('There was a problem trying to request the code.');
@@ -386,10 +386,10 @@ class WhatsProt
         } else {
             if ($this->debug) {
                 print_r("Firing onConnectError\n");
-            }            
+            }
             $this->eventManager()->fireConnectError(
-               $this->phoneNumber, 
-               $this->socket                
+               $this->phoneNumber,
+               $this->socket
             );
         }
     }
@@ -410,7 +410,7 @@ class WhatsProt
 
     /**
      * Gets a new micro event dispatcher.
-     * 
+     *
      * @return WhatsAppEvent The event manager.
      */
     public function eventManager()
@@ -1005,7 +1005,7 @@ class WhatsProt
         }
         else{
     		$this->sendRequestFileUpload($fhash, 'audio', $fsize, $filepath, $to);
-    		return true;   
+    		return true;
     	}
     }
 
@@ -1043,7 +1043,7 @@ class WhatsProt
         }
         else{
         $this->sendRequestFileUpload($fhash, 'image', $fsize, $filepath, $to);
-    	return true;  
+    	return true;
     	}
     }
 
@@ -1108,7 +1108,7 @@ class WhatsProt
      * @param  bool $storeURLmedia Keep a copy of media file.
 	 * @param  int $fsize size of the media file
      * @param string $fhash base64 hash of the media file
-     * 
+     *
      * @return bool
      */
     public function sendMessageVideo($to, $filepath, $storeURLmedia = false, $fsize = 0, $fhash = "")
@@ -1121,7 +1121,7 @@ class WhatsProt
         }
         else{
     		$this->sendRequestFileUpload($fhash, 'video', $fsize, $filepath, $to);
-    		return true;   
+    		return true;
     	}
     }
 
@@ -1165,7 +1165,7 @@ class WhatsProt
         $messageNode = new ProtocolNode("iq", $messageHash, null, "");
         $this->sendNode($messageNode);
         $this->eventManager()->fireSendPong(
-            $this->phoneNumber, 
+            $this->phoneNumber,
             $msgid
         );
     }
@@ -1196,7 +1196,7 @@ class WhatsProt
         $node = new ProtocolNode("presence", $presence, null, "");
         $this->sendNode($node);
         $this->eventManager()->fireSendPresence(
-            $this->phoneNumber, 
+            $this->phoneNumber,
             $presence['type'],
             $this->name
         );
@@ -1298,7 +1298,7 @@ class WhatsProt
 
         $this->sendNode($node);
         $this->eventManager()->fireSendStatusUpdate(
-            $this->phoneNumber, 
+            $this->phoneNumber,
             $txt
         );
     }
@@ -1325,7 +1325,7 @@ class WhatsProt
         $mediaNode = new ProtocolNode("media", $mediaAttribs, array($vCardNode), "");
         $this->sendMessageNode($to, $mediaNode);
     }
-    
+
     /**
      * Send a vCard to the user/group as Broadcast.
      *
@@ -1384,14 +1384,14 @@ class WhatsProt
 
         if (!empty($url)) {
             $this->eventManager()->fireUploadFile(
-                $this->phoneNumber, 
-                basename($file), 
+                $this->phoneNumber,
+                basename($file),
                 $url
             );
             return $url;
         } else {
             $this->eventManager()->fireUploadFileFailed(
-                $this->phoneNumber, 
+                $this->phoneNumber,
                 basename($file)
             );
             return false;
@@ -1867,22 +1867,22 @@ class WhatsProt
 
     /**
      * Will process the data from the server after it's been decrypted and parsed.
-     * 
+     *
      * This also provides a convenient method to use to unit test the event framework.
-     * 
+     *
      */
     protected function processInboundDataNode(ProtocolNode $node, $autoReceipt = true) {
         $this->debugPrint($node->nodeString("rx  ") . "\n");
         $this->serverReceivedId = $node->getAttribute('id');
-        
+
         if ($node->getTag() == "challenge") {
             $this->processChallenge($node);
-        } 
+        }
         elseif($node->getTag() == "failure"  )
 		{
 
 			$this->loginStatus = static::DISCONNECTED_STATUS;
-			
+
 		}
         elseif ($node->getTag() == "success") {
             $this->loginStatus = static::CONNECTED_STATUS;
@@ -2126,7 +2126,7 @@ class WhatsProt
                 	"paused",
                 	$node->getAttribute('t')
             	);
-            }          	
+            }
         }
         if ($node->getTag() == "iq"
             && $node->getAttribute('type') == "get"
@@ -2396,7 +2396,7 @@ class WhatsProt
         $ack = new ProtocolNode("ack", $attributes, null, null);
         $this->sendNode($ack);
     }
-    
+
     /**
      * Process and save media image
      *
@@ -2508,7 +2508,7 @@ class WhatsProt
             $filetype = $duplicate->getAttribute("type");
 //            $width = $duplicate->getAttribute("width");
 //            $height = $duplicate->getAttribute("height");
-            $exploded = explode("/", $url);  
+            $exploded = explode("/", $url);
             $filename = array_pop($exploded);
         } else {
             //upload new file
@@ -2625,8 +2625,8 @@ class WhatsProt
                 $error = "socket EOF, closing socket...";
                 fclose($this->socket);
                 $this->socket = null;
-                $this->eventManager()->fireClose(                        
-                    $this->phoneNumber, 
+                $this->eventManager()->fireClose(
+                    $this->phoneNumber,
                     $error
                 );
             }
