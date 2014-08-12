@@ -2069,20 +2069,6 @@ class WhatsProt
                     $node->getAttribute('t')
                 );
             }
-            if ($node->getAttribute('type') == "subject") {
-                print_r($node);
-                $reset_from = explode('@', $node->getAttribute('from'));
-                $reset_author = explode('@',$node->getAttribute('author'));
-                $this->eventManager()->fireGetGroupsSubject(
-                    $this->phoneNumber,
-                    reset($reset_from),
-                    $node->getAttribute('t'),
-                    reset($reset_author),
-                    reset($reset_author),
-                    $node->getChild(0)->getAttribute('name'),
-                    $node->getChild(2)->getData()
-                );
-            }
         }
         if ($node->getTag() == "presence" && $node->getAttribute("status") == "dirty") {
             //clear dirty
@@ -2361,6 +2347,15 @@ class WhatsProt
                     //TODO
                     break;
                	case "subject":
+                    $this->eventManager()->fireGetGroupsSubject(
+                        $this->phoneNumber,
+                        $node->getAttribute('from'),
+                        $node->getAttribute('t'),
+                        $node->getAttribute('participant'),
+                        $node->getAttribute('participant'),
+                        $node->getAttribute('notify'),
+                        $node->getChild(0)->getData()
+                    );
                     //TODO
                     break;
                 default:
