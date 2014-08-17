@@ -81,3 +81,7 @@ pip-log.txt
 
 # Komodo Project
 .komodoproject
+
+# Composer
+/vendor
+/composer.lock
