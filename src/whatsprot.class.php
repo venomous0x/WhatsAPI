@@ -2330,6 +2330,20 @@ class WhatsProt
                     //TODO
                     break;
                 case "participant":
+                    if ($node->hasChild('remove')) {
+                        $this->eventManager()->fireGroupsParticipantsRemove(
+                            $this->phoneNumber,
+                            $node->getAttribute('from'),
+                            $node->getChild(0)->getAttribute('jid'),
+                            $node->getChild(0)->getAttribute('author')
+                        );
+                    } else if ($node->hasChild('add')) {
+                        $this->eventManager()->fireGroupsParticipantsAdd(
+                            $this->phoneNumber,
+                            $node->getAttribute('from'),
+                            $node->getChild(0)->getAttribute('jid')
+                        );
+                    }
                     //TODO
                     break;
                	case "subject":
