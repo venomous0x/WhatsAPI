@@ -1,0 +1,21 @@
+{
+    "name": "venomous0x/whats-api",
+    "description": "Interface to WhatsApp Messenger",
+    "license": "MIT",
+    "authors": [
+        {
+            "role": "TODO",
+            "name": "Firstname Lastname",
+            "email": "email@example.com"
+        }
+    ],
+    "autoload": {
+        "classmap": [
+            "src/whatsprot.class.php",
+            "src/events"
+        ]
+    },
+    "require": {
+        "ext-curl": "*"
+    }
+}
