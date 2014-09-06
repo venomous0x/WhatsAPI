@@ -21,7 +21,7 @@ $identity = 'e807f1fcf82d132f9bb018ca6738a19f'; // Obtained during registration 
 $nickname = 'John Doe';                         // This is the username displayed by WhatsApp clients.
 
 
-// Create a instance of WhastPort.
+// Create a instance of WhatsProt.
 $w = new WhatsProt($username, $identity, $nickname, $debug);
 
 // How to create an account __ONLY__ if you do not have a associated to our phone number.
