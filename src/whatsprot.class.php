@@ -2712,7 +2712,7 @@ class WhatsProt
         $broadcastNode = new ProtocolNode("broadcast", null, $toNodes, null);
 
         $messageHash = array();
-        $messageHash["to"] = "broadcast";
+        $messageHash["to"] = "14100000@broadcast";
         $messageHash["type"] = $type;
         $id = $this->createMsgId("broadcast");
         $messageHash["id"] = $id;
