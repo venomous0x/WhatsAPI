@@ -2926,7 +2926,7 @@ class WhatsProt
     	if(stripos($filepath, 'http')!== false && !preg_match('/\s/',$filepath)){
 		$extension = end(explode(".", $filepath));
 		$newImageName = rand(0, 100000);
-		$imagePath = static::PICTURES_FOLDER."/".$newImageName.".jpg";
+		$imagePath = __DIR__.'/'.static::PICTURES_FOLDER."/".$newImageName.".jpg";
 		if($extension == 'jpg'){
 			copy($filepath, $imagePath);
 			$filepath = $imagePath;
