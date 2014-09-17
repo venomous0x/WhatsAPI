@@ -781,10 +781,11 @@ class WhatsAppEvent
      * @param $result SyncResult
      */
     function fireGetSyncResult(
+		$phone,
         $result
     ) {
-        $callbackEvent = function(WhatsAppEventListener $listener) use ($result) {
-            $listener->onGetSyncResult($result);
+        $callbackEvent = function(WhatsAppEventListener $listener) use ($phone,$result) {
+            $listener->onGetSyncResult($phone,$result);
         };
         $this->fireCallback($callbackEvent);
     }
