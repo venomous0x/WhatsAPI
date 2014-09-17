@@ -995,7 +995,7 @@ class WhatsProt
      * @param  bool $storeURLmedia Keep copy of file
      * @return bool
      */
-    public function sendMessageAudio($to, $filepath, $storeURLmedia = false)
+    public function sendMessageAudio($to, $filepath, $storeURLmedia = false, $fsize = 0, $fhash = "")
     {
     	if ($fsize==0 || $fhash == "")
     	{
