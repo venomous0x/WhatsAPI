@@ -305,16 +305,15 @@ class WhatsProt
         // Build the url.
         $host = 'https://' . static::WHATSAPP_REQUEST_HOST;
         $query = array(
-            'cc' => $phone['cc'],
+            'method' => $method,
             'in' => $phone['phone'],
-            'to' => $this->phoneNumber,
+            'cc' => $phone['cc'],
+            'id' => $this->identity,
             'lg' => $langCode,
             'lc' => $countryCode,
-            'method' => $method,
-            'mcc' => $phone['mcc'],
-            'mnc' => '001',
             'token' => urlencode($token),
-            'id' => $this->identity,
+            'sim_mcc' => '000', //$phone['mcc']
+            'sim_mnc' => '000', // 001
         );
 
         if ($this->debug) {
