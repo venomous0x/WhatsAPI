@@ -159,6 +159,8 @@ class WhatsProt
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
             'id' => $this->identity,
+            'lg' => $langCode,
+            'lc' => $countryCode,
             'c' => 'cookie',
         );
 
@@ -223,6 +225,8 @@ class WhatsProt
             'in' => $phone['phone'],
             'id' => $this->identity,
             'code' => $code,
+            'lg' => $langCode,
+            'lc' => $countryCode,
             'c' => 'cookie',
         );
 
@@ -1656,7 +1660,7 @@ class WhatsProt
      */
     protected function buildIdentity($identity)
     {
-        return strtolower(urlencode(sha1($identity, true)));
+        return urlencode(sha1($identity, true));
     }
 
     protected function checkIdentity($identity)
