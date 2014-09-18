@@ -45,7 +45,14 @@ $w = new WhatsProt($username, $identity, $nickname, $debug);
  *   - method: Used method.
  *   - retry_after: Waiting time before requesting a new code.
  */
-$w->codeRequest('sms');
+ try
+ {
+    $w->codeRequest('sms');
+ }
+ catch(Exception $e)
+ {
+    echo $e;
+ }
 
 
 // You must wait until you receive a code from WhatsApp, either to your phone via sms
@@ -73,7 +80,14 @@ $w->codeRequest('sms');
  *   - currency: Currency price of account.
  *   - price_expiration: Price expiration in UNIX Timestamp.
  */
-$w->codeRegister('123456');
+ try
+ {
+    $w->codeRegister('123456');
+ }
+ catch(Exception $e)
+ {
+    echo $e;
+ }
 
 // IT IS VERY IMPORTANT THAT YOU NOTE AND KEEP YOUR DETAILS.
 // YOU WILL NEED TO UPDATE THE SCRIPT WITH THE PASSWORD ETC.
