@@ -161,7 +161,6 @@ class WhatsProt
             'id' => $this->identity,
             'lg' => $langCode,
             'lc' => $countryCode,
-            'c' => 'cookie',
         );
 
         $response = $this->getResponse($host, $query);
@@ -227,7 +226,6 @@ class WhatsProt
             'code' => $code,
             'lg' => $langCode,
             'lc' => $countryCode,
-            'c' => 'cookie',
         );
 
         $response = $this->getResponse($host, $query);
