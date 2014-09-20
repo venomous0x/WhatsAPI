@@ -152,6 +152,19 @@ class WhatsProt
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The provided phone number is not valid.');
         }
+        
+        if ($countryCode == null && $phone['ISO3166'] != '') {
+            $countryCode = $phone['ISO3166'];
+        }
+        if ($countryCode == null) {
+            $countryCode = 'US';
+        }
+        if ($langCode == null && $phone['ISO639'] != '') {
+            $langCode = $phone['ISO639'];
+        }
+        if ($langCode == null) {
+            $langCode = 'en';
+        }
 
         // Build the url.
         $host = 'https://' . static::WHATSAPP_CHECK_HOST;
@@ -159,7 +172,8 @@ class WhatsProt
             'cc' => $phone['cc'],
             'in' => $phone['phone'],
             'id' => $this->identity,
-            'c' => 'cookie',
+            'lg' => $langCode,
+            'lc' => $countryCode,
         );
 
         $response = $this->getResponse($host, $query);
@@ -215,6 +229,19 @@ class WhatsProt
         if (!$phone = $this->dissectPhone()) {
             throw new Exception('The provided phone number is not valid.');
         }
+        
+        if ($countryCode == null && $phone['ISO3166'] != '') {
+            $countryCode = $phone['ISO3166'];
+        }
+        if ($countryCode == null) {
+            $countryCode = 'US';
+        }
+        if ($langCode == null && $phone['ISO639'] != '') {
+            $langCode = $phone['ISO639'];
+        }
+        if ($langCode == null) {
+            $langCode = 'en';
+        }
 
         // Build the url.
         $host = 'https://' . static::WHATSAPP_REGISTER_HOST;
@@ -223,7 +250,8 @@ class WhatsProt
             'in' => $phone['phone'],
             'id' => $this->identity,
             'code' => $code,
-            'c' => 'cookie',
+            'lg' => $langCode,
+            'lc' => $countryCode,
         );
 
         $response = $this->getResponse($host, $query);
@@ -1656,7 +1684,7 @@ class WhatsProt
      */
     protected function buildIdentity($identity)
     {
-        return strtolower(urlencode(sha1($identity, true)));
+        return urlencode(sha1($identity, true));
     }
 
     protected function checkIdentity($identity)
