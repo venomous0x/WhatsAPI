@@ -390,13 +390,14 @@ class WhatsAppEventListenerBase implements WhatsAppEventListener {
     ) {}
 
     public function onMediaMessageSent(
-        $phone, 
-        $to, 
-        $id, 
-        $filetype, 
-        $url, 
-        $filename, 
-        $filesize, 
+        $phone,
+        $to,
+        $id,
+        $filetype,
+        $url,
+        $filename,
+        $filesize,
+        $filehash,
         $icon
     ) {}
 
