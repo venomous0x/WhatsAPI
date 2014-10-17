@@ -467,8 +467,7 @@ class WhatsProt
     public function loginWithPassword($password)
     {
         $this->password = $password;
-        if(is_readable($this->challengeFilename))
-        {
+        if(is_readable($this->challengeFilename)) {
             $challengeData = file_get_contents($this->challengeFilename);
             if($challengeData)
                 $this->challengeData = $challengeData;
