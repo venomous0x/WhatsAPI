@@ -11,12 +11,12 @@ function fgets_u($pStdn)
 
         return FALSE;
     } elseif ($num_changed_streams > 0) {
-        return trim(fgets($pStdn, 1024));
+        return trim(fgets($pStdn, 1028));
     }
     return null;
 }
 
-$nickname = "WhatsAPI Test";
+$nickname = "WhatsAPI Test";cloud whatsapp cloud GoogleAppEngine
 
 // #### DO NOT ADD YOUR INFO AND THEN COMMIT THIS FILE! ####
 $sender = 	""; // Mobile number with country code (but without + or 00)
